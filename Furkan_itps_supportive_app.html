@@ -470,6 +470,19 @@
         .fleet-table tr:hover {
             background: #f8fafc;
         }
+
+        .humorous-note {
+            font-size: 0.85rem;
+            color: #7c3aed;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            background: #f5f3ff;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px dashed #c084fc;
+        }
     </style>
 </head>
 
@@ -932,24 +945,24 @@
                     const inHg = m.altim ? (m.altim * 0.02953).toFixed(2) : '---';
 
                     return `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.8rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 0.6rem;">
-                            <div style="display:inline-flex; flex-direction: column; gap: 4px;">
-                                <div style="display:inline-block; padding: 4px 14px; border-radius: 6px; background: ${catColor}; color: white; font-size: 0.9rem; font-weight: 950; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: fit-content;">${category}</div>
-                                <div style="font-size: 0.65rem; font-weight: 850; color: #dc2626; background: #fee2e2; padding: 2px 8px; border-radius: 4px; border: 1px solid #fecaca; width: fit-content;">⏱️ ${ageStr}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 0.4rem;">
+                            <div style="display:inline-flex; flex-direction: column; gap: 2px;">
+                                <div style="display:inline-block; padding: 2px 10px; border-radius: 4px; background: ${catColor}; color: white; font-size: 0.8rem; font-weight: 950; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: fit-content;">${category}</div>
+                                <div style="font-size: 0.6rem; font-weight: 850; color: #dc2626; background: #fee2e2; padding: 1px 6px; border-radius: 3px; border: 1px solid #fecaca; width: fit-content;">⏱️ ${ageStr}</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 0.75rem; font-weight: 900; color: #1e293b; margin-bottom: 2px;">${m.name || 'Station Data'}</div>
-                                <div style="font-size: 0.6rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Conditions at:</div>
-                                <div style="font-size: 0.75rem; font-weight: 800; color: #475569;">${fullTimeStr}</div>
+                                <div style="font-size: 0.7rem; font-weight: 900; color: #1e293b; margin-bottom: 1px;">${m.name || 'Station Data'}</div>
+                                <div style="font-size: 0.55rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Conditions at:</div>
+                                <div style="font-size: 0.7rem; font-weight: 800; color: #475569;">${fullTimeStr}</div>
                             </div>
                         </div>
-                        <div style="font-size: 0.95rem; line-height: 1.7; color: #1e293b;">
-                            <div style="margin-bottom: 3px;"><b>Wind</b>: ${wind}</div>
-                            <div style="margin-bottom: 3px;"><b>Visibility</b>: ${vis}</div>
-                            ${wx ? `<div style="margin-bottom: 3px;"><b>Weather</b>: <span style="background: #fef2f2; color: #be123c; padding: 1px 6px; border-radius: 4px; border: 1px solid #fee2e2; font-weight: 700;">${wx}</span></div>` : ''}
-                            <div style="margin-bottom: 3px;"><b>Sky</b>: ${clouds}</div>
-                            <div style="margin-bottom: 3px;"><b>Temperature</b>: ${m.temp}°C (Dew point: ${m.dewp}°C)</div>
-                            <div style="margin-bottom: 3px;"><b>Altimeter</b>: ${m.altim} hPa (${inHg} in Hg)</div>
+                        <div style="font-size: 0.88rem; line-height: 1.4; color: #1e293b;">
+                            <div style="margin-bottom: 2px;"><b>Wind</b>: ${wind}</div>
+                            <div style="margin-bottom: 2px;"><b>Visibility</b>: ${vis}</div>
+                            ${wx ? `<div style="margin-bottom: 2px;"><b>Weather</b>: <span style="background: #fef2f2; color: #be123c; padding: 0px 4px; border-radius: 3px; border: 1px solid #fee2e2; font-weight: 700;">${wx}</span></div>` : ''}
+                            <div style="margin-bottom: 2px;"><b>Sky</b>: ${clouds}</div>
+                            <div style="margin-bottom: 2px;"><b>Temp</b>: ${m.temp}°C (Dew: ${m.dewp}°C)</div>
+                            <div style="margin-bottom: 0px;"><b>Altimeter</b>: ${m.altim} hPa (${inHg} inHg)</div>
                         </div>
                     `;
                 };
@@ -1003,15 +1016,15 @@
 
                         const clouds = decodeClouds(f.clouds);
                         const wx = decodeWeather(f.wxString);
-                        return `<div style="padding: 6px 0; border-bottom: 1px dashed rgba(15, 23, 42, 0.08); font-size: 0.82rem; line-height: 1.3;">
-                                    <div style="margin-bottom: 3px; display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: #1e293b; color: white; padding: 0px 5px; border-radius: 3px; font-weight: 950; font-size: 0.6rem; text-transform: uppercase;">${humanType}</span>
-                                        <span style="color: #475569; font-weight: 800; font-size: 0.7rem;">${fromTime}${toTime}</span>
+                        return `<div style="padding: 4px 0; border-bottom: 1px dashed rgba(15, 23, 42, 0.08); font-size: 0.8rem; line-height: 1.25;">
+                                    <div style="margin-bottom: 2px; display: flex; align-items: center; gap: 6px;">
+                                        <span style="background: #1e293b; color: white; padding: 0px 4px; border-radius: 2px; font-weight: 950; font-size: 0.55rem; text-transform: uppercase;">${humanType}</span>
+                                        <span style="color: #475569; font-weight: 800; font-size: 0.65rem;">${fromTime}${toTime}</span>
                                     </div>
-                                    <div style="color: #1e293b; padding-left: 8px; border-left: 3px solid #5eead4; display: grid; grid-template-columns: 1.2fr 1fr; gap: 1px 8px;">
+                                    <div style="color: #1e293b; padding-left: 6px; border-left: 2px solid #5eead4; display: grid; grid-template-columns: 1.1fr 1fr; gap: 0px 6px;">
                                         <div><b>Wind</b>: ${wind}</div>
                                         <div><b>Vis</b>: ${vis}${wx ? ` <b>(${wx})</b>` : ''}</div>
-                                        <div style="grid-column: span 2; color: #475569; font-size: 0.75rem;"><b>Sky</b>: ${clouds}</div>
+                                        <div style="grid-column: span 2; color: #475569; font-size: 0.7rem;"><b>Sky</b>: ${clouds}</div>
                                     </div>
                                 </div>`;
                     }).join('');
@@ -1244,6 +1257,7 @@
                             <button class="btn-back" onclick="goBackHome()">← Back Home</button>
                             <div class="card">
                                 <h2>👨‍✈️ Student Instructor W&B</h2>
+                                <p class="humorous-note">"Please don't gain weight... if you do, let me know so we can update it! :D"</p>
                                 <div class="grid">
                                     <div class="input-group">
                                         <label>Front Seat - Left (Pilot)</label>
@@ -1394,8 +1408,37 @@
 
         function renderFleet() {
             const root = document.getElementById('root');
-            const search = (state.fleetSearch || '').toLowerCase();
+            // Check if we are already on the fleet screen to avoid re-rendering the container
+            const existingSearch = document.getElementById('fleet-search-input');
 
+            if (!existingSearch) {
+                root.innerHTML = `
+                    <div class="container" style="padding-top: 1.5rem; max-width: 900px;">
+                        <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <h1 style="font-size: 2.2rem; margin-bottom: 1rem;">✈️🚁 Call Signs</h1>
+                            <div style="max-width: 500px; margin: 0 auto; position: relative;">
+                                <input type="text" 
+                                       id="fleet-search-input"
+                                       placeholder="Search Registration, Type or Call Sign..." 
+                                       value="${state.fleetSearch || ''}"
+                                       oninput="state.fleetSearch = this.value; updateFleetResults()"
+                                       style="width: 100%; padding: 0.8rem 1.25rem; border-radius: 0.75rem; border: 2px solid #3b82f6; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); outline: none;">
+                                <span style="position: absolute; right: 1.1rem; top: 0.9rem; font-size: 1.1rem;">🔍</span>
+                            </div>
+                        </div>
+                        <div id="fleet-results-container"></div>
+                    </div>
+                `;
+            }
+            updateFleetResults();
+        }
+
+        function updateFleetResults() {
+            const container = document.getElementById('fleet-results-container');
+            if (!container) return;
+
+            const search = (state.fleetSearch || '').toLowerCase();
             const filteredFleet = aircraftDatabase.fleet.filter(f =>
                 f.call.toLowerCase().includes(search) ||
                 f.type.toLowerCase().includes(search) ||
@@ -1408,22 +1451,22 @@
             const renderTable = (list, title) => {
                 if (list.length === 0) return '';
                 return `
-                    <div style="margin-bottom: 2rem;">
-                        <h3 style="color: white; margin-bottom: 1rem; font-weight: 900; letter-spacing: -0.02em;">${title}</h3>
-                        <table class="fleet-table">
+                    <div style="margin-bottom: 1.25rem;">
+                        <h3 style="color: white; margin-bottom: 0.6rem; font-weight: 900; font-size: 1.1rem;">${title}</h3>
+                        <table class="fleet-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
-                                    <th>Call Sign</th>
-                                    <th>Aircraft Type</th>
-                                    <th>Registration</th>
+                                    <th style="padding: 0.6rem;">Call</th>
+                                    <th style="padding: 0.6rem;">Type</th>
+                                    <th style="padding: 0.6rem;">Reg</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${list.map(f => `
                                     <tr>
-                                        <td style="font-weight: 950; color: #1e293b; background: #f1f5f9;">${f.call}</td>
-                                        <td>${f.type}</td>
-                                        <td style="font-family: monospace; font-weight: 700; color: #2563eb;">${f.reg}</td>
+                                        <td style="font-weight: 950; color: #1e293b; background: #f1f5f9; padding: 0.5rem 0.6rem;">${f.call}</td>
+                                        <td style="padding: 0.5rem 0.6rem;">${f.type}</td>
+                                        <td style="font-family: monospace; font-weight: 700; color: #2563eb; padding: 0.5rem 0.6rem;">${f.reg}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -1432,28 +1475,11 @@
                 `;
             };
 
-            root.innerHTML = `
-                <div class="container" style="padding-top: 2rem; max-width: 900px;">
-                    <button class="btn-back" onclick="goBackHome()">← Back Home</button>
-                    <div style="text-align: center; margin-bottom: 2rem;">
-                        <h1 style="font-size: 2.5rem; margin-bottom: 1.5rem;">✈️🚁 Call Signs</h1>
-                        
-                        <div style="max-width: 500px; margin: 0 auto; position: relative;">
-                            <input type="text" 
-                                   placeholder="Search Registration, Type or Call Sign..." 
-                                   value="${state.fleetSearch || ''}"
-                                   oninput="state.fleetSearch = this.value; renderFleet()"
-                                   style="width: 100%; padding: 1rem 1.5rem; border-radius: 1rem; border: 2px solid #3b82f6; font-size: 1.1rem; font-weight: 600; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); outline: none;">
-                            <span style="position: absolute; right: 1.5rem; top: 1.1rem; font-size: 1.2rem;">🔍</span>
-                        </div>
-                    </div>
-                    
-                    ${rotary.length === 0 && fixed.length === 0 ?
-                    `<div style="text-align: center; color: white; padding: 3rem; background: rgba(255,255,255,0.05); border-radius: 1.5rem;">No results found for "${state.fleetSearch}"</div>` :
-                    renderTable(rotary, '🚁 Rotary Wing Aircraft') + renderTable(fixed, '✈️ Fixed Wing Aircraft')
-                }
-                </div>
-            `;
+            if (rotary.length === 0 && fixed.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: white; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 1rem;">No results found for "${state.fleetSearch}"</div>`;
+            } else {
+                container.innerHTML = renderTable(rotary, '🚁 Rotary Wing') + renderTable(fixed, '✈️ Fixed Wing');
+            }
         }
 
         function calculateAll() {
