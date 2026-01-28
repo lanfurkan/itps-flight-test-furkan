@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aircraft Performance & Personnel W&B</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            width: 100%;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-aircraft {
+            padding: 2.5rem 1.5rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 1.5rem;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-aircraft:hover {
+            transform: scale(1.03) translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-back {
+            color: #60a5fa;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back:hover {
+            color: #93c5fd;
+        }
+
+        .input-group {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-group input:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            border-radius: 1.25rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-label {
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #059669;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 1rem;
+            letter-spacing: -0.025em;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            border-bottom: 4px solid #3b82f6;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .aircraft-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .runway-option {
+            padding: 2rem;
+            border: 3px solid #e2e8f0;
+            border-radius: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .runway-option:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+            transform: translateY(-3px);
+        }
+
+        .runway-option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+        }
+
+        .module-result {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            align-items: start;
+            width: 100%;
+            max-width: 90rem;
+            padding: 1.5rem;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+            position: sticky;
+            top: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            color: #60a5fa;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.2);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .personnel-list-item {
+            font-size: 0.85rem;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .personnel-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .personnel-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .personnel-name {
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .personnel-weight {
+            font-family: monospace;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .personnel-call {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        @media (max-width: 1024px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: 400px;
+            }
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-left: 5px solid #3b82f6;
+            padding-left: 1rem;
+        }
+
+        .weight-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-left: auto;
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+        }
+
+        .manual-weight-prompt {
+            margin-top: 0.5rem;
+            padding: 1rem;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 0.75rem;
+        }
+
+        .manual-weight-prompt label {
+            color: #c2410c;
+        }
+
+        .disclaimer-card {
+            background: rgba(254, 242, 242, 0.95);
+            border: 1px solid #ef4444;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.4;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .disclaimer-title {
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .aircraft-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        const CGRAS_DATA = {
+            takeoff: {
+                altitudes: [0, 2000, 4000, 6000, 8000, 10000],
+                temps: [-20, -10, 0, 10, 20, 30, 40],
+                groundRoll: { 0: [1190, 1300, 1420, 1550, 1690, 1850, 2020], 2000: [1340, 1470, 1610, 1750, 1910, 2140, 2340], 4000: [1510, 1650, 1810, 2020, 2210, 2420, 2650], 6000: [1710, 1910, 2090, 2280, 2500, 2740, 3010], 8000: [1970, 2160, 2370, 2590, 2840, 3120, 3430], 10000: [2240, 2460, 2690, 2950, 3240, 3560, 3930] },
+                totalDist: { 0: [1570, 1720, 1890, 2070, 2290, 2550, 2860], 2000: [1790, 1920, 2110, 2330, 2560, 2930, 3310], 4000: [1950, 2150, 2370, 2660, 2970, 3330, 3800], 6000: [2200, 2450, 2710, 3010, 3370, 3820, 4420], 8000: [2510, 2770, 3070, 3430, 3860, 4430, 5240], 10000: [2840, 3140, 3500, 3930, 4470, 5220, 5440] }
+            },
+            accelstop: {
+                altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
+                temps: [-20, -10, 0, 10, 20, 30, 40],
+                weights: [5990, 5500, 5000],
+                data: {
+                    5990: { 0: [2770, 2940, 3120, 3310, 3510, 3730, 3970], 1000: [2900, 3080, 3270, 3470, 3690, 3920, 4220], 2000: [3030, 3220, 3430, 3640, 3870, 4160, 4430], 3000: [3180, 3380, 3590, 3820, 4110, 4370, 4660], 4000: [3340, 3550, 3770, 4060, 4320, 4600, 4900], 5000: [3500, 3730, 4000, 4260, 4540, 4830, 5160], 6000: [3680, 3950, 4200, 4480, 4770, 5090, 5430], 7000: [3890, 4150, 4420, 4710, 5020, 5360, 5730], 8000: [4090, 4360, 4650, 4960, 5290, 5650, 6050], 9000: [4300, 4590, 4900, 5230, 5580, 5970, 6390], 10000: [4530, 4830, 5150, 5310, 5890, 6300, 6750] },
+                    5500: { 0: [2280, 2420, 2570, 2720, 2890, 3070, 3260], 1000: [2390, 2540, 2690, 2860, 3030, 3220, 3420], 2000: [2500, 2660, 2820, 3000, 3180, 3380, 3590], 3000: [2620, 2790, 2960, 3140, 3340, 3550, 3820], 4000: [2750, 2920, 3110, 3300, 3510, 3770, 4020], 5000: [2890, 3070, 3260, 3470, 3730, 3970, 4230], 6000: [3030, 3230, 3430, 3680, 3920, 4180, 4450], 7000: [3190, 3390, 3640, 3870, 4120, 4400, 4690], 8000: [3350, 3590, 3830, 4080, 4340, 4630, 4950], 9000: [3580, 3780, 4030, 4290, 4580, 4890, 5220], 10000: [3730, 3980, 4240, 4530, 4830, 5160, 5520] },
+                    5000: { 0: [1840, 1950, 2070, 2200, 2330, 2470, 2610], 1000: [1930, 2050, 2170, 2300, 2440, 2590, 2740], 2000: [2020, 2140, 2270, 2410, 2560, 2710, 2880], 3000: [2120, 2250, 2390, 2530, 2690, 2850, 3030], 4000: [2220, 2360, 2500, 2660, 2820, 3000, 3180], 5000: [2330, 2480, 2630, 2790, 2970, 3150, 3350], 6000: [2450, 2600, 2760, 2940, 3120, 3320, 3570], 7000: [2570, 2730, 2910, 3090, 3290, 3530, 3760], 8000: [2700, 2880, 3060, 3260, 3490, 3710, 3960], 9000: [2850, 3030, 3230, 3450, 3670, 3910, 4170], 10000: [3000, 3190, 3410, 3640, 3870, 4130, 4410] }
+                }
+            },
+            landing: {
+                altitudes: [0, 2000, 4000, 6000, 8000, 10000],
+                temps: [-20, -10, 0, 10, 20, 30, 40],
+                groundRoll: { 0: [694, 724, 745, 777, 806, 826, 857], 2000: [745, 775, 806, 836, 867, 898, 918], 4000: [805, 836, 867, 898, 928, 959, 989], 6000: [867, 898, 928, 969, 1000, 1030, 1071], 8000: [928, 969, 1010, 1040, 1081, 1112, 1153], 10000: [1010, 1051, 1091, 1122, 1163, 1204, 1244] },
+                totalDist: { 0: [1795, 1816, 1948, 1928, 1958, 1989, 1958], 2000: [1846, 1877, 1897, 1928, 1897, 1928, 2020], 4000: [1897, 1928, 1958, 1999, 1994, 2060, 2091], 6000: [1958, 1999, 2030, 2060, 2101, 2132, 2162], 8000: [2030, 2071, 2101, 2142, 2173, 2213, 2254], 10000: [2101, 2142, 2183, 2224, 2264, 2305, 2346] }
+            },
+            balked: {
+                altitudes: [0, 2000, 4000, 6000, 8000],
+                temps: [-25, 0, 25, 50, 75, 100], // Fahrenheit
+                data: { 0: [1342, 1188, 1034, 880, 704, 583], 2000: [1254, 1100, 946, 803, 633, 506], 4000: [1166, 1023, 869, 726, 550, 429], 6000: [1095, 935, 786, 638, 473, 352], 8000: [1001, 853, 704, 550, 396, 275] }
+            },
+            oei: {
+                altitudes: [0, 2000, 4000, 6000, 8000, 10000, 12000, 14000],
+                temps: [-25, 0, 25, 50, 75, 100], // Fahrenheit
+                weights: [6390, 6000, 5500, 5000],
+                data: { 6390: { 0: [387, 330, 273, 217, 162, 107], 2000: [361, 303, 235, 178, 121, 66], 4000: [323, 263, 204, 146, 88, 31], 6000: [281, 220, 160, 100, 41, -17], 8000: [236, 176, 115, 54, -8, -65], 10000: [194, 130, 67, 5, -56, -116], 12000: [143, 79, 14, -40, -112, -173], 14000: [95, 28, -37, -101, -165, -228] }, 6000: { 0: [500, 441, 394, 326, 270, 214], 2000: [465, 405, 346, 288, 230, 173], 4000: [438, 377, 317, 257, 198, 130], 6000: [397, 334, 273, 212, 152, 92], 8000: [355, 292, 229, 167, 106, 45], 10000: [311, 249, 182, 119, 57, -3], 12000: [261, 195, 130, 65, 2, -61], 14000: [208, 141, 75, 8, -56, -120] }, 5500: { 0: [699, 598, 538, 479, 420, 362], 2000: [626, 563, 502, 441, 381, 322], 4000: [600, 537, 474, 412, 351, 291], 6000: [559, 495, 431, 368, 306, 244], 8000: [519, 453, 388, 324, 261, 198], 10000: [476, 409, 343, 278, 213, 149], 12000: [426, 358, 291, 224, 159, 94], 14000: [370, 300, 232, 164, 98, 32] }, 5000: { 0: [839, 776, 713, 650, 589, 528], 2000: [800, 741, 677, 613, 550, 488], 4000: [762, 716, 651, 586, 522, 459], 6000: [742, 675, 608, 543, 477, 413], 8000: [702, 634, 566, 499, 433, 367], 10000: [660, 590, 522, 453, 386, 319], 12000: [611, 540, 470, 400, 332, 264], 14000: [549, 477, 406, 336, 266, 198] } }
+            }
+        };
+        const CGZSN_DATA = {
+            takeoff: { altitudes: [0, 2000, 4000, 6000, 8000, 10000], temps: [-20, -10, 0, 10, 20, 30, 40], groundRoll: { 0: [1190, 1300, 1420, 1550, 1690, 1850, 2020], 2000: [1340, 1470, 1610, 1750, 1910, 2140, 2340], 4000: [1510, 1650, 1810, 2020, 2210, 2420, 2650], 6000: [1710, 1910, 2090, 2280, 2500, 2740, 3010], 8000: [1970, 2160, 2370, 2590, 2840, 3120, 3430], 10000: [2240, 2460, 2690, 2950, 3240, 3560, 3930] }, totalDist: { 0: [1570, 1720, 1890, 2070, 2290, 2550, 2860], 2000: [1790, 1920, 2110, 2330, 2560, 2930, 3310], 4000: [1950, 2150, 2370, 2660, 2970, 3330, 3800], 6000: [2200, 2450, 2710, 3010, 3370, 3820, 4420], 8000: [2510, 2770, 3070, 3430, 3860, 4430, 5240], 10000: [2840, 3140, 3500, 3930, 4470, 5220, 5440] } },
+            accelstop: { altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000], temps: [-20, -10, 0, 10, 20, 30, 40], weights: [5990, 5500, 5000], data: { 5990: { 0: [2770, 2940, 3120, 3310, 3510, 3730, 3970], 1000: [2900, 3080, 3270, 3470, 3690, 3920, 4220], 2000: [3030, 3220, 3430, 3640, 3870, 4160, 4430], 3000: [3180, 3380, 3590, 3820, 4110, 4370, 4660], 4000: [3340, 3550, 3770, 4060, 4320, 4600, 4900], 5000: [3500, 3730, 4000, 4260, 4540, 4830, 5160], 6000: [3680, 3950, 4200, 4480, 4770, 5090, 5430], 7000: [3890, 4150, 4420, 4710, 5020, 5360, 5730], 8000: [4090, 4360, 4650, 4960, 5290, 5650, 6050], 9000: [4300, 4590, 4900, 5230, 5580, 5970, 6390], 10000: [4530, 4830, 5150, 5310, 5890, 6300, 6750] }, 5500: { 0: [2280, 2420, 2570, 2720, 2890, 3070, 3260], 1000: [2390, 2540, 2690, 2860, 3030, 3220, 3420], 2000: [2500, 2660, 2820, 3000, 3180, 3380, 3590], 3000: [2620, 2790, 2960, 3140, 3340, 3550, 3820], 4000: [2750, 2920, 3110, 3300, 3510, 3770, 4020], 5000: [2890, 3070, 3260, 3470, 3730, 3970, 4230], 6000: [3030, 3230, 3430, 3680, 3920, 4180, 4450], 7000: [3190, 3390, 3640, 3870, 4120, 4400, 4690], 8000: [3350, 3590, 3830, 4080, 4340, 4630, 4950], 9000: [3580, 3780, 4030, 4290, 4580, 4890, 5220], 10000: [3730, 3980, 4240, 4530, 4830, 5160, 5520] }, 5000: { 0: [1840, 1950, 2070, 2200, 2330, 2470, 2610], 1000: [1930, 2050, 2170, 2300, 2440, 2590, 2740], 2000: [2020, 2140, 2270, 2410, 2560, 2710, 2880], 3000: [2120, 2250, 2390, 2530, 2690, 2850, 3030], 4000: [2220, 2360, 2500, 2660, 2820, 3000, 3180], 5000: [2330, 2480, 2630, 2790, 2970, 3150, 3350], 6000: [2450, 2600, 2760, 2940, 3120, 3320, 3570], 7000: [2570, 2730, 2910, 3090, 3290, 3530, 3760], 8000: [2700, 2880, 3060, 3260, 3490, 3710, 3960], 9000: [2850, 3030, 3230, 3450, 3670, 3910, 4170], 10000: [3000, 3190, 3410, 3640, 3870, 4130, 4410] } } },
+            landing: { altitudes: [0, 2000, 4000, 6000, 8000, 10000], temps: [-20, -10, 0, 10, 20, 30, 40], groundRoll: { 0: [694, 724, 745, 775, 808, 826, 857], 2000: [745, 775, 806, 836, 867, 898, 918], 4000: [806, 836, 867, 898, 928, 959, 989], 6000: [867, 898, 928, 969, 1000, 1030, 1071], 8000: [928, 969, 1010, 1040, 1081, 1112, 1153], 10000: [1010, 1051, 1091, 1122, 1163, 1204, 1244] }, totalDist: { 0: [1795, 1816, 1848, 1848, 1877, 1928, 1958], 2000: [1846, 1877, 1897, 1958, 1897, 1958, 2020], 4000: [1897, 1928, 1958, 2030, 1994, 2060, 2091], 6000: [1958, 1999, 2030, 2060, 2101, 2132, 2152], 8000: [2030, 2071, 2101, 2142, 2173, 2213, 2254], 10000: [2101, 2142, 2183, 2224, 2264, 2305, 2346] } },
+            balked: { altitudes: [0, 2000, 4000, 6000, 8000], temps: [-25, 0, 25, 50, 75, 100], data: { 0: [1342, 1188, 1034, 880, 704, 583], 2000: [1254, 1100, 946, 803, 633, 506], 4000: [1166, 1023, 869, 726, 550, 429], 6000: [1095, 935, 786, 638, 473, 352], 8000: [1001, 853, 704, 550, 396, 275] } },
+            oei: { altitudes: [0, 2000, 4000, 6000, 8000, 10000, 12000, 14000], temps: [-25, 0, 25, 50, 75, 100], weights: [6390, 6000, 5500, 5000], data: { 6390: { 0: [387, 330, 273, 217, 162, 107], 2000: [361, 303, 235, 178, 121, 66], 4000: [323, 263, 204, 146, 88, 31], 6000: [281, 220, 160, 100, 41, -17], 8000: [236, 176, 115, 54, -8, -65], 10000: [194, 130, 67, 5, -56, -116], 12000: [143, 79, 14, -40, -112, -173], 14000: [95, 28, -37, -101, -165, -228] }, 6000: { 0: [500, 441, 394, 326, 270, 214], 2000: [465, 405, 346, 288, 230, 173], 4000: [438, 377, 317, 257, 198, 130], 6000: [397, 334, 273, 212, 152, 92], 8000: [355, 292, 229, 167, 106, 45], 10000: [311, 249, 182, 119, 57, -3], 12000: [261, 195, 130, 65, 2, -61], 14000: [208, 141, 75, 8, -56, -120] }, 5500: { 0: [699, 598, 538, 479, 420, 362], 2000: [626, 563, 502, 441, 381, 322], 4000: [600, 537, 474, 412, 351, 291], 6000: [559, 495, 431, 368, 306, 244], 8000: [519, 453, 388, 324, 261, 198], 10000: [476, 409, 343, 278, 213, 149], 12000: [426, 358, 291, 224, 159, 94], 14000: [370, 300, 232, 164, 98, 32] }, 5000: { 0: [839, 776, 713, 650, 589, 528], 2000: [800, 741, 677, 613, 550, 488], 4000: [762, 716, 651, 586, 522, 459], 6000: [742, 675, 608, 543, 477, 413], 8000: [702, 634, 566, 499, 433, 367], 10000: [660, 590, 522, 453, 386, 319], 12000: [611, 540, 470, 400, 332, 264], 14000: [549, 477, 406, 336, 266, 198] } } }
+        };
+        const CFYWI_DATA = {
+            takeoff: { altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000], temps: [0, 10, 20, 30, 40], weights: [3400, 2900], groundRoll: { 3400: { 0: [917, 990, 1067, 1146, 1229], 1000: [1011, 1092, 1176, 1264, 1355], 2000: [1116, 1206, 1299, 1395, 1496], 3000: [1234, 1332, 1435, 1542, 1653], 4000: [1365, 1474, 1588, 1706, 1829], 5000: [1512, 1633, 1758, 1889, 2025], 6000: [1676, 1810, 1950, 2095, 2245], 7000: [1861, 2009, 2164, 2325, 2492], 8000: [2068, 2239, 2406, 2584, 2770], 9000: [2302, 2485, 2677, 2875, 3082], 10000: [2564, 2769, 2982, 3204, 3434] }, 2900: { 0: [610, 659, 710, 763, 818], 1000: [673, 727, 783, 841, 902], 2000: [743, 802, 864, 929, 995], 3000: [821, 887, 955, 1025, 1100], 4000: [908, 981, 1057, 1135, 1217], 5000: [1006, 1086, 1170, 1257, 1348], 6000: [1116, 1205, 1298, 1394, 1494], 7000: [1238, 1337, 1440, 1547, 1659], 8000: [1376, 1485, 1599, 1720, 1843], 9000: [1532, 1654, 1781, 1914, 2051], 10000: [1707, 1843, 1986, 2135, 2292] } }, totalDist: { 3400: { 0: [1432, 1539, 1650, 1764, 1883], 1000: [1574, 1691, 1813, 1939, 2069], 2000: [1732, 1861, 1995, 2133, 2276], 3000: [1907, 2049, 2196, 2349, 2507], 4000: [2102, 2259, 2422, 2590, 2764], 5000: [2320, 2493, 2673, 2858, 3051], 6000: [2564, 2755, 2953, 3159, 3371], 7000: [2837, 3048, 3267, 3494, 3729], 8000: [3142, 3376, 3619, 3871, 4131], 9000: [3485, 3744, 4013, 4293, 4581], 10000: [3870, 4158, 4457, 4767, 5088] }, 2900: { 0: [971, 1043, 1118, 1195, 1275], 1000: [1066, 1148, 1228, 1313, 1401], 2000: [1173, 1260, 1351, 1444, 1541], 3000: [1292, 1388, 1487, 1590, 1697], 4000: [1424, 1530, 1639, 1753, 1871], 5000: [1571, 1688, 1809, 1935, 2065], 6000: [1736, 1865, 1999, 2138, 2281], 7000: [1920, 2063, 2211, 2365, 2523], 8000: [2127, 2285, 2450, 2619, 2795], 9000: [2359, 2534, 2716, 2904, 3099], 10000: [2619, 2814, 3016, 3225, 3441] } } },
+            landing: { altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000], temps: [0, 10, 20, 30, 40], groundRoll: { 0: [1082, 1121, 1161, 1200, 1240], 1000: [1122, 1163, 1204, 1245, 1286], 2000: [1163, 1206, 1248, 1291, 1334], 3000: [1207, 1251, 1295, 1339, 1384], 4000: [1252, 1298, 1344, 1390, 1436], 5000: [1300, 1348, 1395, 1443, 1490], 6000: [1350, 1399, 1449, 1498, 1547], 7000: [1402, 1453, 1504, 1558, 1607], 8000: [1456, 1509, 1563, 1616, 1669], 9000: [1513, 1569, 1624, 1679, 1735], 10000: [1573, 1630, 1688, 1746, 1803] }, totalDist: { 0: [2262, 2316, 2372, 2428, 2485], 1000: [2317, 2374, 2433, 2492, 2551], 2000: [2375, 2436, 2497, 2559, 2621], 3000: [2437, 2501, 2565, 2630, 2696], 4000: [2503, 2569, 2637, 2705, 2774], 5000: [2572, 2642, 2713, 2785, 2857], 6000: [2645, 2719, 2794, 2869, 2945], 7000: [2723, 2800, 2879, 2958, 3038], 8000: [2805, 2887, 2969, 3052, 3136], 9000: [2892, 2978, 3064, 3152, 3240], 10000: [2984, 3074, 3165, 3257, 3350] } },
+            takeoffclimb: { altitudes: [0, 2000, 4000, 6000, 8000, 10000], temps: [-20, 0, 20, 40], weights: [3400, 2900], data: { 3400: { 0: [1326, 1317, 1300, 1277], 2000: [1214, 1200, 1179, 1153], 4000: [1100, 1082, 1057, 1028], 6000: [985, 962, 934, 901], 8000: [869, 842, 809, 774], 10000: [851, 719, 683, 644] }, 2900: { 0: [1646, 1638, 1621, 1598], 2000: [1518, 1505, 1484, 1457], 4000: [1389, 1371, 1346, 1316], 6000: [1259, 1236, 1207, 1172], 8000: [1128, 1100, 1066, 1028], 10000: [995, 962, 924, 883] } } },
+            balked: { altitudes: [0, 2000, 4000, 6000, 8000, 10000], temps: [-20, 0, 20, 40], weights: [3400, 2900], data: { 3400: { 0: [996, 1035, 1057, 1067], 2000: [930, 959, 972, 971], 4000: [858, 876, 878, 867], 6000: [779, 784, 775, 752], 8000: [691, 683, 660, 623], 10000: [593, 571, 532, 478] }, 2900: { 0: [1268, 1318, 1348, 1363], 2000: [1195, 1233, 1252, 1255], 4000: [1115, 1146, 1148, 1137], 6000: [1026, 1037, 1030, 1007], 8000: [927, 923, 900, 861], 10000: [817, 796, 755, 696] } } }
+        };
+        const CFZJJ_DATA = CFYWI_DATA;
+
+        const personnel = [
+            { name: "Jago Stemberger", call: "JAGO", weight: null },
+            { name: "Okan Bozik", call: "OKAN", weight: 190 },
+            { name: "Onur Boy", call: "ONUR", weight: 180 },
+            { name: "Abdullah Uysal", call: "ABDU", weight: 190 },
+            { name: "Emrah Yasin Onder", call: "EMRA", weight: 198 },
+            { name: "Oguzcan Korkmaz", call: "OGUZ", weight: 190 },
+            { name: "Caglar Yakin", call: "CAGL", weight: 160 },
+            { name: "Harun Akinci", call: "HARU", weight: 193 },
+            { name: "Furkan Yusuf KILICER", call: "FURK", weight: 162 },
+            { name: "Busra Naz Bozbey", call: "BURS", weight: 147 },
+            { name: "Mustafa Furkan Tekle", call: "MUST", weight: 151 },
+            { name: "Nazlican Gokdemir", call: "NAZL", weight: 163 },
+            { name: "Tim DeGroot", call: "GROO", weight: 199 },
+            { name: "Davide Pasquali", call: "PASQ", weight: 162 },
+            { name: "Timo Benitz", call: "TIMO", weight: 145 },
+            { name: "Sebastian Dewsnap", call: "DEWS", weight: 253 },
+            { name: "Giorgio Clementi", call: "GIO", weight: 274 },
+            { name: "Williams Grac", call: "GRC", weight: 143 },
+            { name: "Alain Lacharite", call: "ALA", weight: 171 },
+            { name: "Raphael Langumier", call: "LGR", weight: 160 },
+            { name: "David Lohse", call: "LOH", weight: 200 },
+            { name: "Stan Constantine", call: "STA", weight: 215 },
+            { name: "Thiago Macedo", call: "TIO", weight: 178 },
+            { name: "Alexandre Fiorenzano", call: "ALEX", weight: 172 },
+            { name: "Sibte Gillani", call: "SIB", weight: 219 },
+            { name: "Brendan Pierce", call: "BRE", weight: 170 },
+            { name: "Bennett Leong", call: "BEN", weight: 197 },
+            { name: "Sasa Dobrosavljevic", call: "SASA", weight: 155 },
+            { name: "Cyril Gennari", call: "CYR", weight: 155 },
+            { name: "Berni Csabai", call: "CHINGO", weight: 180 },
+            { name: "Stephen Crockett", call: "CROC", weight: 230 },
+            { name: "Carl Bertrand", call: "BER", weight: 180 },
+            { name: "Mark Chivers", call: "CHIV", weight: 228 },
+            { name: "Amit Alfia", call: "AMIT", weight: 170 },
+            { name: "David Ostler", call: "OST", weight: null },
+            { name: "Marc Dehm", call: "DEHM", weight: 194 },
+            { name: "Martin Bosse", call: "BOS", weight: 180 },
+            { name: "Alan Uehara", call: "UEH", weight: 153 },
+            { name: "Henry Language", call: "HHL", weight: 181 },
+            { name: "Guy Lynch", call: "GUY", weight: 230 },
+            { name: "Sannie Xu", call: "SAN", weight: 135 },
+            { name: "Vincent Clementi", call: "VIN", weight: 199 },
+            { name: "Michael Mulquiney", call: "MULQ", weight: null },
+            { name: "Vaughn Guigui", call: "GUI", weight: 180 },
+            { name: "Warwick Nuttall", call: "WARW", weight: null },
+            { name: "Mikko Koli", call: "MPK", weight: 209 },
+            { name: "Jens Lundgreen-Nielsen", call: "JENS", weight: 164 },
+            { name: "Daryl Lim", call: "LIM", weight: null },
+            { name: "Steve Griffiths", call: "GRIF", weight: null },
+            { name: "Peter Kosogorin", call: "KOSO", weight: null }
+        ];
+
+        const aircraftDatabase = {
+            CGRAS: CGRAS_DATA,
+            CGZSN: CGZSN_DATA,
+            CFYWI: CFYWI_DATA,
+            CFZJJ: CFZJJ_DATA,
+            personnel: personnel
+        };
+
+        function interpolate(x, x0, x1, y0, y1) {
+            if (x1 === x0) return y0;
+            return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+        }
+
+        function bilinearInterpolate(altitude, temp, altitudes, temps, dataMatrix) {
+            let altIdx0 = 0, altIdx1 = 0;
+            for (let i = 0; i < altitudes.length - 1; i++) {
+                if (altitude >= altitudes[i] && altitude <= altitudes[i + 1]) {
+                    altIdx0 = i; altIdx1 = i + 1; break;
+                }
+            }
+            if (altitude < altitudes[0]) { altIdx0 = 0; altIdx1 = 1; }
+            if (altitude > altitudes[altitudes.length - 1]) { altIdx0 = altitudes.length - 2; altIdx1 = altitudes.length - 1; }
+
+            let tempIdx0 = 0, tempIdx1 = 0;
+            for (let i = 0; i < temps.length - 1; i++) {
+                if (temp >= temps[i] && temp <= temps[i + 1]) {
+                    tempIdx0 = i; tempIdx1 = i + 1; break;
+                }
+            }
+            if (temp < temps[0]) { tempIdx0 = 0; tempIdx1 = 1; }
+            if (temp > temps[temps.length - 1]) { tempIdx0 = temps.length - 2; tempIdx1 = temps.length - 1; }
+
+            const alt0 = altitudes[altIdx0], alt1 = altitudes[altIdx1];
+            const temp0 = temps[tempIdx0], temp1 = temps[tempIdx1];
+            const val00 = dataMatrix[altitudes[altIdx0]][tempIdx0];
+            const val01 = dataMatrix[altitudes[altIdx0]][tempIdx1];
+            const val10 = dataMatrix[altitudes[altIdx1]][tempIdx0];
+            const val11 = dataMatrix[altitudes[altIdx1]][tempIdx1];
+            const valTemp0 = interpolate(altitude, alt0, alt1, val00, val10);
+            const valTemp1 = interpolate(altitude, alt0, alt1, val01, val11);
+            return interpolate(temp, temp0, temp1, valTemp0, valTemp1);
+        }
+
+        function render() {
+            const root = document.getElementById('root');
+            if (state.screen === 'aircraft') {
+                root.innerHTML = `
+                    <div class="flex-center">
+                        <div class="text-center">
+                            <h1>✈️ Aircraft Tools</h1>
+                            <p>Select a module to continue</p>
+                            <div class="aircraft-grid">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWeather()">📡 Aviation Weather (METAR & TAF)</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWB()">👨‍✈️ Student Instructor - Weight and Balance</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #a855f7, #9333ea);" onclick="selectAircraft('CFZJJ')">SR22-CFZJJ</button>
+                            </div>
+
+                            <div class="disclaimer-card">
+                                <div class="disclaimer-title">⚠️ Disclaimer</div>
+                                For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
+                            </div>
+                            <div style="font-weight: 800; font-size: 1.15rem; color: white; margin-top: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Developed by Furkan Yusuf Kılıçer</div>
+                        </div>
+                    </div>
+                `;
+            } else if (state.screen === 'wb') {
+                renderWB();
+            } else if (state.screen === 'weather') {
+                renderWeather();
+            } else if (state.screen === 'runway') {
+                renderRunway();
+            } else if (state.screen === 'calculator') {
+                renderCalculator();
+            }
+        }
+
+        function selectAircraft(aircraft) {
+            state.screen = 'runway';
+            state.selectedAircraft = aircraft;
+            state.runwayMode = null;
+            state.allResults = null;
+            state.weights = {};
+            render();
+        }
+
+        function startWB() {
+            state.screen = 'wb';
+            render();
+        }
+
+        function goBackHome() {
+            state.screen = 'aircraft';
+            state.selectedAircraft = null;
+            state.weatherData = null;
+            render();
+        }
+
+        function startWeather() {
+            state.screen = 'weather';
+            fetchWeather();
+            render();
+        }
+
+        async function fetchWeather() {
+            state.weatherLoading = true;
+            render();
+            const stArray = ['CYXU', 'CYSA', 'CYKF', 'CYQS', 'CYCE', 'CYTB'];
+            const stationStr = stArray.join(',');
+            const now = new Date().getTime();
+            console.log("🚀 Starting Aggressive Weather Fetch...");
+
+            async function superFetch(url, isXml = false) {
+                const proxyOrder = [
+                    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}&_=${now}`,
+                    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+                    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+                    (u) => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`
+                ];
+
+                for (const px of proxyOrder) {
+                    const controller = new AbortController();
+                    const tid = setTimeout(() => controller.abort(), 10000); // 10s
+                    try {
+                        const target = px(url);
+                        const res = await fetch(target, { cache: 'no-store', signal: controller.signal });
+                        clearTimeout(tid);
+                        if (!res.ok) continue;
+
+                        let body = await res.text();
+
+                        // Detect HTML error pages
+                        if (body.includes('<title>403 Forbidden</title>') ||
+                            body.includes('<TITLE>Access Denied</TITLE>') ||
+                            body.includes('Internal Server Error') ||
+                            body.includes('Stormcaster')) {
+                            console.log(`⚠️ Proxy ${px(url).split('/')[2]} returned error page, trying next...`);
+                            continue;
+                        }
+
+                        if (!body) continue;
+                        if (isXml) return body;
+                        try { return JSON.parse(body); } catch (e) { return body; }
+                    } catch (e) { clearTimeout(tid); }
+                }
+                return null;
+            }
+
+            async function fetchNotamCA(station) {
+                const coords = {
+                    'CYXU': { lat: 43.033, lon: -81.151 },
+                    'CYSA': { lat: 42.999, lon: -82.309 },
+                    'CYKF': { lat: 43.461, lon: -80.379 },
+                    'CYQS': { lat: 42.276, lon: -82.956 },
+                    'CYCE': { lat: 44.030, lon: -79.937 },
+                    'CYTB': { lat: 48.370, lon: -89.324 }
+                };
+                const c = coords[station.trim().toUpperCase()];
+                if (!c) return [];
+                const url = `https://notam.ca/api/v1/notams?point=${c.lon},${c.lat}&radius=25`;
+                const data = await superFetch(url);
+                if (!data) return [];
+                const list = Array.isArray(data) ? data : (data.notams || data.items || []);
+                return list.map(n => ({
+                    icaoId: station,
+                    rawNOTAM: n.text || n.raw || n.notamText || n.message || JSON.stringify(n)
+                }));
+            }
+
+            try {
+                // Fetch through Vercel Proxy to bypass CORS and blocking
+                const [m, t, nav, xml, faa, pilot, ...scrapes] = await Promise.all([
+                    superFetch(`https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json`),
+                    superFetch(`https://aviationweather.gov/api/data/taf?ids=${stationStr}&format=json`),
+                    // Proxy calls:
+                    fetch(`/api/notam-proxy?source=navcanada&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
+                    fetch(`/api/notam-proxy?source=awc-xml&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
+                    fetch(`/api/notam-proxy?source=faa&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
+                    fetch(`/api/notam-proxy?source=pilotweb&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
+                    ...stArray.map(s => {
+                        const coords = {
+                            'CYXU': { lat: 43.033, lon: -81.151 },
+                            'CYSA': { lat: 42.999, lon: -82.309 },
+                            'CYKF': { lat: 43.461, lon: -80.379 },
+                            'CYQS': { lat: 42.276, lon: -82.956 },
+                            'CYCE': { lat: 44.030, lon: -79.937 },
+                            'CYTB': { lat: 48.370, lon: -89.324 }
+                        };
+                        const c = coords[s];
+                        return fetch(`/api/notam-proxy?source=notamca&stations=${s}&lat=${c.lat}&lon=${c.lon}`).then(r => r.json()).then(j => j.data).catch(() => []);
+                    })
+                ]);
+
+                let allNotams = [];
+                const addRaw = (list) => { if (Array.isArray(list)) allNotams.push(...list); };
+                console.log("📊 Source Results:", { metar: !!m, taf: !!t, nav: !!nav, xml: !!xml, faa: !!faa, pilot: !!pilot });
+
+                if (nav) {
+                    // Nav Canada wxrecall is HTML, proxy returns structured data if possible or raw HTML
+                    if (Array.isArray(nav)) {
+                        addRaw(nav);
+                    } else if (typeof nav === 'string') {
+                        const doc = new DOMParser().parseFromString(nav, 'text/html');
+                        const notams = Array.from(doc.querySelectorAll('.notam-text, pre, [class*="notam"]')).map(el => ({
+                            icaoId: 'NAV_CANADA',
+                            rawNOTAM: el.textContent.trim()
+                        })).filter(n => n.rawNOTAM.length > 30);
+                        addRaw(notams);
+                    }
+                }
+                if (xml) {
+                    const x = new DOMParser().parseFromString(xml, "text/xml");
+                    const xmlNotams = Array.from(x.querySelectorAll("NOTAM, notam")).map(n => ({ icaoId: n.querySelector("icao_id, station")?.textContent, rawNOTAM: n.querySelector("raw_text, text")?.textContent }));
+                    addRaw(xmlNotams);
+                }
+                if (faa && faa.items) {
+                    addRaw(faa.items.map(i => ({ icaoId: i.icaoLocation, rawNOTAM: i.traditionalMessage || i.icaoMessage })));
+                }
+                if (pilot && typeof pilot === 'string' && !pilot.includes('<!DOCTYPE')) {
+                    const pilotLines = pilot.split('\n').filter(l => {
+                        const trimmed = l.trim();
+                        return trimmed.startsWith('!') && !trimmed.startsWith('<!--') && !trimmed.includes('<') && trimmed.length > 20;
+                    });
+                    pilotLines.forEach(l => allNotams.push({ icaoId: 'UNKNOWN', rawNOTAM: l.trim() }));
+                }
+                scrapes.forEach(s => addRaw(s));
+
+                if (allNotams.length === 0) stArray.forEach(st => allNotams.push({ icaoId: st, rawNOTAM: `${st} - No NOTAMs retrieved. Systems operational.` }));
+
+                const seen = new Set();
+                const uniqueNotams = allNotams.filter(n => {
+                    if (!n.rawNOTAM) return false;
+                    const key = `${n.icaoId}-${n.rawNOTAM.substring(0, 60)}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+
+                console.log('📊 Final Weather Data:', {
+                    metars: (m || []).length,
+                    tafs: (t || []).length,
+                    notams: uniqueNotams.length,
+                    notamDetails: uniqueNotams.map(n => ({
+                        icaoId: n.icaoId,
+                        preview: (n.rawNOTAM || '').substring(0, 50) + '...'
+                    }))
+                });
+
+                // 🔍 DETAILED NOTAM SAMPLE (first 5)
+                console.log('🔍 FIRST 5 NOTAMs DETAILED:');
+                uniqueNotams.slice(0, 5).forEach((n, i) => {
+                    console.log(`  [${i}] icaoId: "${n.icaoId}"`);
+                    console.log(`      rawNOTAM: "${n.rawNOTAM?.substring(0, 150)}..."`);
+                });
+                state.weatherData = { metars: m || [], tafs: t || [], notams: uniqueNotams };
+            } catch (error) {
+                console.error("🔥 Engine Failure:", error);
+                state.weatherData = "Error fetching weather data. (Link failed)";
+            } finally {
+                state.weatherLoading = false;
+                render();
+            }
+        }
+
+        function renderWeather() {
+            const root = document.getElementById('root');
+            let content = '';
+
+            if (state.weatherLoading) {
+                root.innerHTML = `
+                    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem;">
+                        <div class="text-center" style="color: white; font-size: 1.25rem;">📡 Fetching latest weather data...</div>
+                        <button class="btn-back" onclick="goBackHome()" style="position: static;">← Stop & Back Home</button>
+                    </div>
+                `;
+                return;
+            } else if (typeof state.weatherData === 'string') {
+                root.innerHTML = `
+                    <div class="container" style="padding-top: 2rem;">
+                        <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                        <div class="results" style="background: #fef2f2; border-color: #ef4444; color: #991b1b; margin-top: 1rem;">⚠️ ${state.weatherData}</div>
+                        <button class="btn-primary" style="margin-top: 1rem;" onclick="fetchWeather()">🔄 Try Again</button>
+                    </div>
+                `;
+                return;
+            } else if (state.weatherData) {
+                const stationsList = ['CYXU', 'CYSA', 'CYKF', 'CYQS', 'CYCE', 'CYTB'];
+
+                const getRunwayWinds = (windDir, windSpeed) => {
+                    if (windDir === null || windSpeed === null || typeof windDir === 'undefined' || typeof windSpeed === 'undefined') return null;
+
+                    // METAR is True, Runways are Magnetic. 
+                    // CYXU Magnetic Variation is approx 9° West.
+                    // To get Magnetic: True + 9 (West is Best/Plus)
+                    const magWindDir = (windDir + 9) % 360;
+
+                    const runways = [
+                        { id: '15', dir: 151 },
+                        { id: '33', dir: 331 },
+                        { id: '09', dir: 88 },
+                        { id: '27', dir: 268 }
+                    ];
+                    return runways.map(r => {
+                        const diff = (magWindDir - r.dir + 360) % 360;
+                        const rad = diff * Math.PI / 180;
+                        const head = Math.round(windSpeed * Math.cos(rad));
+                        const cross = Math.round(windSpeed * Math.sin(rad));
+
+                        // Crosswind Side: 
+                        // If diff is 0-180, wind is from the RIGHT of the runway heading.
+                        // If diff is 180-360, wind is from the LEFT.
+                        const isFromRight = diff > 0 && diff < 180;
+
+                        return {
+                            id: r.id,
+                            head: head,
+                            cross: Math.abs(cross),
+                            side: cross === 0 ? '' : (isFromRight ? 'Right' : 'Left'),
+                            headArrow: head >= 0 ? '↓' : '↑', // ↓ = wind hitting nose (headwind), ↑ = wind from behind (tailwind)
+                            crossArrow: cross === 0 ? '' : (isFromRight ? '←' : '→'), // ← = blowing from right to left, → = blowing from left to right
+                            favorable: head >= 0
+                        };
+                    });
+                };
+
+                const decodeClouds = (clouds) => {
+                    if (!clouds || clouds.length === 0) return 'Clear skies';
+                    const mapping = {
+                        'SKC': 'Clear skies', 'CLR': 'Clear skies', 'FEW': 'Few clouds', 'SCT': 'Scattered clouds',
+                        'BKN': 'Broken clouds', 'OVC': 'Overcast clouds', 'OVX': 'Indefinite ceiling',
+                        'NSC': 'No significant clouds', 'CAVOK': 'Cloud and Visibility OK'
+                    };
+                    return clouds.map(c => {
+                        const level = c.base || 0;
+                        const cover = c.cover;
+                        const desc = mapping[cover] || cover;
+
+                        // If it's a clear code, or indefinite at 0ft, just return the description
+                        if (['SKC', 'CLR', 'NSC', 'CAVOK'].includes(cover) || (cover === 'OVX' && level === 0)) {
+                            return desc;
+                        }
+
+                        const style = level < 1000 ? 'color: #dc2626; font-weight: 800;' : (level < 3000 ? 'color: #2563eb; font-weight: 700;' : '');
+                        return `<span style="${style}">${desc} at ${level} ft</span>`;
+                    }).join(', ');
+                };
+
+                const decodeWeather = (wx) => {
+                    if (!wx) return '';
+                    const codes = {
+                        'SN': 'Snow', 'RA': 'Rain', 'DZ': 'Drizzle', 'SH': 'Showers', 'TS': 'Thunderstorms',
+                        'FG': 'Fog', 'BR': 'Mist', 'HZ': 'Haze', 'FU': 'Smoke', 'BL': 'Blowing', 'DU': 'Dust',
+                        'SQ': 'Squalls', 'FC': 'Funnel Cloud', 'GR': 'Hail', 'PL': 'Ice Pellets', 'FZ': 'Freezing',
+                        'VC': 'In the vicinity', 'MI': 'Shallow', 'PR': 'Partial', 'DR': 'Low drifting'
+                    };
+                    let result = wx.startsWith('-') ? 'Light ' : (wx.startsWith('+') ? 'Heavy ' : '');
+                    const cleanWx = wx.replace(/[+-]/g, '');
+                    const parts = cleanWx.match(/.{1,2}/g) || [];
+                    result += parts.map(p => codes[p] || p).join(' ');
+                    return result;
+                };
+
+                const decodeMetar = (m) => {
+                    if (!m) return 'No data available.';
+                    const wind = m.wspd === 0 ? 'Calm' : `${m.wspd} knots from ${m.wdir}°${m.wgst ? ` (Gusting to ${m.wgst} kt)` : ''}`;
+                    const vis = m.visib === "6+" ? 'More than 6 miles' : `${m.visib} miles`;
+
+                    const clouds = decodeClouds(m.clouds);
+                    const wx = decodeWeather(m.wxString);
+                    const lowestCloud = m.clouds && m.clouds.length > 0 ? Math.min(...m.clouds.map(c => c.base || 10000)) : 10000;
+                    const visibilityVal = parseFloat(m.visib) || 10;
+
+                    const category = (lowestCloud < 1000 || visibilityVal < 3) ? 'IFR' : (lowestCloud <= 3000 || visibilityVal <= 5 ? 'MVFR' : 'VFR');
+                    const catColor = category === 'VFR' ? '#16a34a' : (category === 'MVFR' ? '#2563eb' : '#dc2626');
+                    const cloudBaseStr = lowestCloud < 10000 ? `<br>☁️ <b>Lowest Cloud Base: ${lowestCloud} ft</b>` : '';
+                    const timeStr = m.reportTime ? new Date(m.reportTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : 'N/A';
+
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+                            <div style="display:inline-block; padding: 2px 10px; border-radius: 6px; background: ${catColor}; color: white; font-size: 0.8rem; font-weight: 950; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${category}</div>
+                            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">📅 Observed: ${timeStr}</div>
+                        </div>
+                        <div style="font-size: 1rem; line-height: 1.5;">
+                            🌬️ Wind: ${wind}<br>
+                            👁️ Visibility: <b>${vis}</b>${wx ? `<br>🌧️ Weather: ${wx}` : ''}<br>
+                            ☁️ Clouds: ${clouds}${cloudBaseStr}<br>
+                            🌡️ Temp: ${m.temp}°C (Dew: ${m.dewp}°C)<br>
+                            🎯 Alt: ${m.altim} hPa
+                        </div>
+                    `;
+                };
+
+                const decodeTaf = (t) => {
+                    if (!t || !t.fcsts) return 'No forecast available.';
+                    const issueTime = t.issueTime ? new Date(t.issueTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : 'N/A';
+                    const validFrom = t.validTimeFrom ? new Date(t.validTimeFrom).toLocaleDateString([], { day: '2-digit', month: 'short' }) + ' ' + new Date(t.validTimeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : '';
+                    const validTo = t.validTimeTo ? new Date(t.validTimeTo).toLocaleDateString([], { day: '2-digit', month: 'short' }) + ' ' + new Date(t.validTimeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : '';
+
+                    const header = `
+                        <div style="margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #ccfbf1; display: flex; flex-direction: column; gap: 0.3rem;">
+                            <div style="font-size: 0.75rem; font-weight: 800; color: #065f46;">📅 Issued: <b>${issueTime}</b></div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: #047857; background: #defcf5; padding: 3px 8px; border-radius: 4px;">⏱️ Valid: ${validFrom} → ${validTo}</div>
+                        </div>
+                    `;
+
+                    const forecasts = t.fcsts.map(f => {
+                        const time = new Date(f.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+                        const type = f.fcstChange || 'Initial';
+                        const wind = f.wspd === null ? 'Same' : (f.wspd === 0 ? 'Calm' : `<b>${f.wspd} kt</b> from ${f.wdir}°${f.wgst ? ` (G${f.wgst} kt)` : ''}`);
+                        const vis = f.visib === null ? 'Same' : (f.visib === "6+" ? '>6 miles' : `<b>${f.visib} miles</b>`);
+
+                        const clouds = decodeClouds(f.clouds);
+                        const wx = decodeWeather(f.wxString);
+                        return `<div style="padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.9rem; line-height: 1.4;">
+                                    <span style="background: #e6fffa; color: #00685b; padding: 1px 6px; border-radius: 4px; font-weight: 900; font-size: 0.75rem; margin-right: 6px;">${time} [${type}]</span>
+                                    <span style="color: #1e293b;">${wind}, Vis: ${vis}${wx ? `, <b>${wx}</b>` : ''}, ☁️ ${clouds}</span>
+                                </div>`;
+                    }).join('');
+
+                    return header + forecasts;
+                };
+
+                const decodeNotam = (n) => {
+                    if (!n) return 'No active notices.';
+                    const raw = n.rawDesc || n.rawNOTAM || "";
+                    let eli5 = "Safety info: ";
+
+                    if (raw.includes("CLSD") || raw.includes("CLOSED")) eli5 += "Closed area! ";
+                    if (raw.includes("RWY") || raw.includes("RUNWAY")) eli5 += "Runway work nearby. ";
+                    if (raw.includes("TWY") || raw.includes("TAXIWAY")) eli5 += "Taxiway blocked. ";
+                    if (raw.includes("WIP") || raw.includes("WORK IN PROGRESS")) eli5 += "Construction on field. ";
+                    if (raw.includes("SNOW") || raw.includes("GRDE")) eli5 += "Snow/Ice on ground. ";
+                    if (raw.includes("MEN AND EQUIP")) eli5 += "Workers & trucks active. ";
+                    if (raw.includes("OBST")) eli5 += "Obstacle reported. ";
+                    if (eli5 === "Safety info: ") eli5 += "General equipment or procedure update.";
+
+                    return `
+                        <div style="font-size: 0.85rem; line-height: 1.4; color: #374151;">
+                            ${raw}
+                        </div>
+                        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.4rem; color: #92400e;">
+                            <b style="font-size: 0.65rem; text-transform: uppercase;">🍌 Banana Mode (ELI5):</b><br>
+                            <span style="font-size: 0.8rem; font-weight: 700;">${eli5}</span>
+                        </div>
+                    `;
+                };
+
+                const sidebarLeft = state.bananaMode ? `
+                    <div style="position: fixed; left: 0.5rem; top: 10%; width: 48px; min-height: 200px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.8rem; padding: 0.4rem; color: white; z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 0.6rem; overflow: hidden; transition: all 0.3s ease;">
+                        <div style="font-weight: 950; font-size: 0.55rem; color: rgba(255,255,255,0.5); text-align: center; letter-spacing: 0.05em; margin-bottom: 0.2rem;">☁️ GLOSSARY</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Overcast -->
+                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
+                                <img src="https://images.unsplash.com/photo-1483977399920-6c9bfb24d6ca?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
+                                <div><b style="font-size: 0.75rem;">OVC</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Overcast (Full)</span></div>
+                            </div>
+                            <!-- Broken -->
+                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
+                                <img src="https://images.unsplash.com/photo-1534088568595-a066f77ec3ed?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
+                                <div><b style="font-size: 0.75rem;">BKN</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Broken (Heavy)</span></div>
+                            </div>
+                            <!-- Scattered -->
+                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
+                                <img src="https://images.unsplash.com/photo-1509803332458-d051f79395c0?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
+                                <div><b style="font-size: 0.75rem;">SCT</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Scattered</span></div>
+                            </div>
+                            <!-- Few -->
+                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
+                                <img src="https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
+                                <div><b style="font-size: 0.75rem;">FEW</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Few Patches</span></div>
+                            </div>
+                            <!-- Fog -->
+                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
+                                <img src="https://images.unsplash.com/photo-1487621167305-5d2ed81ceec2?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
+                                <div><b style="font-size: 0.75rem;">OVX/FG</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Fog/Indefinite</span></div>
+                            </div>
+                        </div>
+                    </div>
+                ` : '';
+
+                const sidebarRight = state.bananaMode ? `
+                    <div style="position: fixed; right: 0.5rem; top: 10%; width: 190px; background: rgba(255,255,255,0.08); backdrop-filter: blur(28px); padding: 0.85rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.15); font-size: 0.75rem; color: #f8fafc; box-shadow: 0 12px 24px rgba(0,0,0,0.4); z-index: 1000;">
+                        <div style="font-weight: 950; color: #f1f5f9; margin-bottom: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; font-size: 0.75rem; text-align: center;">🚩 CATEGORIES</div>
+                            <div style="display: flex; align-items: flex-start; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.75rem; margin-bottom: 0.5rem;">
+                                <div style="width: 14px; height: 14px; background: #22c55e; border-radius: 3px; margin-top: 2px; flex-shrink: 0;"></div>
+                                <div><b style="color: white; font-size: 0.85rem;">VFR</b><div style="font-size: 0.7rem; color: #cbd5e1; margin-top: 1px;">Ceil > 3k', Vis > 5m</div></div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.75rem; margin-bottom: 0.5rem;">
+                                <div style="width: 14px; height: 14px; background: #3b82f6; border-radius: 3px; margin-top: 2px; flex-shrink: 0;"></div>
+                                <div><b style="color: white; font-size: 0.85rem;">MVFR</b><div style="font-size: 0.7rem; color: #cbd5e1; margin-top: 1px;">Ceil 1-3k', Vis 3-5m</div></div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.75rem; margin-bottom: 0.5rem;">
+                                <div style="width: 14px; height: 14px; background: #ef4444; border-radius: 3px; margin-top: 2px; flex-shrink: 0;"></div>
+                                <div><b style="color: white; font-size: 0.85rem;">IFR</b><div style="font-size: 0.7rem; color: #cbd5e1; margin-top: 1px;">Ceil < 1k', Vis < 3m</div></div>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.65rem; line-height: 1.2; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem; text-align: center;">* Ceiling: Lowest BKN/OVC.</div>
+                    </div>
+                ` : '';
+
+                root.innerHTML = `
+                    <div style="min-height: 100vh; position: relative; width: 100%; overflow-x: hidden; padding: 1.5rem 0;">
+                        ${sidebarLeft}
+                        ${sidebarRight}
+                        <div class="container" style="position: relative; z-index: 10;">
+                            <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                            <div class="card" style="box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.98); padding: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                                    <h2 style="margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.04em;">🌤️ Aviation Weather Recall</h2>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.bananaMode = !state.bananaMode; render()">
+                                            ${state.bananaMode ? '👨‍✈️ Pilot Mode' : "🍌 I'm not Pilot I want Banana Mode"}
+                                        </button>
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.showNotams = !state.showNotams; render()">
+                                            ${state.showNotams ? '📜 Hide NOTAMs' : '📜 NOTAMs'}
+                                        </button>
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.showWindy = !state.showWindy; render()">
+                                            ${state.showWindy ? '🌐 Hide Windy' : '🌐 Windy'}
+                                        </button>
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="fetchWeather()">🔄 Refresh</button>
+                                    </div>
+                                </div>
+                                
+                                ${state.showWindy ? `
+                                    <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden; border: 1px solid #e2e8f0; height: 210px;">
+                                        <iframe 
+                                            width="100%" 
+                                            height="210" 
+                                            src="https://embed.windy.com/embed2.html?lat=43.033&lon=-81.150&detailLat=43.033&detailLon=-81.150&zoom=11&level=surface&overlay=cloudbase&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=true&detailTab=meteogram&metricWind=kt&metricTemp=degree&radarRange=-1" 
+                                            frameborder="0">
+                                        </iframe>
+                                    </div>
+                                ` : ''}
+
+                                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+                                    ${stationsList.map(st => {
+                    const m = Array.isArray(state.weatherData?.metars) ? state.weatherData.metars.find(x => x.icaoId === st) : null;
+                    const t = Array.isArray(state.weatherData?.tafs) ? state.weatherData.tafs.find(x => x.icaoId === st) : null;
+                    return `
+                                            <div class="module-result" style="margin: 0; padding: 1.25rem; border-left: 6px solid #3b82f6; background: #fafafa; border-radius: 0 0.85rem 0.85rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.6rem;">
+                                                    <div style="font-weight: 950; color: #0f172a; font-size: 1.25rem; letter-spacing: -0.04em;">📍 ${st}</div>
+                                                    ${st === 'CYXU' ? (() => {
+                            const rw = getRunwayWinds(m?.wdir, m?.wspd);
+                            if (!rw) return '';
+                            return `<div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                                            ${rw.map(w => `
+                                                                <div style="background: ${w.favorable ? '#f0fdf4' : '#fff1f2'}; border: 1px solid ${w.favorable ? '#10b981' : '#fecaca'}; padding: 0.25rem 0.6rem; border-radius: 0.5rem; font-size: 0.75rem; min-width: 95px; text-align: center;">
+                                                                    <div style="font-weight: 900; color: ${w.favorable ? '#15803d' : '#be123c'}; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 3px; font-size: 0.85rem; text-transform: uppercase;">RWY ${w.id}</div>
+                                                                    <div style="display: flex; flex-direction: column; line-height: 1.3;">
+                                                                        <span style="font-weight: 900; color: #1e293b;">${w.headArrow} ${Math.abs(w.head)} ${w.head >= 0 ? 'HEAD' : 'TAIL'}</span>
+                                                                        <span style="color: #64748b; font-weight: 700;">${w.crossArrow} ${w.cross} ${w.side.charAt(0)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            `).join('')}
+                                                        </div>`;
+                        })() : ''}
+                                                </div>
+                                                
+                                                <div style="margin-bottom: 1rem;">
+                                                    <div style="font-size: 0.75rem; font-weight: 900; color: #2563eb; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.1em;">📡 METAR</div>
+                                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #1e293b; background: #f8fafc; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #e2e8f0; line-height: 1.5;">${state.bananaMode ? decodeMetar(m) : (m ? m.rawOb.trim() : '[N/A]')}</div>
+                                                </div>
+
+                                                <div>
+                                                    <div style="font-size: 0.75rem; font-weight: 900; color: #059669; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.1em;">📅 TAF</div>
+                                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #064e3b; background: #f0fdf9; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ccfbf1; white-space: pre-line; line-height: 1.5;">${state.bananaMode ? decodeTaf(t) : (t ? t.rawTAF.trim() : '[N/A]')}</div>
+                                                </div>
+
+                                                ${state.showNotams ? `
+                                                <div style="margin-top: 1rem;">
+                                                    <div style="font-size: 0.75rem; font-weight: 900; color: #7c3aed; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.1em;">📜 NOTAMs</div>
+                                                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                                        ${(() => {
+                                const stationNotams = Array.isArray(state.weatherData?.notams) ? state.weatherData.notams.filter(x => {
+                                    const id = (x.icaoId || "").toUpperCase().trim();
+                                    const target = st.toUpperCase().trim();
+                                    // Daha esnek eşleştirme
+                                    return id === target ||
+                                        id === target.substring(1) ||
+                                        id.includes(target) ||
+                                        target.includes(id) ||
+                                        (x.rawNOTAM && x.rawNOTAM.toUpperCase().includes(target));
+                                }) : [];
+
+                                console.log(`${st} NOTAMs found:`, stationNotams.length, stationNotams);
+
+                                if (stationNotams.length === 0) {
+                                    return `<div style="font-size: 0.85rem; color: #64748b; font-style: italic; padding: 0.75rem; background: #f8fafc; border-radius: 0.6rem; border: 1px solid #e2e8f0;">No active NOTAMs for ${st} or NOTAMs could not be retrieved.</div>`;
+                                }
+
+                                return stationNotams.map((n, idx) => `
+                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #4c1d95; background: #f5f3ff; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ddd6fe; line-height: 1.5; margin-bottom: 0.5rem;">
+                                        <div style="font-weight: 800; color: #7c3aed; margin-bottom: 0.5rem; font-size: 0.7rem; border-bottom: 1px solid #ddd6fe; padding-bottom: 0.3rem;">NOTAM #${idx + 1} - ${n.icaoId || st}</div>
+                                        ${state.bananaMode ? decodeNotam(n) : (n.rawNOTAM || '[No content]')}
+                                    </div>
+                                `).join('');
+                            })()}
+                                                    </div>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                        `;
+                }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateWBField(field, value) {
+            state.wb[field] = value;
+            render();
+        }
+
+        function updateManualWeight(personId, weight) {
+            state.wb.manualWeights[personId] = weight;
+            render();
+        }
+
+        function renderWB() {
+            const root = document.getElementById('root');
+
+            const getPersonnelOptions = (selectedIdx) => {
+                let options = `<option value="" ${selectedIdx === "" ? 'selected' : ''}>Empty</option>`;
+                const sortedPersonnel = aircraftDatabase.personnel
+                    .map((p, idx) => ({ ...p, originalIdx: idx }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                options += sortedPersonnel.map(p => {
+                    const isSelected = selectedIdx !== "" && parseInt(selectedIdx) === p.originalIdx;
+                    const weightTag = p.weight === null ? ' [N/A]' : '';
+                    return `<option value="${p.originalIdx}" ${isSelected ? 'selected' : ''}>${p.name} (${p.call})${weightTag}</option>`;
+                }).join('');
+                return options;
+            };
+
+            const getWeightPrompt = (field, id) => {
+                if (id === "" || id === null) return '';
+                const person = aircraftDatabase.personnel[id];
+                if (person && person.weight === null) {
+                    return `
+                        <div class="manual-weight-prompt">
+                            <label>Weight unknown for ${person.name}. Please enter (lb):</label>
+                            <input type="number" value="${state.wb.manualWeights[id] || ''}" onchange="updateManualWeight('${id}', this.value)" placeholder="Enter weight">
+                        </div>
+                    `;
+                }
+                return '';
+            };
+
+            const sidebarHtml = `
+                <div class="sidebar">
+                    <div class="sidebar-title">👥 Personnel Directory</div>
+                    ${aircraftDatabase.personnel
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(p => `
+                            <div class="personnel-list-item">
+                                <div class="personnel-info">
+                                    <span class="personnel-name">${p.name}</span>
+                                    <span class="personnel-weight">${p.weight !== null ? p.weight + ' lb' : '[N/A]'}</span>
+                                </div>
+                                <span class="personnel-call">${p.call}</span>
+                            </div>
+                        `).join('')}
+                </div>
+            `;
+
+            root.innerHTML = `
+                <div class="flex-center" style="background: none; min-height: unset; padding-top: 2rem;">
+                    <div class="app-layout">
+                        ${sidebarHtml}
+                        <div class="wb-content">
+                            <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                            <div class="card">
+                                <h2>👨‍✈️ Student Instructor W&B</h2>
+                                <div class="grid">
+                                    <div class="input-group">
+                                        <label>Front Seat - Left (Pilot)</label>
+                                        <select onchange="updateWBField('frontLeft', this.value)">
+                                            ${getPersonnelOptions(state.wb.frontLeft)}
+                                        </select>
+                                        ${getWeightPrompt('frontLeft', state.wb.frontLeft)}
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Front Seat - Right</label>
+                                        <select onchange="updateWBField('frontRight', this.value)">
+                                            ${getPersonnelOptions(state.wb.frontRight)}
+                                        </select>
+                                        ${getWeightPrompt('frontRight', state.wb.frontRight)}
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Centre Seat</label>
+                                        <select onchange="updateWBField('centre', this.value)">
+                                            ${getPersonnelOptions(state.wb.centre)}
+                                        </select>
+                                        ${getWeightPrompt('centre', state.wb.centre)}
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Rear Seat</label>
+                                        <select onchange="updateWBField('rear', this.value)">
+                                            ${getPersonnelOptions(state.wb.rear)}
+                                        </select>
+                                        ${getWeightPrompt('rear', state.wb.rear)}
+                                    </div>
+                                </div>
+                                <button class="btn-primary" onclick="calculateWB()">Calculate Weights</button>
+                                <div id="wb-results"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        function calculateSR22Takeoff(d, a, t, w) {
+            return {
+                takeoffRoll: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.groundRoll[w])),
+                takeoffDistance: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.totalDist[w]))
+            };
+        }
+        function calculateSR22Landing(d, a, t) {
+            return {
+                landingRoll: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.groundRoll)),
+                landingDistance: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.totalDist))
+            };
+        }
+        function calculateSR22TakeoffClimb(d, a, t, w) {
+            return {
+                takeoffClimbRate: Math.round(bilinearInterpolate(a, t, d.takeoffclimb.altitudes, d.takeoffclimb.temps, d.takeoffclimb.data[w]))
+            };
+        }
+        function calculateSR22Balked(d, a, t, w) {
+            return {
+                balkedClimbRate: Math.round(bilinearInterpolate(a, t, d.balked.altitudes, d.balked.temps, d.balked.data[w])),
+                bestRateClimb: 77
+            };
+        }
+        function calculateWB() {
+            let totalWeight = 0;
+            let breakdown = [];
+            let missingWeight = false;
+
+            // Handle Front Seats (Grouped)
+            const flIdx = state.wb.frontLeft;
+            const frIdx = state.wb.frontRight;
+            let frontSeatsWeight = 0;
+            let frontSeatsNames = [];
+
+            [flIdx, frIdx].forEach((idx, i) => {
+                if (idx !== "" && idx !== null) {
+                    const person = aircraftDatabase.personnel[idx];
+                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[idx]);
+                    if (isNaN(weight)) {
+                        missingWeight = true;
+                    } else {
+                        frontSeatsWeight += weight;
+                        frontSeatsNames.push(`${person.name} FS-${i === 0 ? 'L' : 'R'}`);
+                    }
+                }
+            });
+
+            if (frontSeatsNames.length > 0) {
+                totalWeight += frontSeatsWeight;
+                breakdown.push(`<span>Front Seats:</span> <b>${frontSeatsNames.join(' + ')}</b> (${frontSeatsWeight} lb)`);
+            }
+
+            // Handle Centre and Rear
+            ['centre', 'rear'].forEach(f => {
+                const idx = state.wb[f];
+                if (idx !== "" && idx !== null) {
+                    const person = aircraftDatabase.personnel[idx];
+                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[idx]);
+                    if (isNaN(weight)) {
+                        missingWeight = true;
+                    } else {
+                        totalWeight += weight;
+                        breakdown.push(`<span>${f.charAt(0).toUpperCase() + f.slice(1)} Seat:</span> <b>${person.name}</b> (${weight} lb)`);
+                    }
+                }
+            });
+
+            const resultsDiv = document.getElementById('wb-results');
+            if (missingWeight) {
+                resultsDiv.innerHTML = `<div class="results" style="background: #fef2f2; border-color: #ef4444; color: #991b1b;">⚠️ Please enter all manual weights!</div>`;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="results">
+                        <h3 style="color: #065f46;">✅ W&B Personnel Summary</h3>
+                        <div class="result-item"><span class="result-label">Total Personnel Weight:</span><span class="result-value">${totalWeight} lb</span></div>
+                        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem; color: #334155;">
+                            ${breakdown.map(b => `<div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.5); padding: 0.5rem 1rem; border-radius: 0.5rem;">${b}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRunway() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container">
+                    <button class="btn-back" onclick="goBackHome()">← Back</button>
+                    <div class="card">
+                        <h2>✈️ ${state.selectedAircraft} - Runway</h2>
+                        <div class="runway-option ${state.runwayMode === 'cyxu' ? 'selected' : ''}" onclick="selectRunway('cyxu')">
+                            <h3>🛫 CYXU Runway</h3>
+                            <p style="color: #64748b; margin: 0;">Elevation: 912 ft (automatic)</p>
+                        </div>
+                        <div class="runway-option ${state.runwayMode === 'custom' ? 'selected' : ''}" onclick="selectRunway('custom')">
+                            <h3>🎯 Custom Elevation</h3>
+                            <p style="color: #64748b; margin: 0;">Enter your own elevation</p>
+                        </div>
+                        ${state.runwayMode ? `<button class="btn-primary" onclick="proceedToCalculator()">Continue</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectRunway(mode) {
+            state.runwayMode = mode;
+            state.altitude = mode === 'cyxu' ? '912' : '';
+            render();
+        }
+
+        function proceedToCalculator() {
+            state.screen = 'calculator';
+            render();
+        }
+
+        function calculateAll() {
+            const altitude = parseFloat(state.altitude);
+            const tempCelsius = parseFloat(state.temperature);
+            if (isNaN(altitude) || isNaN(tempCelsius)) { alert("Please enter values!"); return; }
+
+            const data = aircraftDatabase[state.selectedAircraft];
+            let allResults = {};
+            const isSR22 = state.selectedAircraft.startsWith('CF');
+
+            if (isSR22) {
+                // SR22 Logic (Celsius directly)
+                if (state.weights.takeoff) allResults.takeoff = { ...calculateSR22Takeoff(data, altitude, tempCelsius, state.weights.takeoff), weight: state.weights.takeoff };
+                allResults.landing = calculateSR22Landing(data, altitude, tempCelsius);
+                if (state.weights.takeoffclimb) allResults.takeoffclimb = { ...calculateSR22TakeoffClimb(data, altitude, tempCelsius, state.weights.takeoffclimb), weight: state.weights.takeoffclimb };
+                if (state.weights.balked) allResults.balked = { ...calculateSR22Balked(data, altitude, tempCelsius, state.weights.balked), weight: state.weights.balked };
+            } else {
+                // C340 Logic
+                const tempF = (tempCelsius * 9 / 5) + 32; // CONVERSION FOR BALKED/OEI
+                allResults.takeoff = { takeoffRoll: Math.round(bilinearInterpolate(altitude, tempCelsius, data.takeoff.altitudes, data.takeoff.temps, data.takeoff.groundRoll)), takeoffDistance: Math.round(bilinearInterpolate(altitude, tempCelsius, data.takeoff.altitudes, data.takeoff.temps, data.takeoff.totalDist)) };
+                if (state.weights.accelstop) allResults.accelstop = { accelerateStopDistance: Math.round(bilinearInterpolate(altitude, tempCelsius, data.accelstop.altitudes, data.accelstop.temps, data.accelstop.data[state.weights.accelstop])), weight: state.weights.accelstop };
+                allResults.landing = { landingRoll: Math.round(bilinearInterpolate(altitude, tempCelsius, data.landing.altitudes, data.landing.temps, data.landing.groundRoll)), landingDistance: Math.round(bilinearInterpolate(altitude, tempCelsius, data.landing.altitudes, data.landing.temps, data.landing.totalDist)) };
+                allResults.balked = { balkedClimbRate: Math.round(bilinearInterpolate(altitude, tempF, data.balked.altitudes, data.balked.temps, data.balked.data)) };
+                if (data.oei && state.weights.oei) allResults.oei = { oeiClimbRate: Math.round(bilinearInterpolate(altitude, tempF, data.oei.altitudes, data.oei.temps, data.oei.data[state.weights.oei])), weight: state.weights.oei };
+            }
+            state.allResults = allResults;
+            render();
+        }
+
+        // Placeholder for SR22 calcs - can be filled if needed
+        function calculateSR22Takeoff(d, a, t, w) {
+            return {
+                takeoffRoll: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.groundRoll[w])),
+                takeoffDistance: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.totalDist[w]))
+            };
+        }
+        function calculateSR22Landing(d, a, t) {
+            return {
+                landingRoll: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.groundRoll)),
+                landingDistance: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.totalDist))
+            };
+        }
+        function calculateSR22TakeoffClimb(d, a, t, w) {
+            return {
+                takeoffClimbRate: Math.round(bilinearInterpolate(a, t, d.takeoffclimb.altitudes, d.takeoffclimb.temps, d.takeoffclimb.data[w]))
+            };
+        }
+        function calculateSR22Balked(d, a, t, w) {
+            return {
+                balkedClimbRate: Math.round(bilinearInterpolate(a, t, d.balked.altitudes, d.balked.temps, d.balked.data[w])),
+                bestRateClimb: 77
+            };
+        }
+
+        function renderCalculator() {
+            const data = aircraftDatabase[state.selectedAircraft];
+            let elevationHtml = `
+                <div class="input-group">
+                    <label>Elevation (ft) ${state.runwayMode === 'cyxu' ? '- CYXU' : ''}</label>
+                    <input type="number" value="${state.altitude}" ${state.runwayMode === 'cyxu' ? 'disabled' : ''} onchange="state.altitude=this.value;render()">
+                </div>
+            `;
+
+            let weightInputsHtml = '';
+            const isSR22 = state.selectedAircraft.startsWith('CF');
+
+            if (isSR22) {
+                const modules = [
+                    { id: 'takeoff', name: 'Take-Off', weights: data.takeoff?.weights || [3400, 2900] },
+                    { id: 'takeoffclimb', name: 'Take-Off Climb', weights: data.takeoffclimb?.weights || [3400, 2900] },
+                    { id: 'balked', name: 'Balked Climb', weights: data.balked?.weights || [3400, 2900] }
+                ];
+                weightInputsHtml = modules.map(m => `
+                    <div class="input-group">
+                        <label>${m.name} Weight (lb)</label>
+                        <select onchange="state.weights['${m.id}']=this.value;render()">
+                            <option value="">Select Weight</option>
+                            ${m.weights.map(w => `<option value="${w}" ${state.weights[m.id] == w ? 'selected' : ''}>${w} lb</option>`).join('')}
+                        </select>
+                    </div>
+                `).join('');
+            } else if (data.accelstop) {
+                weightInputsHtml = `
+                    <div class="input-group">
+                        <label>Accel-Stop Weight (lb)</label>
+                        <select onchange="state.weights['accelstop']=this.value;render()">
+                            <option value="">Select Weight</option>
+                            ${data.accelstop.weights.map(w => `<option value="${w}" ${state.weights.accelstop == w ? 'selected' : ''}>${w} lb</option>`).join('')}
+                        </select>
+                    </div>
+                    ${data.oei ? `
+                    <div class="input-group">
+                        <label>OEI Climb Weight (lb)</label>
+                        <select onchange="state.weights['oei']=this.value;render()">
+                            <option value="">Select Weight</option>
+                            ${data.oei.weights.map(w => `<option value="${w}" ${state.weights.oei == w ? 'selected' : ''}>${w} lb</option>`).join('')}
+                        </select>
+                    </div>` : ''}
+                `;
+            }
+
+            let resultsHtml = '';
+            if (state.allResults) {
+                resultsHtml = '<div class="results"><h3>✅ Results</h3>';
+                Object.entries(state.allResults).forEach(([key, res]) => {
+                    resultsHtml += `<div class="module-result"><div class="module-title">${key.toUpperCase()} ${res.weight ? `<span class="weight-subtitle">(${res.weight} lb)</span>` : ''}</div>`;
+                    if (res.takeoffRoll) resultsHtml += `<div class="result-item"><span>Roll:</span> <b>${res.takeoffRoll} ft</b></div><div class="result-item"><span>Total:</span> <b>${res.takeoffDistance} ft</b></div>`;
+                    if (res.landingRoll) resultsHtml += `<div class="result-item"><span>Roll:</span> <b>${res.landingRoll} ft</b></div><div class="result-item"><span>Total:</span> <b>${res.landingDistance} ft</b></div>`;
+                    if (res.accelerateStopDistance) resultsHtml += `<div class="result-item"><span>Distance:</span> <b>${res.accelerateStopDistance} ft</b></div>`;
+                    if (res.balkedClimbRate) resultsHtml += `<div class="result-item"><span>Rate:</span> <b>${res.balkedClimbRate} fpm</b> ${res.bestRateClimb ? `(@ ${res.bestRateClimb} KIAS)` : ''}</div>`;
+                    if (res.oeiClimbRate) resultsHtml += `<div class="result-item"><span>Rate (OEI):</span> <b>${res.oeiClimbRate} fpm</b></div>`;
+                    if (res.takeoffClimbRate) resultsHtml += `<div class="result-item"><span>Rate:</span> <b>${res.takeoffClimbRate} fpm</b></div>`;
+                    resultsHtml += `</div>`;
+                });
+                resultsHtml += '</div>';
+            }
+
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container">
+                    <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                    <div class="card">
+                        <h2>🚀 ${state.selectedAircraft} Performance</h2>
+                        ${elevationHtml}
+                        <div class="input-group">
+                            <label>Temperature (°C)</label>
+                            <input type="number" value="${state.temperature}" onchange="state.temperature=this.value;render()" placeholder="e.g. 15">
+                        </div>
+                        ${weightInputsHtml}
+                        <button class="btn-primary" onclick="calculateAll()">Calculate All</button>
+                        ${resultsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        let state = {
+            screen: 'aircraft',
+            selectedAircraft: null,
+            runwayMode: null,
+            altitude: '',
+            temperature: '',
+            weights: {},
+            allResults: null,
+            wb: { frontLeft: "", frontRight: "", centre: "", rear: "", manualWeights: {} },
+            weatherData: null,
+            weatherLoading: false,
+            bananaMode: false,
+            showWindy: false,
+            showNotams: false
+        };
+        render();
+    </script>
+</body>
+
+</html>
