@@ -514,7 +514,7 @@
             { name: "Mikko Koli", call: "MPK", weight: 209 },
             { name: "Jens Lundgreen-Nielsen", call: "JENS", weight: 164 },
             { name: "Daryl Lim", call: "LIM", weight: null },
-            { name: "Steve Griffiths", call: "GRIF", weight: null },
+            { name: "Steve Griffiths", call: "GRIF", weight: 175 },
             { name: "Peter Kosogorin", call: "KOSO", weight: null }
         ];
 
@@ -567,7 +567,7 @@
                 root.innerHTML = `
                     <div class="flex-center">
                         <div class="text-center">
-                            <h1>✈️ Aircraft Tools</h1>
+                            <h1>✈️ Flight Test Tools</h1>
                             <p>Select a module to continue</p>
                             <div class="aircraft-grid">
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWeather()">📡 Aviation Weather (METAR & TAF)</button>
@@ -633,148 +633,51 @@
             console.log("🚀 Starting Aggressive Weather Fetch...");
 
             async function superFetch(url, isXml = false) {
-                const proxyOrder = [
+                const proxies = [
                     (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}&_=${now}`,
                     (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-                    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-                    (u) => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`
+                    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`
                 ];
 
-                for (const px of proxyOrder) {
+                async function tryProxy(pxUrl) {
                     const controller = new AbortController();
-                    const tid = setTimeout(() => controller.abort(), 10000); // 10s
+                    const tid = setTimeout(() => controller.abort(), 5000);
                     try {
-                        const target = px(url);
-                        const res = await fetch(target, { cache: 'no-store', signal: controller.signal });
+                        const res = await fetch(pxUrl, { signal: controller.signal });
                         clearTimeout(tid);
-                        if (!res.ok) continue;
-
-                        let body = await res.text();
-
-                        // Detect HTML error pages
-                        if (body.includes('<title>403 Forbidden</title>') ||
-                            body.includes('<TITLE>Access Denied</TITLE>') ||
-                            body.includes('Internal Server Error') ||
-                            body.includes('Stormcaster')) {
-                            console.log(`⚠️ Proxy ${px(url).split('/')[2]} returned error page, trying next...`);
-                            continue;
-                        }
-
-                        if (!body) continue;
-                        if (isXml) return body;
-                        try { return JSON.parse(body); } catch (e) { return body; }
-                    } catch (e) { clearTimeout(tid); }
-                }
-                return null;
-            }
-
-            async function fetchNotamCA(station) {
-                const coords = {
-                    'CYXU': { lat: 43.033, lon: -81.151 },
-                    'CYSA': { lat: 42.999, lon: -82.309 },
-                    'CYKF': { lat: 43.461, lon: -80.379 },
-                    'CYQS': { lat: 42.276, lon: -82.956 },
-                    'CYCE': { lat: 44.030, lon: -79.937 },
-                    'CYTB': { lat: 48.370, lon: -89.324 }
-                };
-                const c = coords[station.trim().toUpperCase()];
-                if (!c) return [];
-                const url = `https://notam.ca/api/v1/notams?point=${c.lon},${c.lat}&radius=25`;
-                const data = await superFetch(url);
-                if (!data) return [];
-                const list = Array.isArray(data) ? data : (data.notams || data.items || []);
-                return list.map(n => ({
-                    icaoId: station,
-                    rawNOTAM: n.text || n.raw || n.notamText || n.message || JSON.stringify(n)
-                }));
-            }
-
-            try {
-                // Fetch through Vercel Proxy to bypass CORS and blocking
-                const [m, t, nav, xml, faa, pilot, ...scrapes] = await Promise.all([
-                    superFetch(`https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json`),
-                    superFetch(`https://aviationweather.gov/api/data/taf?ids=${stationStr}&format=json`),
-                    // Proxy calls:
-                    fetch(`/api/notam-proxy?source=navcanada&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
-                    fetch(`/api/notam-proxy?source=awc-xml&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
-                    fetch(`/api/notam-proxy?source=faa&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
-                    fetch(`/api/notam-proxy?source=pilotweb&stations=${stationStr}`).then(r => r.json()).then(j => j.data).catch(() => null),
-                    ...stArray.map(s => {
-                        const coords = {
-                            'CYXU': { lat: 43.033, lon: -81.151 },
-                            'CYSA': { lat: 42.999, lon: -82.309 },
-                            'CYKF': { lat: 43.461, lon: -80.379 },
-                            'CYQS': { lat: 42.276, lon: -82.956 },
-                            'CYCE': { lat: 44.030, lon: -79.937 },
-                            'CYTB': { lat: 48.370, lon: -89.324 }
-                        };
-                        const c = coords[s];
-                        return fetch(`/api/notam-proxy?source=notamca&stations=${s}&lat=${c.lat}&lon=${c.lon}`).then(r => r.json()).then(j => j.data).catch(() => []);
-                    })
-                ]);
-
-                let allNotams = [];
-                const addRaw = (list) => { if (Array.isArray(list)) allNotams.push(...list); };
-                console.log("📊 Source Results:", { metar: !!m, taf: !!t, nav: !!nav, xml: !!xml, faa: !!faa, pilot: !!pilot });
-
-                if (nav) {
-                    // Nav Canada wxrecall is HTML, proxy returns structured data if possible or raw HTML
-                    if (Array.isArray(nav)) {
-                        addRaw(nav);
-                    } else if (typeof nav === 'string') {
-                        const doc = new DOMParser().parseFromString(nav, 'text/html');
-                        const notams = Array.from(doc.querySelectorAll('.notam-text, pre, [class*="notam"]')).map(el => ({
-                            icaoId: 'NAV_CANADA',
-                            rawNOTAM: el.textContent.trim()
-                        })).filter(n => n.rawNOTAM.length > 30);
-                        addRaw(notams);
+                        if (!res.ok) throw new Error("Fetch failed");
+                        const body = await res.text();
+                        if (!body || body.includes('<title>403 Forbidden</title>') || body.includes('Access Denied')) throw new Error("Blocked");
+                        return body;
+                    } catch (e) {
+                        clearTimeout(tid);
+                        throw e;
                     }
                 }
-                if (xml) {
-                    const x = new DOMParser().parseFromString(xml, "text/xml");
-                    const xmlNotams = Array.from(x.querySelectorAll("NOTAM, notam")).map(n => ({ icaoId: n.querySelector("icao_id, station")?.textContent, rawNOTAM: n.querySelector("raw_text, text")?.textContent }));
-                    addRaw(xmlNotams);
-                }
-                if (faa && faa.items) {
-                    addRaw(faa.items.map(i => ({ icaoId: i.icaoLocation, rawNOTAM: i.traditionalMessage || i.icaoMessage })));
-                }
-                if (pilot && typeof pilot === 'string' && !pilot.includes('<!DOCTYPE')) {
-                    const pilotLines = pilot.split('\n').filter(l => {
-                        const trimmed = l.trim();
-                        return trimmed.startsWith('!') && !trimmed.startsWith('<!--') && !trimmed.includes('<') && trimmed.length > 20;
-                    });
-                    pilotLines.forEach(l => allNotams.push({ icaoId: 'UNKNOWN', rawNOTAM: l.trim() }));
-                }
-                scrapes.forEach(s => addRaw(s));
 
-                if (allNotams.length === 0) stArray.forEach(st => allNotams.push({ icaoId: st, rawNOTAM: `${st} - No NOTAMs retrieved. Systems operational.` }));
+                try {
+                    const fastestResult = await Promise.any(proxies.map(p => tryProxy(p(url))));
+                    if (isXml) return fastestResult;
+                    try { return JSON.parse(fastestResult); } catch (e) { return fastestResult; }
+                } catch (e) {
+                    console.error("🏁 All proxies failed or timed out.");
+                    return null;
+                }
+            }
 
-                const seen = new Set();
-                const uniqueNotams = allNotams.filter(n => {
-                    if (!n.rawNOTAM) return false;
-                    const key = `${n.icaoId}-${n.rawNOTAM.substring(0, 60)}`;
-                    if (seen.has(key)) return false;
-                    seen.add(key);
-                    return true;
-                });
+
+            try {
+                const [m, t] = await Promise.all([
+                    superFetch(`https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json`),
+                    superFetch(`https://aviationweather.gov/api/data/taf?ids=${stationStr}&format=json`)
+                ]);
 
                 console.log('📊 Final Weather Data:', {
                     metars: (m || []).length,
-                    tafs: (t || []).length,
-                    notams: uniqueNotams.length,
-                    notamDetails: uniqueNotams.map(n => ({
-                        icaoId: n.icaoId,
-                        preview: (n.rawNOTAM || '').substring(0, 50) + '...'
-                    }))
+                    tafs: (t || []).length
                 });
 
-                // 🔍 DETAILED NOTAM SAMPLE (first 5)
-                console.log('🔍 FIRST 5 NOTAMs DETAILED:');
-                uniqueNotams.slice(0, 5).forEach((n, i) => {
-                    console.log(`  [${i}] icaoId: "${n.icaoId}"`);
-                    console.log(`      rawNOTAM: "${n.rawNOTAM?.substring(0, 150)}..."`);
-                });
-                state.weatherData = { metars: m || [], tafs: t || [], notams: uniqueNotams };
+                state.weatherData = { metars: m || [], tafs: t || [] };
             } catch (error) {
                 console.error("🔥 Engine Failure:", error);
                 state.weatherData = "Error fetching weather data. (Link failed)";
@@ -791,7 +694,7 @@
             if (state.weatherLoading) {
                 root.innerHTML = `
                     <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem;">
-                        <div class="text-center" style="color: white; font-size: 1.25rem;">📡 Fetching latest weather data...</div>
+                        <div class="text-center" style="color: white; font-size: 1.25rem;">📡 Fetching...</div>
                         <button class="btn-back" onclick="goBackHome()" style="position: static;">← Stop & Back Home</button>
                     </div>
                 `;
@@ -942,63 +845,47 @@
                     return header + forecasts;
                 };
 
-                const decodeNotam = (n) => {
-                    if (!n) return 'No active notices.';
-                    const raw = n.rawDesc || n.rawNOTAM || "";
-                    let eli5 = "Safety info: ";
 
-                    if (raw.includes("CLSD") || raw.includes("CLOSED")) eli5 += "Closed area! ";
-                    if (raw.includes("RWY") || raw.includes("RUNWAY")) eli5 += "Runway work nearby. ";
-                    if (raw.includes("TWY") || raw.includes("TAXIWAY")) eli5 += "Taxiway blocked. ";
-                    if (raw.includes("WIP") || raw.includes("WORK IN PROGRESS")) eli5 += "Construction on field. ";
-                    if (raw.includes("SNOW") || raw.includes("GRDE")) eli5 += "Snow/Ice on ground. ";
-                    if (raw.includes("MEN AND EQUIP")) eli5 += "Workers & trucks active. ";
-                    if (raw.includes("OBST")) eli5 += "Obstacle reported. ";
-                    if (eli5 === "Safety info: ") eli5 += "General equipment or procedure update.";
-
-                    return `
-                        <div style="font-size: 0.85rem; line-height: 1.4; color: #374151;">
-                            ${raw}
-                        </div>
-                        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.4rem; color: #92400e;">
-                            <b style="font-size: 0.65rem; text-transform: uppercase;">🍌 Banana Mode (ELI5):</b><br>
-                            <span style="font-size: 0.8rem; font-weight: 700;">${eli5}</span>
-                        </div>
-                    `;
-                };
-
-                const sidebarLeft = state.bananaMode ? `
-                    <div style="position: fixed; left: 0.5rem; top: 10%; width: 48px; min-height: 200px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.8rem; padding: 0.4rem; color: white; z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 0.6rem; overflow: hidden; transition: all 0.3s ease;">
-                        <div style="font-weight: 950; font-size: 0.55rem; color: rgba(255,255,255,0.5); text-align: center; letter-spacing: 0.05em; margin-bottom: 0.2rem;">☁️ GLOSSARY</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <!-- Overcast -->
-                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
-                                <img src="https://images.unsplash.com/photo-1483977399920-6c9bfb24d6ca?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
-                                <div><b style="font-size: 0.75rem;">OVC</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Overcast (Full)</span></div>
+                const notamUrl = "https://notam.ca/?point=CYXU%7Csite%7C-81.151%2C43.033&point=CYSA%7Csite%7C-80.934%2C43.416&point=CYKF%7Csite%7C-80.379%2C43.461&point=CYQS%7Csite%7C-81.110%2C42.770&point=CYCE%7Csite%7C-81.506%2C43.286&point=CYTB%7Csite%7C-80.747%2C42.926";
+                const sidebarLeft = `
+                    <div style="position: fixed; left: 0.5rem; top: 10%; width: 70px; min-height: 48px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; padding: 0.6rem; color: white; z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 0.6rem; overflow: hidden; transition: all 0.3s ease;">
+                        <a href="${notamUrl}" target="_blank" style="text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #7c3aed; padding: 10px 4px; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transform: scale(1.1); margin-bottom: 5px;">
+                            <span style="font-size: 1.5rem;">📜</span>
+                            <span style="font-size: 0.6rem; font-weight: 950; text-transform: uppercase; letter-spacing: 0.05em;">NOTAMs</span>
+                        </a>
+                        
+                        ${state.bananaMode ? `
+                            <div style="font-weight: 950; font-size: 0.55rem; color: rgba(255,255,255,0.5); text-align: center; letter-spacing: 0.05em; margin-bottom: 0.4rem; margin-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">☁️ RISK GUIDE</div>
+                            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                <!-- Fog/OVX -->
+                                <div style="display: flex; flex-direction: column; gap: 1px; border-left: 3px solid #dc2626; padding-left: 6px;">
+                                    <b style="font-size: 0.75rem; color: #fca5a5;">FG / OVX</b>
+                                    <span style="font-size: 0.55rem; color: #f87171; line-height: 1.1; font-weight: 700;">CRITICAL:<br>Hidden Sky</span>
+                                </div>
+                                <!-- Overcast -->
+                                <div style="display: flex; flex-direction: column; gap: 1px; border-left: 3px solid #ef4444; padding-left: 6px;">
+                                    <b style="font-size: 0.75rem; color: #fecaca;">OVC</b>
+                                    <span style="font-size: 0.55rem; color: #fca5a5; line-height: 1.1; font-weight: 600;">HIGH RISK:<br>Full Cover</span>
+                                </div>
+                                <!-- Broken -->
+                                <div style="display: flex; flex-direction: column; gap: 1px; border-left: 3px solid #3b82f6; padding-left: 6px;">
+                                    <b style="font-size: 0.75rem; color: #bfdbfe;">BKN</b>
+                                    <span style="font-size: 0.55rem; color: #93c5fd; line-height: 1.1;">MEDIUM:<br>Mostly Cloudy</span>
+                                </div>
+                                <!-- Scattered -->
+                                <div style="display: flex; flex-direction: column; gap: 1px; border-left: 3px solid #0ea5e9; padding-left: 6px;">
+                                    <b style="font-size: 0.75rem; color: #bae6fd;">SCT</b>
+                                    <span style="font-size: 0.55rem; color: #7dd3fc; line-height: 1.1;">LOW:<br>Scattered</span>
+                                </div>
+                                <!-- Few -->
+                                <div style="display: flex; flex-direction: column; gap: 1px; border-left: 3px solid #22c55e; padding-left: 6px;">
+                                    <b style="font-size: 0.75rem; color: #bbf7d0;">FEW</b>
+                                    <span style="font-size: 0.55rem; color: #86efac; line-height: 1.1;">MINIMAL:<br>Few Patches</span>
+                                </div>
                             </div>
-                            <!-- Broken -->
-                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
-                                <img src="https://images.unsplash.com/photo-1534088568595-a066f77ec3ed?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
-                                <div><b style="font-size: 0.75rem;">BKN</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Broken (Heavy)</span></div>
-                            </div>
-                            <!-- Scattered -->
-                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
-                                <img src="https://images.unsplash.com/photo-1509803332458-d051f79395c0?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
-                                <div><b style="font-size: 0.75rem;">SCT</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Scattered</span></div>
-                            </div>
-                            <!-- Few -->
-                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
-                                <img src="https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
-                                <div><b style="font-size: 0.75rem;">FEW</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Few Patches</span></div>
-                            </div>
-                            <!-- Fog -->
-                            <div style="display: flex; gap: 0.4rem; align-items: center; white-space: nowrap;">
-                                <img src="https://images.unsplash.com/photo-1487621167305-5d2ed81ceec2?q=80&w=120&auto=format&fit=crop" style="width: 48px; height: 48px; border-radius: 0.5rem; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.2);">
-                                <div><b style="font-size: 0.75rem;">OVX/FG</b> <span style="font-size: 0.6rem; color: rgba(255,255,255,0.7); display: block;">Fog/Indefinite</span></div>
-                            </div>
-                        </div>
+                        ` : ''}
                     </div>
-                ` : '';
+                `;
 
                 const sidebarRight = state.bananaMode ? `
                     <div style="position: fixed; right: 0.5rem; top: 10%; width: 190px; background: rgba(255,255,255,0.08); backdrop-filter: blur(28px); padding: 0.85rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.15); font-size: 0.75rem; color: #f8fafc; box-shadow: 0 12px 24px rgba(0,0,0,0.4); z-index: 1000;">
@@ -1031,9 +918,6 @@
                                     <div style="display: flex; gap: 0.5rem;">
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.bananaMode = !state.bananaMode; render()">
                                             ${state.bananaMode ? '👨‍✈️ Pilot Mode' : "🍌 I'm not Pilot I want Banana Mode"}
-                                        </button>
-                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.showNotams = !state.showNotams; render()">
-                                            ${state.showNotams ? '📜 Hide NOTAMs' : '📜 NOTAMs'}
                                         </button>
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.showWindy = !state.showWindy; render()">
                                             ${state.showWindy ? '🌐 Hide Windy' : '🌐 Windy'}
@@ -1088,38 +972,6 @@
                                                     <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #064e3b; background: #f0fdf9; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ccfbf1; white-space: pre-line; line-height: 1.5;">${state.bananaMode ? decodeTaf(t) : (t ? t.rawTAF.trim() : '[N/A]')}</div>
                                                 </div>
 
-                                                ${state.showNotams ? `
-                                                <div style="margin-top: 1rem;">
-                                                    <div style="font-size: 0.75rem; font-weight: 900; color: #7c3aed; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.1em;">📜 NOTAMs</div>
-                                                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                                                        ${(() => {
-                                const stationNotams = Array.isArray(state.weatherData?.notams) ? state.weatherData.notams.filter(x => {
-                                    const id = (x.icaoId || "").toUpperCase().trim();
-                                    const target = st.toUpperCase().trim();
-                                    // Daha esnek eşleştirme
-                                    return id === target ||
-                                        id === target.substring(1) ||
-                                        id.includes(target) ||
-                                        target.includes(id) ||
-                                        (x.rawNOTAM && x.rawNOTAM.toUpperCase().includes(target));
-                                }) : [];
-
-                                console.log(`${st} NOTAMs found:`, stationNotams.length, stationNotams);
-
-                                if (stationNotams.length === 0) {
-                                    return `<div style="font-size: 0.85rem; color: #64748b; font-style: italic; padding: 0.75rem; background: #f8fafc; border-radius: 0.6rem; border: 1px solid #e2e8f0;">No active NOTAMs for ${st} or NOTAMs could not be retrieved.</div>`;
-                                }
-
-                                return stationNotams.map((n, idx) => `
-                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #4c1d95; background: #f5f3ff; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ddd6fe; line-height: 1.5; margin-bottom: 0.5rem;">
-                                        <div style="font-weight: 800; color: #7c3aed; margin-bottom: 0.5rem; font-size: 0.7rem; border-bottom: 1px solid #ddd6fe; padding-bottom: 0.3rem;">NOTAM #${idx + 1} - ${n.icaoId || st}</div>
-                                        ${state.bananaMode ? decodeNotam(n) : (n.rawNOTAM || '[No content]')}
-                                    </div>
-                                `).join('');
-                            })()}
-                                                    </div>
-                                                </div>
-                                                ` : ''}
                                             </div>
                                         `;
                 }).join('')}
@@ -1498,8 +1350,7 @@
             weatherData: null,
             weatherLoading: false,
             bananaMode: false,
-            showWindy: false,
-            showNotams: false
+            showWindy: false
         };
         render();
     </script>
