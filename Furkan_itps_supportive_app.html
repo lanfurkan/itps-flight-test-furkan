@@ -483,6 +483,29 @@
             border-radius: 0.5rem;
             border: 1px dashed #c084fc;
         }
+
+        .btn-feedback {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .btn-feedback:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -682,6 +705,9 @@
                 root.innerHTML = `
                     <div class="flex-center">
                         <div class="text-center">
+                            <a href="mailto:furkan.kilicer@itpscanada.com?subject=ITPS App Feedback/Bug Report" class="btn-feedback">
+                                📧 Suggestion or Bug Report?
+                            </a>
                             <h1>✈️ Flight Test Tools</h1>
                             <p>Select a module to continue</p>
                             <div class="aircraft-grid">
