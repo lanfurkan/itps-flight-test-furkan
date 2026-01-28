@@ -817,7 +817,6 @@
                 }
             }
 
-
             try {
                 const [m, t] = await Promise.all([
                     superFetch(`https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json&decoded=true`),
@@ -1202,7 +1201,6 @@
                                                     </div>
                                                     <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #064e3b; background: #f0fdf9; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ccfbf1; white-space: pre-line; line-height: 1.5;">${state.bananaMode ? decodeTaf(t) : (t ? t.rawTAF.trim() : '[N/A]')}</div>
                                                 </div>
-
                                             </div>
                                         `;
                 }).join('')}
@@ -1332,29 +1330,12 @@
                 </div>
             `;
         }
-        function calculateSR22Takeoff(d, a, t, w) {
-            return {
-                takeoffRoll: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.groundRoll[w])),
-                takeoffDistance: Math.round(bilinearInterpolate(a, t, d.takeoff.altitudes, d.takeoff.temps, d.takeoff.totalDist[w]))
-            };
+
+        function proceedToCalculator() {
+            state.screen = 'calculator';
+            render();
         }
-        function calculateSR22Landing(d, a, t) {
-            return {
-                landingRoll: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.groundRoll)),
-                landingDistance: Math.round(bilinearInterpolate(a, t, d.landing.altitudes, d.landing.temps, d.landing.totalDist))
-            };
-        }
-        function calculateSR22TakeoffClimb(d, a, t, w) {
-            return {
-                takeoffClimbRate: Math.round(bilinearInterpolate(a, t, d.takeoffclimb.altitudes, d.takeoffclimb.temps, d.takeoffclimb.data[w]))
-            };
-        }
-        function calculateSR22Balked(d, a, t, w) {
-            return {
-                balkedClimbRate: Math.round(bilinearInterpolate(a, t, d.balked.altitudes, d.balked.temps, d.balked.data[w])),
-                bestRateClimb: 77
-            };
-        }
+
         function calculateWB() {
             let totalWeight = 0;
             let breakdown = [];
@@ -1663,6 +1644,7 @@
             allResults: null,
             wb: { frontLeft: "", frontRight: "", centre: "", rear: "", manualWeights: {} },
             weatherData: null,
+            weatherLoading: false,
             bananaMode: false,
             showWindy: false,
             sidebarHidden: false,
