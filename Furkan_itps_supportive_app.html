@@ -624,7 +624,7 @@
             { name: "Ryan Munro", call: "MUNR", weight: 223 },
             { name: "Todd Wilson", call: "WILS", weight: 194 },
             { name: "Atish Moudgil", call: "MOUZ", weight: 190 },
-            { name: "Manual Entry", call: "GUEST", weight: null, isManual: true }
+            { name: "Write Weight Manually", call: "GUEST", weight: null, isManual: true }
         ];
 
         const aircraftDatabase = {
@@ -1229,8 +1229,18 @@
 
             const getPersonnelOptions = (selectedIdx) => {
                 let options = `<option value="" ${selectedIdx === "" ? 'selected' : ''}>Empty</option>`;
+
+                // Find manual entry item for the top
+                const manualIdx = aircraftDatabase.personnel.findIndex(p => p.isManual);
+                if (manualIdx !== -1) {
+                    const p = aircraftDatabase.personnel[manualIdx];
+                    const isSelected = selectedIdx !== "" && parseInt(selectedIdx) === manualIdx;
+                    options += `<option value="${manualIdx}" ${isSelected ? 'selected' : ''}>✍️ ${p.name}</option>`;
+                }
+
                 const sortedPersonnel = aircraftDatabase.personnel
                     .map((p, idx) => ({ ...p, originalIdx: idx }))
+                    .filter(p => !p.isManual) // Exclude manual from sorted list
                     .sort((a, b) => a.name.localeCompare(b.name));
 
                 options += sortedPersonnel.map(p => {
