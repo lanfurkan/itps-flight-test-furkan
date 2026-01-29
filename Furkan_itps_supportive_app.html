@@ -781,20 +781,27 @@
                 const targetUrl = url + (url.includes('?') ? '&' : '?') + `_cache=${now}`;
 
                 const proxies = [
-                    (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&_=${now}`,
                     (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+                    (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&_=${now}`,
                     (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
                 ];
 
                 async function tryProxy(pxUrl) {
                     const controller = new AbortController();
-                    const tid = setTimeout(() => controller.abort(), 8000);
+                    const tid = setTimeout(() => controller.abort(), 15000);
                     try {
-                        const res = await fetch(pxUrl, {
+                        // Remove problematic headers for Vercel deployment
+                        const fetchOptions = {
                             signal: controller.signal,
-                            cache: 'no-store',
-                            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-                        });
+                            cache: 'no-store'
+                        };
+
+                        // Only add headers if not using allorigins (causes CORS preflight issues)
+                        if (!pxUrl.includes('allorigins.win')) {
+                            fetchOptions.headers = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
+                        }
+
+                        const res = await fetch(pxUrl, fetchOptions);
                         clearTimeout(tid);
                         if (!res.ok) throw new Error("Fetch failed: " + res.status);
                         const body = await res.text();
