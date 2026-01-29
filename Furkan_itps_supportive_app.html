@@ -778,18 +778,17 @@
 
             async function superFetch(url, isXml = false) {
                 const now = new Date().getTime();
-                // Add timestamp to the target URL itself to bypass origin-side caching
                 const targetUrl = url + (url.includes('?') ? '&' : '?') + `_cache=${now}`;
 
                 const proxies = [
-                    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}&_=${now}`,
-                    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-                    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`
+                    (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&_=${now}`,
+                    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+                    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
                 ];
 
                 async function tryProxy(pxUrl) {
                     const controller = new AbortController();
-                    const tid = setTimeout(() => controller.abort(), 5000);
+                    const tid = setTimeout(() => controller.abort(), 8000);
                     try {
                         const res = await fetch(pxUrl, {
                             signal: controller.signal,
@@ -797,9 +796,20 @@
                             headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                         });
                         clearTimeout(tid);
-                        if (!res.ok) throw new Error("Fetch failed");
+                        if (!res.ok) throw new Error("Fetch failed: " + res.status);
                         const body = await res.text();
                         if (!body || body.includes('<title>403 Forbidden</title>') || body.includes('Access Denied')) throw new Error("Blocked");
+
+                        // allorigins returns JSON with 'contents' field
+                        if (pxUrl.includes('allorigins.win')) {
+                            try {
+                                const json = JSON.parse(body);
+                                if (json.contents) return json.contents;
+                                return body;
+                            } catch (e) {
+                                return body;
+                            }
+                        }
                         return body;
                     } catch (e) {
                         clearTimeout(tid);
@@ -807,32 +817,59 @@
                     }
                 }
 
-                try {
-                    const fastestResult = await Promise.any(proxies.map(p => tryProxy(p(targetUrl))));
-                    if (isXml) return fastestResult;
-                    try { return JSON.parse(fastestResult); } catch (e) { return fastestResult; }
-                } catch (e) {
-                    console.error("🏁 All proxies failed or timed out.");
-                    return null;
+                // Try each proxy sequentially instead of Promise.any for better debugging
+                for (const proxyFn of proxies) {
+                    try {
+                        const proxyUrl = proxyFn(targetUrl);
+                        console.log(`🔄 Trying proxy: ${proxyUrl.split('?')[0]}...`);
+                        const result = await tryProxy(proxyUrl);
+                        console.log(`✅ Proxy success!`);
+                        if (isXml) return result;
+                        try { return JSON.parse(result); } catch (e) { return result; }
+                    } catch (e) {
+                        console.warn(`❌ Proxy failed: ${e.message}`);
+                        continue;
+                    }
                 }
+
+                console.error("🏁 All proxies failed.");
+                return null;
             }
 
             try {
-                const [m, t] = await Promise.all([
-                    superFetch(`https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json&decoded=true`),
-                    superFetch(`https://aviationweather.gov/api/data/taf?ids=${stationStr}&format=json&decoded=true`)
-                ]);
+                console.log('🌐 Fetching METAR and TAF data...');
+
+                // Fetch METAR first
+                const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${stationStr}&format=json&decoded=true`;
+                console.log('📡 METAR URL:', metarUrl);
+                const m = await superFetch(metarUrl);
+
+                // Fetch TAF
+                const tafUrl = `https://aviationweather.gov/api/data/taf?ids=${stationStr}&format=json&decoded=true`;
+                console.log('📡 TAF URL:', tafUrl);
+                const t = await superFetch(tafUrl);
+
+                console.log('📊 Raw METAR response:', typeof m, Array.isArray(m) ? m.length : 'not array');
+                console.log('📊 Raw TAF response:', typeof t, Array.isArray(t) ? t.length : 'not array');
+
+                // Ensure we have arrays
+                const metars = Array.isArray(m) ? m : [];
+                const tafs = Array.isArray(t) ? t : [];
 
                 console.log('📊 Final Weather Data:', {
-                    metars: (m || []).length,
-                    tafs: (t || []).length
+                    metars: metars.length,
+                    tafs: tafs.length
                 });
 
-                state.weatherData = { metars: m || [], tafs: t || [] };
-                state.lastUpdated = new Date().toLocaleTimeString();
+                if (metars.length === 0 && tafs.length === 0) {
+                    state.weatherData = "No weather data available. The aviation weather service may be temporarily unavailable.";
+                } else {
+                    state.weatherData = { metars, tafs };
+                    state.lastUpdated = new Date().toLocaleTimeString();
+                }
             } catch (error) {
                 console.error("🔥 Engine Failure:", error);
-                state.weatherData = "Error fetching weather data. (Link failed)";
+                state.weatherData = "Error fetching weather data: " + error.message;
             } finally {
                 state.weatherLoading = false;
                 render();
