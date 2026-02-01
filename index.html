@@ -713,14 +713,10 @@
                             <p>Select a module to continue</p>
                             <div class="aircraft-grid">
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWeather()">📡 Aviation Weather (METAR & TAF)</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWB()">👨‍✈️ Student Instructor - Weight and Balance</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #6366f1, #4f46e5); grid-column: span 2; margin-bottom: 0.5rem;" onclick="state.screen = 'fleet'; state.fleetSearch = ''; render()">✈️🚁 Call Signs</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="state.screen = 'wbmenu'; render()">⚖️ Weight and Balance</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); grid-column: span 2; margin-bottom: 0.5rem;" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">🌐 ITPS Portal</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="state.screen = 'links'; render()">🔗 Linkler</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c);" onclick="state.screen = 'documents'; render()">📄 Documents</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #a855f7, #9333ea);" onclick="selectAircraft('CFZJJ')">SR22-CFZJJ</button>
                             </div>
 
                             <div class="disclaimer-card">
@@ -732,6 +728,8 @@
                         </div>
                     </div>
                 `;
+            } else if (state.screen === 'wbmenu') {
+                renderWBMenu();
             } else if (state.screen === 'wb') {
                 renderWB();
             } else if (state.screen === 'weather') {
@@ -1340,11 +1338,18 @@
                                         ${getWeightPrompt('frontRight', state.wb.frontRight)}
                                     </div>
                                     <div class="input-group">
-                                        <label>Centre Seat</label>
-                                        <select onchange="updateWBField('centre', this.value)">
-                                            ${getPersonnelOptions(state.wb.centre)}
+                                        <label>Centre Seat - Left</label>
+                                        <select onchange="updateWBField('centreLeft', this.value)">
+                                            ${getPersonnelOptions(state.wb.centreLeft)}
                                         </select>
-                                        ${getWeightPrompt('centre', state.wb.centre)}
+                                        ${getWeightPrompt('centreLeft', state.wb.centreLeft)}
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Centre Seat - Right</label>
+                                        <select onchange="updateWBField('centreRight', this.value)">
+                                            ${getPersonnelOptions(state.wb.centreRight)}
+                                        </select>
+                                        ${getWeightPrompt('centreRight', state.wb.centreRight)}
                                     </div>
                                     <div class="input-group">
                                         <label>Rear Seat</label>
@@ -1397,20 +1402,42 @@
                 breakdown.push(`<span>Front Seats:</span> <b>${frontSeatsNames.join(' + ')}</b> (${frontSeatsWeight} lb)`);
             }
 
-            // Handle Centre and Rear
-            ['centre', 'rear'].forEach(f => {
-                const idx = state.wb[f];
+            // Handle Centre Seats (Grouped)
+            const clIdx = state.wb.centreLeft;
+            const crIdx = state.wb.centreRight;
+            let centreSeatsWeight = 0;
+            let centreSeatsNames = [];
+
+            [clIdx, crIdx].forEach((idx, i) => {
                 if (idx !== "" && idx !== null) {
                     const person = aircraftDatabase.personnel[idx];
                     let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[idx]);
                     if (isNaN(weight)) {
                         missingWeight = true;
                     } else {
-                        totalWeight += weight;
-                        breakdown.push(`<span>${f.charAt(0).toUpperCase() + f.slice(1)} Seat:</span> <b>${person.name}</b> (${weight} lb)`);
+                        centreSeatsWeight += weight;
+                        centreSeatsNames.push(`${person.name} CS-${i === 0 ? 'L' : 'R'}`);
                     }
                 }
             });
+
+            if (centreSeatsNames.length > 0) {
+                totalWeight += centreSeatsWeight;
+                breakdown.push(`<span>Centre Seats:</span> <b>${centreSeatsNames.join(' + ')}</b> (${centreSeatsWeight} lb)`);
+            }
+
+            // Handle Rear
+            const rIdx = state.wb.rear;
+            if (rIdx !== "" && rIdx !== null) {
+                const person = aircraftDatabase.personnel[rIdx];
+                let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[rIdx]);
+                if (isNaN(weight)) {
+                    missingWeight = true;
+                } else {
+                    totalWeight += weight;
+                    breakdown.push(`<span>Rear Seat:</span> <b>${person.name}</b> (${weight} lb)`);
+                }
+            }
 
             const resultsDiv = document.getElementById('wb-results');
             if (missingWeight) {
@@ -1692,10 +1719,100 @@
                     <button class="btn-back" onclick="goBackHome()">← Back Home</button>
                     <div class="card">
                         <h2>📄 Documents</h2>
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <div style="padding: 2rem; background: #f1f5f9; border-radius: 1rem; text-align: center; color: #64748b;">
-                                📭 No documents available at the moment.
-                            </div>
+                        <div class="input-group" style="margin-bottom: 1.5rem;">
+                            <label>🔍 Search Documents</label>
+                            <input type="text" id="docSearch" placeholder="Type document name..." onkeyup="filterDocuments()" style="width: 100%; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1.1rem;">
+                        </div>
+                        <div id="documentsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a href="https://drive.google.com/file/d/1PWvetAYTPKXS7fPij9DILnju8MBSbVHk/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 C-GZSN CHECKLIST">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488); width: 100%; padding: 1.25rem;">
+                                    🛩️ C340 (C-GZSN) CHECKLIST
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/17CETBgdKO0HcnYHmvHGWnLw-RjgCkAhK/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 SIMPLE CHECKLIST">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5); width: 100%; padding: 1.25rem;">
+                                    🛩️ C340 SIMPLE CHECKLIST
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1COYQ92yRzG5xrQ3h3H6pwuOHejYhuNmK/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="IAR 823 CHECKLIST">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); width: 100%; padding: 1.25rem;">
+                                    🛩️ IAR 823 CHECKLIST
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1yNIiOHMpnkfjJ6ahp0KceWvnunzFkOYN/view?usp=drive_link" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 C-GRAS">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #dc2626, #b91c1c); width: 100%; padding: 1.25rem;">
+                                    🛩️ C340 (C-GRAS)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1s84lsxcLIVhoRV6mdlOtcToi_qLUtLGe/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="ITPS Report Writing and Presentation Guide">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); width: 100%; padding: 1.25rem;">
+                                    📖 ITPS Report Writing and Presentation Guide v2-4
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1jKKl0ag3dJ0dDH8OMn7enaV-itq0R03k/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-22 Full Report Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-22 - Full Report Template (v5-20260112)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1zDyTvx1kqgJ3ftgyQVIPYthyAtevZGtS/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-24 Post Flight Report Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-24 - Post Flight Report Template (v5-20260112)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1bhsOt_pPwLnOHVPv8MHoA82IM7TMD24C/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-23 Graphical Report Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-23 - Graphical Report Template (v4-20260112)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/18SV97zZto0MESgk6Jlvdw_USW-eo4EW_/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-21 Compliance Report Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-21 - Compliance Report Template (v3-20260112)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1v_XPtMTJyk-gPzAw8y3Z6-c_jE29Efnx/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-17 Flight Test Planning Sheet Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #06b6d4, #0891b2); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-17 - Flight Test Planning Sheet Template (v4-20260112)
+                                </button>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1PxyUSMO0ZufzoS1RvzKhDZJbkBYMjdMc/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-16 Flight Test Plan Template">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #84cc16, #65a30d); width: 100%; padding: 1.25rem;">
+                                    📄 Appendix 2-1-16 - Flight Test Plan Template (v5-20260112)
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterDocuments() {
+            const searchTerm = document.getElementById('docSearch').value.toLowerCase();
+            const docItems = document.querySelectorAll('.doc-item');
+
+            docItems.forEach(item => {
+                const docName = item.getAttribute('data-name').toLowerCase();
+                if (docName.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function renderWBMenu() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container" style="padding-top: 2rem;">
+                    <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                    <div class="card">
+                        <h2>⚖️ Weight and Balance</h2>
+                        <div class="aircraft-grid">
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWB()">👨‍✈️ Student Instructor - Weight and Balance</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #a855f7, #9333ea);" onclick="selectAircraft('CFZJJ')">SR22-CFZJJ</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #6366f1, #4f46e5); grid-column: span 2; display: none;" onclick="state.screen = 'fleet'; state.fleetSearch = ''; render()">✈️🚁 Call Signs</button>
                         </div>
                     </div>
                 </div>
@@ -1710,7 +1827,7 @@
             temperature: '',
             weights: {},
             allResults: null,
-            wb: { frontLeft: "", frontRight: "", centre: "", rear: "", manualWeights: {} },
+            wb: { frontLeft: "", frontRight: "", centreLeft: "", centreRight: "", rear: "", manualWeights: {} },
             weatherData: null,
             weatherLoading: false,
             bananaMode: false,
