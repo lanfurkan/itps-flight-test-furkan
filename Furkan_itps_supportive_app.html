@@ -704,7 +704,8 @@
             if (state.screen === 'aircraft') {
                 root.innerHTML = `
                     <div class="flex-center">
-                        <div class="text-center">
+                        <div class="text-center" style="position: relative;">
+                            <div style="position: absolute; top: -1rem; right: 0; color: #94a3b8; font-size: 0.85rem; font-weight: 600;">v1.1</div>
                             <a href="mailto:furkan.kilicer@itpscanada.com?subject=ITPS App Feedback/Bug Report" class="btn-feedback">
                                 📧 Suggestion or Bug Report?
                             </a>
@@ -714,6 +715,8 @@
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWeather()">📡 Aviation Weather (METAR & TAF)</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWB()">👨‍✈️ Student Instructor - Weight and Balance</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #6366f1, #4f46e5); grid-column: span 2; margin-bottom: 0.5rem;" onclick="state.screen = 'fleet'; state.fleetSearch = ''; render()">✈️🚁 Call Signs</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="state.screen = 'links'; render()">🔗 Linkler</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c);" onclick="state.screen = 'documents'; render()">📄 Documents</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
@@ -725,6 +728,7 @@
                                 For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
                             </div>
                             <div style="font-weight: 800; font-size: 1.15rem; color: white; margin-top: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Developed by Furkan Yusuf Kılıçer</div>
+                            <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem;">Last Updated: 31/01/2026</div>
                         </div>
                     </div>
                 `;
@@ -738,6 +742,10 @@
                 renderCalculator();
             } else if (state.screen === 'fleet') {
                 renderFleet();
+            } else if (state.screen === 'links') {
+                renderLinks();
+            } else if (state.screen === 'documents') {
+                renderDocuments();
             }
         }
 
@@ -787,7 +795,7 @@
                     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
                 ];
 
-                const fetchWithTimeout = (pxUrl, timeout = 6000) => {
+                const fetchWithTimeout = (pxUrl, timeout = 3000) => {
                     return new Promise((resolve, reject) => {
                         const controller = new AbortController();
                         const timer = setTimeout(() => {
@@ -1177,23 +1185,13 @@
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.sidebarHidden = !state.sidebarHidden; render()">
                                             ${state.sidebarHidden ? '👁️ Show Sidebars' : '🙈 Hide Sidebars'}
                                         </button>
-                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.showWindy = !state.showWindy; render()">
-                                            ${state.showWindy ? '🌐 Hide Windy' : '🌐 Windy'}
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="window.open('https://www.windy.com/43.030/-81.156/meteogram?43.030,-81.156,9', '_blank')">
+                                            🌐 Windy
                                         </button>
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="fetchWeather()">🔄 Refresh</button>
                                     </div>
                                 </div>
                                 
-                                ${state.showWindy ? `
-                                    <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden; border: 1px solid #e2e8f0; height: 210px;">
-                                        <iframe 
-                                            width="100%" 
-                                            height="210" 
-                                            src="https://embed.windy.com/embed2.html?lat=43.033&lon=-81.150&detailLat=43.033&detailLon=-81.150&zoom=11&level=surface&overlay=cloudbase&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=true&detailTab=meteogram&metricWind=kt&metricTemp=degree&radarRange=-1" 
-                                            frameborder="0">
-                                        </iframe>
-                                    </div>
-                                ` : ''}
 
                                 <div style="display: flex; flex-direction: column; gap: 2.5rem;">
                                     ${stationsList.map(st => {
@@ -1663,6 +1661,44 @@
                         ${weightInputsHtml}
                         <button class="btn-primary" onclick="calculateAll()">Calculate All</button>
                         ${resultsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLinks() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container" style="padding-top: 2rem;">
+                    <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                    <div class="card">
+                        <h2>🔗 Linkler</h2>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a href="https://itpscanadaltd.sharepoint.com/sites/FWStudentsCoursesMaterial/Shared%20Documents/Forms/AllItems.aspx" target="_blank" style="text-decoration: none;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%; padding: 1.5rem;">
+                                    📚 FW Students Courses Material
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDocuments() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container" style="padding-top: 2rem;">
+                    <button class="btn-back" onclick="goBackHome()">← Back Home</button>
+                    <div class="card">
+                        <h2>📄 Documents</h2>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a href="./In_Flight_Guide_v1.2_ITPS_2026A.pdf" target="_blank" style="text-decoration: none;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c); width: 100%; padding: 1.5rem;">
+                                    ✈️ In Flight Guide v1.2 ITPS 2026A
+                                </button>
+                            </a>
+                        </div>
                     </div>
                 </div>
             `;
