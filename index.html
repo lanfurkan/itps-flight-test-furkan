@@ -717,6 +717,9 @@
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); grid-column: span 2; margin-bottom: 0.5rem;" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">🌐 ITPS Portal</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="state.screen = 'links'; render()">🔗 Linkler</button>
                                 <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c);" onclick="state.screen = 'documents'; render()">📄 Documents</button>
+                                <a href="https://drive.google.com/file/d/1mpqxYIw3lcip_OWvv2obJBC7tlYQE1CL/view?usp=sharing" target="_blank" style="grid-column: span 2; text-decoration: none;">
+                                    <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%;">✈️ In Flight Guide v1.2 ITPS 2026A</button>
+                                </a>
                             </div>
 
                             <div class="disclaimer-card">
@@ -1284,10 +1287,11 @@
                 const person = aircraftDatabase.personnel[id];
                 if (person && (person.weight === null || person.isManual)) {
                     const label = person.isManual ? "No name entry. Enter weight (lb):" : `Weight unknown for ${person.name}. Enter weight (lb):`;
+                    const uniqueKey = `${field}-${id}`;
                     return `
                         <div class="manual-weight-prompt">
                             <label style="color: #6d28d9; font-weight: 800;">${label}</label>
-                            <input type="number" value="${state.wb.manualWeights[id] || ''}" onchange="updateManualWeight('${id}', this.value)" placeholder="Enter weight" style="border: 1px solid #c084fc; background: #faf5ff;">
+                            <input type="number" value="${state.wb.manualWeights[uniqueKey] || ''}" onchange="updateManualWeight('${uniqueKey}', this.value)" placeholder="Enter weight" style="border: 1px solid #c084fc; background: #faf5ff;">
                         </div>
                     `;
                 }
@@ -1384,15 +1388,15 @@
             let frontSeatsWeight = 0;
             let frontSeatsNames = [];
 
-            [flIdx, frIdx].forEach((idx, i) => {
-                if (idx !== "" && idx !== null) {
-                    const person = aircraftDatabase.personnel[idx];
-                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[idx]);
+            [{ idx: flIdx, field: 'frontLeft', pos: 'L' }, { idx: frIdx, field: 'frontRight', pos: 'R' }].forEach(item => {
+                if (item.idx !== "" && item.idx !== null) {
+                    const person = aircraftDatabase.personnel[item.idx];
+                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[item.field + '-' + item.idx]);
                     if (isNaN(weight)) {
                         missingWeight = true;
                     } else {
                         frontSeatsWeight += weight;
-                        frontSeatsNames.push(`${person.name} FS-${i === 0 ? 'L' : 'R'}`);
+                        frontSeatsNames.push(`${person.name} FS-${item.pos}`);
                     }
                 }
             });
@@ -1408,15 +1412,15 @@
             let centreSeatsWeight = 0;
             let centreSeatsNames = [];
 
-            [clIdx, crIdx].forEach((idx, i) => {
-                if (idx !== "" && idx !== null) {
-                    const person = aircraftDatabase.personnel[idx];
-                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[idx]);
+            [{ idx: clIdx, field: 'centreLeft', pos: 'L' }, { idx: crIdx, field: 'centreRight', pos: 'R' }].forEach(item => {
+                if (item.idx !== "" && item.idx !== null) {
+                    const person = aircraftDatabase.personnel[item.idx];
+                    let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[item.field + '-' + item.idx]);
                     if (isNaN(weight)) {
                         missingWeight = true;
                     } else {
                         centreSeatsWeight += weight;
-                        centreSeatsNames.push(`${person.name} CS-${i === 0 ? 'L' : 'R'}`);
+                        centreSeatsNames.push(`${person.name} CS-${item.pos}`);
                     }
                 }
             });
@@ -1430,7 +1434,7 @@
             const rIdx = state.wb.rear;
             if (rIdx !== "" && rIdx !== null) {
                 const person = aircraftDatabase.personnel[rIdx];
-                let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights[rIdx]);
+                let weight = person.weight !== null ? person.weight : parseFloat(state.wb.manualWeights['rear-' + rIdx]);
                 if (isNaN(weight)) {
                     missingWeight = true;
                 } else {
