@@ -506,6 +506,50 @@
             border-color: #3b82f6;
             transform: translateY(-1px);
         }
+
+        /* Flight Test Master Styles */
+        .ftm-table-row {
+            display: grid;
+            grid-template-columns: 45px 1fr 80px 80px 60px;
+            gap: 6px;
+            padding: 12px;
+            border-bottom: 1px solid #e5e5ea;
+            align-items: center;
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+
+        .ftm-table-row:hover {
+            background: #f9f9f9;
+        }
+
+        .ftm-selected {
+            background: #E5F1FF !important;
+        }
+
+        .ftm-row-completed {
+            background-color: rgba(52, 199, 89, 0.15) !important;
+        }
+
+        .ftm-row-skipped {
+            background-color: rgba(255, 149, 0, 0.15) !important;
+        }
+
+        .ftm-table-input {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 15px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .ftm-table-input:focus {
+            background: #f2f2f7;
+            border-color: #007AFF;
+            outline: none;
+        }
     </style>
 </head>
 
@@ -705,23 +749,24 @@
                 root.innerHTML = `
                     <div class="flex-center">
                         <div class="text-center" style="position: relative;">
-                            <div style="position: absolute; top: -1rem; right: 0; color: #94a3b8; font-size: 0.85rem; font-weight: 600;">v1.1</div>
+                            <div style="position: absolute; top: -1rem; right: 0; color: #94a3b8; font-size: 0.85rem; font-weight: 600;">v1.5</div>
                             <a href="mailto:furkan.kilicer@itpscanada.com?subject=ITPS App Feedback/Bug Report" class="btn-feedback">
                                 📧 Suggestion or Bug Report?
                             </a>
-                            <h1>✈️ Flight Test Tools</h1>
+                            <h1>🐵 Flight Test Tools</h1>
                             <p>Select a module to continue</p>
-                            <div class="aircraft-grid">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWeather()">📡 Aviation Weather (METAR & TAF)</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="state.screen = 'wbmenu'; render()">⚖️ Weight and Balance</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); grid-column: span 2; margin-bottom: 0.5rem;" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">🌐 ITPS Portal</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="state.screen = 'links'; render()">🔗 Linkler</button>
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c);" onclick="state.screen = 'documents'; render()">📄 Documents</button>
-                                <a href="https://drive.google.com/file/d/1mpqxYIw3lcip_OWvv2obJBC7tlYQE1CL/view?usp=sharing" target="_blank" style="grid-column: span 2; text-decoration: none;">
-                                    <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%;">✈️ In Flight Guide v1.2 ITPS 2026A</button>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="startWeather()">📡 Weather</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="state.screen = 'wbmenu'; render()">⚖️ W&B</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #007AFF, #5856D6); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="state.screen = 'flightTestMaster'; render()">✈️ Flight Test Master</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="state.screen = 'links'; render()">🔗 Linkler</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f97316, #ea580c); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="state.screen = 'documents'; render()">📄 Documents</button>
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">🌐 ITPS Portal</button>
+                                <a href="https://drive.google.com/file/d/1mpqxYIw3lcip_OWvv2obJBC7tlYQE1CL/view?usp=sharing" target="_blank" style="text-decoration: none;">
+                                    <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">✈️ In Flight Guide</button>
                                 </a>
                                 <a href="https://drive.google.com/file/d/1P6EUb6A4Tte5VzCcsvVrxaUZx6oNbeP2/view?usp=sharing" target="_blank" style="grid-column: span 2; text-decoration: none;">
-                                    <button class="btn-aircraft" style="background: linear-gradient(135deg, #ec4899, #db2777); width: 100%;">📋 Training Sortie Brief</button>
+                                    <button class="btn-aircraft" style="background: linear-gradient(135deg, #ec4899, #db2777); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">📋 Training Brief</button>
                                 </a>
                             </div>
 
@@ -730,7 +775,7 @@
                                 For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
                             </div>
                             <div style="font-weight: 800; font-size: 1.15rem; color: white; margin-top: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Developed by Furkan Yusuf Kılıçer</div>
-                            <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem;">Last Updated: 31/01/2026</div>
+                            <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem;">Last Updated: 02/01/2026</div>
                         </div>
                     </div>
                 `;
@@ -750,6 +795,8 @@
                 renderLinks();
             } else if (state.screen === 'documents') {
                 renderDocuments();
+            } else if (state.screen === 'flightTestMaster') {
+                renderFlightTestMaster();
             }
         }
 
@@ -1707,10 +1754,10 @@
                     <button class="btn-back" onclick="goBackHome()">← Back Home</button>
                     <div class="card">
                         <h2>🔗 Linkler</h2>
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
                             <a href="https://itpscanadaltd.sharepoint.com/sites/FWStudentsCoursesMaterial/Shared%20Documents/Forms/AllItems.aspx" target="_blank" style="text-decoration: none;">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%; padding: 1.5rem;">
-                                    📚 FW Students Courses Material
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📚 FW Students Material
                                 </button>
                             </a>
                         </div>
@@ -1730,63 +1777,63 @@
                             <label>🔍 Search Documents</label>
                             <input type="text" id="docSearch" placeholder="Type document name..." onkeyup="filterDocuments()" style="width: 100%; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1.1rem;">
                         </div>
-                        <div id="documentsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div id="documentsList" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
                             <a href="https://drive.google.com/file/d/1PWvetAYTPKXS7fPij9DILnju8MBSbVHk/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 C-GZSN CHECKLIST">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488); width: 100%; padding: 1.25rem;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
                                     🛩️ C340 (C-GZSN) CHECKLIST
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/17CETBgdKO0HcnYHmvHGWnLw-RjgCkAhK/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 SIMPLE CHECKLIST">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5); width: 100%; padding: 1.25rem;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
                                     🛩️ C340 SIMPLE CHECKLIST
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1COYQ92yRzG5xrQ3h3H6pwuOHejYhuNmK/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="IAR 823 CHECKLIST">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); width: 100%; padding: 1.25rem;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
                                     🛩️ IAR 823 CHECKLIST
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1yNIiOHMpnkfjJ6ahp0KceWvnunzFkOYN/view?usp=drive_link" target="_blank" style="text-decoration: none;" class="doc-item" data-name="C340 C-GRAS">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #dc2626, #b91c1c); width: 100%; padding: 1.25rem;">
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #dc2626, #b91c1c); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
                                     🛩️ C340 (C-GRAS)
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1s84lsxcLIVhoRV6mdlOtcToi_qLUtLGe/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="ITPS Report Writing and Presentation Guide">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); width: 100%; padding: 1.25rem;">
-                                    📖 ITPS Report Writing and Presentation Guide v2-4
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📖 Report Writing Guide
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1jKKl0ag3dJ0dDH8OMn7enaV-itq0R03k/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-22 Full Report Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-22 - Full Report Template (v5-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Full Report Template
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1zDyTvx1kqgJ3ftgyQVIPYthyAtevZGtS/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-24 Post Flight Report Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-24 - Post Flight Report Template (v5-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Post Flight Report
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1bhsOt_pPwLnOHVPv8MHoA82IM7TMD24C/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-23 Graphical Report Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-23 - Graphical Report Template (v4-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Graphical Report
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/18SV97zZto0MESgk6Jlvdw_USW-eo4EW_/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-21 Compliance Report Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-21 - Compliance Report Template (v3-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Compliance Report
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1v_XPtMTJyk-gPzAw8y3Z6-c_jE29Efnx/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-17 Flight Test Planning Sheet Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #06b6d4, #0891b2); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-17 - Flight Test Planning Sheet Template (v4-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #06b6d4, #0891b2); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Planning Sheet
                                 </button>
                             </a>
                             <a href="https://drive.google.com/file/d/1PxyUSMO0ZufzoS1RvzKhDZJbkBYMjdMc/view?usp=sharing" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Appendix 2-1-16 Flight Test Plan Template">
-                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #84cc16, #65a30d); width: 100%; padding: 1.25rem;">
-                                    📄 Appendix 2-1-16 - Flight Test Plan Template (v5-20260112)
+                                <button class="btn-aircraft" style="background: linear-gradient(135deg, #84cc16, #65a30d); width: 100%; padding: 0.75rem; font-size: 0.85rem; min-height: 60px;">
+                                    📄 Test Plan Template
                                 </button>
                             </a>
-                        </div>
+                        </div
                     </div>
                 </div>
             `;
@@ -1813,19 +1860,853 @@
                     <button class="btn-back" onclick="goBackHome()">← Back Home</button>
                     <div class="card">
                         <h2>⚖️ Weight and Balance</h2>
-                        <div class="aircraft-grid">
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); grid-column: span 2; margin-bottom: 0.5rem;" onclick="startWB()">👨‍✈️ Student Instructor - Weight and Balance</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #6366f1, #4f46e5); grid-column: span 2; margin-bottom: 0.5rem;" onclick="state.screen = 'fleet'; state.fleetSearch = ''; render()">✈️🚁 Call Signs</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #a855f7, #9333ea);" onclick="selectAircraft('CFZJJ')">SR22-CFZJJ</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5);" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
-                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488);" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="startWB()">👨‍✈️ Student W&B</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="state.screen = 'fleet'; state.fleetSearch = ''; render()">✈️🚁 Call Signs</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #2563eb, #4f46e5); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="selectAircraft('CGRAS')">C340-CGRAS</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #059669, #0d9488); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="selectAircraft('CGZSN')">C340-CGZSN</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="selectAircraft('CFYWI')">SR22-CFYWI</button>
+                            <button class="btn-aircraft" style="background: linear-gradient(135deg, #a855f7, #9333ea); padding: 0.75rem; font-size: 0.85rem; min-height: 60px;" onclick="selectAircraft('CFZJJ')">SR22-CFZJJ</button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        // Flight Test Master Module
+        let ftmState = {
+            currentFlight: null,
+            selectedRowId: null,
+            flights: [],
+            timerInterval: null,
+            confirmModalCallback: null,
+            isSelectMode: false,
+            selectedFlightIds: new Set(),
+            currentModalStatus: null,
+            usernameResolve: null,
+            importedPoints: null
+        };
+
+        const ftmApp = {
+            scriptUrl: 'https://script.google.com/macros/s/AKfycbyjGTCzoJqBezdlYe0O9F_D9Ba-Uu3lAuqJe3LAfIiKqeJyM1nhETHvu_JEiCPItQdF/exec',
+
+            init() {
+                // Check if username is set
+                let username = localStorage.getItem('flightTestUsername');
+                if (!username) {
+                    username = 'Pilot';
+                    localStorage.setItem('flightTestUsername', username);
+                }
+
+                // Load flights from localStorage
+                const stored = localStorage.getItem('flightTestMaster');
+                if (stored) {
+                    ftmState.flights = JSON.parse(stored);
+                }
+            },
+
+            saveToStorage() {
+                localStorage.setItem('flightTestMaster', JSON.stringify(ftmState.flights));
+            },
+
+            showConfirm(options, callback) {
+                const confirmed = confirm(options.message || 'Are you sure?');
+                if (callback) callback(confirmed);
+            },
+
+            createFlight() {
+                try {
+                    const aircraftName = document.getElementById('ftm-aircraftName').value;
+                    const date = document.getElementById('ftm-flightDate').value;
+                    const testCardName = document.getElementById('ftm-testCardName').value;
+
+                    if (!aircraftName || !date || !testCardName) {
+                        alert('Please fill in all fields (Aircraft, Date, Test Card)');
+                        return;
+                    }
+
+                    // Gather Crew
+                    const crew = [];
+                    for (let i = 1; i <= 4; i++) {
+                        const el = document.getElementById('ftm-crew' + i);
+                        if (el && el.value.trim()) {
+                            crew.push(el.value.trim());
+                        }
+                    }
+
+                    // Prepare Test Points
+                    let initialTestPoints = [];
+                    if (ftmState.importedPoints && ftmState.importedPoints.length > 0) {
+                        initialTestPoints = ftmState.importedPoints.map((p, i) => ({
+                            id: Date.now().toString() + i,
+                            testPoint: p.testPoint || (i + 1).toString(),
+                            description: p.description || '',
+                            startTime: null,
+                            endTime: null,
+                            notes: '',
+                            status: null
+                        }));
+                    } else {
+                        initialTestPoints.push({
+                            id: Date.now().toString(),
+                            testPoint: '1',
+                            description: '',
+                            startTime: null,
+                            endTime: null,
+                            notes: '',
+                            status: null
+                        });
+                    }
+
+                    const flight = {
+                        id: Date.now().toString(),
+                        aircraftName,
+                        date,
+                        testCardName,
+                        picName: document.getElementById('ftm-picName').value || '',
+                        crew: crew,
+                        testPoints: initialTestPoints
+                    };
+
+                    ftmState.flights.push(flight);
+                    this.saveToStorage();
+                    this.openFlight(flight);
+
+                    // Reset Import
+                    ftmState.importedPoints = null;
+                    const importFileEl = document.getElementById('ftm-importFile');
+                    if (importFileEl) importFileEl.value = '';
+
+                } catch (e) {
+                    alert("Error creating flight: " + e.message);
+                    console.error(e);
+                }
+            },
+
+            openFlight(flight) {
+                ftmState.currentFlight = flight;
+                ftmState.selectedRowId = null;
+                renderFlightTestMasterRecording();
+            },
+
+            renderFlightsList() {
+                const container = document.getElementById('ftm-flightsList');
+                if (!container) return;
+
+                if (ftmState.flights.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #8e8e93;">No saved flights yet.<br>Start a new flight test to begin.</div>';
+                    return;
+                }
+
+                container.innerHTML = ftmState.flights
+                    .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+                    .map(flight => {
+                        const points = flight.testPoints || [];
+                        const count = points.length;
+                        const savedDate = new Date(parseInt(flight.id)).toLocaleDateString('tr-TR');
+
+                        let startStr = '--:--';
+                        let endStr = '--:--';
+
+                        if (points.length > 0) {
+                            const startTimes = points.map(p => p.startTime ? new Date(p.startTime).getTime() : Infinity).filter(t => t !== Infinity);
+                            const endTimes = points.map(p => p.endTime ? new Date(p.endTime).getTime() : -Infinity).filter(t => t !== -Infinity);
+
+                            if (startTimes.length > 0) {
+                                startStr = new Date(Math.min(...startTimes)).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                            }
+                            if (endTimes.length > 0) {
+                                endStr = new Date(Math.max(...endTimes)).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                            }
+                        }
+
+                        return `
+                        <div style="background: white; padding: 20px; margin-bottom: 16px; border-radius: 16px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; width: 100%; max-width: 500px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);" onclick="ftmApp.openFlightById('${flight.id}')">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #1c1c1e;">${flight.aircraftName}</h3>
+                                    <p style="font-size: 15px; color: #8e8e93;">${new Date(flight.date).toLocaleDateString('tr-TR')} — ${flight.testCardName}</p>
+                                    <p style="font-size:12px; margin-top:4px; color:#8e8e93;">Saved: ${savedDate}</p>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e5ea;">
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 2px;">Total Points</div>
+                                            <div style="font-size: 14px; font-weight: 600; color: #1c1c1e;">${count}</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 2px;">Start</div>
+                                            <div style="font-size: 14px; font-weight: 600; color: #1c1c1e;">${startStr}</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 2px;">End</div>
+                                            <div style="font-size: 14px; font-weight: 600; color: #1c1c1e;">${endStr}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <button style="padding: 10px 20px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; background: #f2f2f7; color: #007AFF;" onclick="event.stopPropagation(); ftmApp.exportFlight('${flight.id}')">📤 Export</button>
+                                <button style="padding: 10px 20px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; background: #ffe5e5; color: #FF3B30;" onclick="event.stopPropagation(); ftmApp.deleteFlight('${flight.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `}).join('');
+            },
+
+            openFlightById(flightId) {
+                const flight = ftmState.flights.find(f => f.id === flightId);
+                if (flight) this.openFlight(flight);
+            },
+
+            deleteFlight(flightId) {
+                if (confirm('Delete this flight? This cannot be undone.')) {
+                    ftmState.flights = ftmState.flights.filter(f => f.id !== flightId);
+                    this.saveToStorage();
+                    this.renderFlightsList();
+                }
+            },
+
+            exportFlight(flightId) {
+                const flight = ftmState.flights.find(f => f.id === flightId);
+                if (!flight) return;
+
+                const headers = "Test Point,Description,Start Time (Toronto),End Time (Toronto),Duration,Notes,Status\n";
+                let csvRows = "";
+
+                flight.testPoints.forEach(p => {
+                    const duration = (p.startTime && p.endTime) ?
+                        ((new Date(p.endTime) - new Date(p.startTime)) / 1000).toFixed(1) : '';
+                    const safeDesc = p.description ? `"${p.description.replace(/"/g, '""')}"` : "";
+                    const safeNotes = p.notes ? `"${p.notes.replace(/"/g, '""')}"` : "";
+                    let status = 'N/A';
+                    if (p.testPoint && !p.testPoint.startsWith('Event') && p.status) {
+                        status = p.status;
+                    }
+                    const startTimeToronto = this.formatTimeForCSV(p.startTime);
+                    const endTimeToronto = this.formatTimeForCSV(p.endTime);
+                    csvRows += `${p.testPoint},${safeDesc},${startTimeToronto},${endTimeToronto},${duration},${safeNotes},${status}\n`;
+                });
+
+                const csvContent = headers + csvRows;
+                const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                const safeName = flight.aircraftName.replace(/[^a-z0-9]/gi, '_');
+                link.setAttribute("download", `Flight_${safeName}_${flight.date}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            },
+
+            downloadTemplate() {
+                const csvContent = "Test Point,Description\n1,Take-off Handling\n2,Climb Check (5000ft)\n3,Level Flight Acceleration";
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'FlightTest_Template.csv';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            },
+
+            handleFileImport(input) {
+                if (!input.files || input.files.length === 0) return;
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    try {
+                        const content = e.target.result;
+                        let points = [];
+
+                        if (file.name.endsWith('.json')) {
+                            points = JSON.parse(content);
+                        } else {
+                            const lines = content.split(/\r\n|\n/).filter(l => l.trim() !== '');
+                            let startIndex = 0;
+                            if (lines[0].toLowerCase().includes('description')) startIndex = 1;
+
+                            for (let i = startIndex; i < lines.length; i++) {
+                                const cols = lines[i].split(',');
+                                if (cols.length >= 2) {
+                                    points.push({
+                                        testPoint: cols[0].trim(),
+                                        description: cols[1].trim()
+                                    });
+                                }
+                            }
+                        }
+
+                        ftmState.importedPoints = points;
+                        const statusEl = document.getElementById('ftm-importStatus');
+                        if (statusEl) {
+                            statusEl.style.display = 'block';
+                            statusEl.textContent = `✅ ${points.length} points loaded`;
+                        }
+                    } catch (err) {
+                        alert("Error parsing file: " + err.message);
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            addRow() {
+                if (!ftmState.currentFlight) return;
+
+                let nextNum = '1';
+                if (ftmState.currentFlight.testPoints.length > 0) {
+                    const lastPoint = ftmState.currentFlight.testPoints[ftmState.currentFlight.testPoints.length - 1];
+                    const lastNum = parseFloat(lastPoint.testPoint);
+                    if (!isNaN(lastNum)) {
+                        nextNum = (Math.floor(lastNum) + 1).toString();
+                    }
+                }
+
+                const newPoint = {
+                    id: Date.now().toString() + Math.random(),
+                    testPoint: nextNum,
+                    description: '',
+                    startTime: null,
+                    endTime: null
+                };
+
+                ftmState.currentFlight.testPoints.push(newPoint);
+                ftmState.selectedRowId = newPoint.id;
+                this.saveCurrentFlight();
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            deleteRow(pointId) {
+                if (!ftmState.currentFlight) return;
+
+                if (confirm('Delete this test point?')) {
+                    ftmState.currentFlight.testPoints = ftmState.currentFlight.testPoints.filter(p => p.id !== pointId);
+                    if (ftmState.selectedRowId === pointId) {
+                        ftmState.selectedRowId = null;
+                    }
+                    this.saveCurrentFlight();
+                    this.renderTable();
+                    this.updateHackButton();
+                }
+            },
+
+            duplicateRow(pointId) {
+                if (!ftmState.currentFlight) return;
+
+                const parentIndex = ftmState.currentFlight.testPoints.findIndex(p => p.id === pointId);
+                if (parentIndex === -1) return;
+
+                const parentPoint = ftmState.currentFlight.testPoints[parentIndex];
+
+                let newTestPointNum = '';
+                const currentNumStr = parentPoint.testPoint.toString();
+
+                if (currentNumStr) {
+                    if (currentNumStr.includes('.')) {
+                        const parts = currentNumStr.split('.');
+                        const lastPart = parseInt(parts[parts.length - 1]);
+                        if (!isNaN(lastPart)) {
+                            parts[parts.length - 1] = lastPart + 1;
+                            newTestPointNum = parts.join('.');
+                        } else {
+                            newTestPointNum = currentNumStr + ".1";
+                        }
+                    } else {
+                        newTestPointNum = currentNumStr + ".1";
+                    }
+                }
+
+                const newPoint = {
+                    id: Date.now().toString() + Math.random(),
+                    testPoint: newTestPointNum,
+                    description: parentPoint.description,
+                    startTime: null,
+                    endTime: null
+                };
+
+                ftmState.currentFlight.testPoints.splice(parentIndex + 1, 0, newPoint);
+                ftmState.selectedRowId = newPoint.id;
+                this.saveCurrentFlight();
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            selectRow(pointId) {
+                ftmState.selectedRowId = pointId;
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            renderTable() {
+                const container = document.getElementById('ftm-tableRows');
+                if (!container || !ftmState.currentFlight) return;
+
+                if (!ftmState.currentFlight.testPoints || ftmState.currentFlight.testPoints.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = ftmState.currentFlight.testPoints.map((point, index) => {
+                    let rowClass = 'ftm-table-row';
+                    if (ftmState.selectedRowId === point.id) rowClass += ' ftm-selected';
+                    if (point.status === 'COMPLETED') rowClass += ' ftm-row-completed';
+                    if (point.status === 'SKIPPED') rowClass += ' ftm-row-skipped';
+
+                    return `
+                    <div class="${rowClass}" onclick="ftmApp.selectRow('${point.id}')">
+                        <input type="number" step="any" class="ftm-table-input" value="${point.testPoint || ''}" placeholder="#" oninput="ftmApp.updatePoint('${point.id}', 'testPoint', this.value)" onclick="event.stopPropagation()">
+                        <div style="font-size: 14px; font-weight: 500; color: #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${point.description || '<span style="color:#c7c7cc; font-weight:400">(No Desc)</span>'}
+                        </div>
+                        <div style="font-family: monospace; font-size: 13px; color: #8e8e93; text-align: center;">${point.startTime ? this.formatTime(point.startTime) : '--:--'}</div>
+                        <div style="font-family: monospace; font-size: 13px; color: #8e8e93; text-align: center;">${point.endTime ? this.formatTime(point.endTime) : '--:--'}</div>
+                        <div style="display:flex; justify-content:center; gap: 4px;">
+                            <button style="background: #e1f0ff; border: none; font-size: 11px; cursor: pointer; padding: 6px 8px; margin: 0 2px; border-radius: 8px; font-weight: 600; color: #007AFF;" title="Duplicate" onclick="event.stopPropagation(); ftmApp.duplicateRow('${point.id}')">COPY</button>
+                            <button style="background: #ffe5e5; border: none; font-size: 11px; cursor: pointer; padding: 6px 8px; margin: 0 2px; border-radius: 8px; font-weight: 600; color: #FF3B30;" title="Delete" onclick="event.stopPropagation(); ftmApp.deleteRow('${point.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            },
+
+            updatePoint(pointId, field, value) {
+                if (!ftmState.currentFlight) return;
+                const point = ftmState.currentFlight.testPoints.find(p => p.id === pointId);
+                if (point) {
+                    point[field] = value;
+                    this.saveCurrentFlight();
+                }
+            },
+
+            saveCurrentFlight() {
+                if (!ftmState.currentFlight) return;
+                const index = ftmState.flights.findIndex(f => f.id === ftmState.currentFlight.id);
+                if (index !== -1) {
+                    ftmState.flights[index] = ftmState.currentFlight;
+                    this.saveToStorage();
+                }
+            },
+
+            formatTime(isoString) {
+                if (!isoString) return '--:--:--';
+                const date = new Date(isoString);
+                return date.toLocaleTimeString('en-US', { hour12: false, timeZone: 'America/Toronto' });
+            },
+
+            getTorontoISOString() {
+                const now = new Date();
+                const torontoDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Toronto' }));
+                const offset = now.getTime() - torontoDate.getTime();
+                const torontoTime = new Date(now.getTime() - offset);
+                return torontoTime.toISOString();
+            },
+
+            formatTimeForCSV(isoString) {
+                if (!isoString) return '';
+                const date = new Date(isoString);
+                const torontoTime = new Date(date.toLocaleString('en-US', { timeZone: 'America/Toronto' }));
+                const year = torontoTime.getFullYear();
+                const month = String(torontoTime.getMonth() + 1).padStart(2, '0');
+                const day = String(torontoTime.getDate()).padStart(2, '0');
+                const hours = String(torontoTime.getHours()).padStart(2, '0');
+                const minutes = String(torontoTime.getMinutes()).padStart(2, '0');
+                const seconds = String(torontoTime.getSeconds()).padStart(2, '0');
+                const milliseconds = String(torontoTime.getMilliseconds()).padStart(3, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+            },
+
+            updateHackButton() {
+                const button = document.getElementById('ftm-hackButton');
+                const infoDiv = document.getElementById('ftm-selectedPointInfo');
+                const infoText = document.getElementById('ftm-selectedPointName');
+                const editBtn = document.getElementById('ftm-editDetailsBtn');
+
+                let state = 'idle';
+                let point = null;
+
+                if (ftmState.selectedRowId && ftmState.currentFlight) {
+                    point = ftmState.currentFlight.testPoints.find(p => p.id === ftmState.selectedRowId);
+                    if (point) {
+                        if (!point.startTime) {
+                            state = 'ready';
+                        } else if (!point.endTime) {
+                            state = 'recording';
+                        } else {
+                            state = 'completed';
+                        }
+                    }
+                }
+
+                if (button) {
+                    if (infoDiv && infoText) {
+                        if (point) {
+                            infoDiv.style.display = 'block';
+                            infoText.textContent = `Test Point ${point.testPoint || '?'} - ${point.description || '(No Description)'}`;
+                        } else {
+                            infoDiv.style.display = 'none';
+                        }
+                    }
+
+                    if (editBtn) {
+                        editBtn.disabled = !point;
+                        editBtn.style.opacity = point ? '1' : '0.5';
+                    }
+
+                    if (state !== 'idle') {
+                        if (state === 'ready') {
+                            button.textContent = "HACK (START)";
+                            button.style.background = "#34C759";
+                            button.disabled = false;
+                        } else if (state === 'recording') {
+                            button.textContent = "STOP";
+                            button.style.background = "#FF3B30";
+                            button.disabled = false;
+                        } else if (state === 'completed') {
+                            button.textContent = "RESTART";
+                            button.style.background = "#FF9500";
+                            button.disabled = false;
+                        }
+
+                        if (point && point.testPoint && point.testPoint.startsWith('Event')) {
+                            button.textContent = "EVENT LOGGED";
+                            button.style.background = "#8E8E93";
+                            button.disabled = true;
+                        }
+                    } else {
+                        button.textContent = "SELECT A ROW";
+                        button.style.background = "#8E8E93";
+                        button.disabled = true;
+                    }
+                }
+            },
+
+            hackButton() {
+                if (!ftmState.currentFlight || !ftmState.selectedRowId) return;
+
+                const point = ftmState.currentFlight.testPoints.find(p => p.id === ftmState.selectedRowId);
+                if (!point) return;
+
+                const self = this;
+
+                if (!point.startTime) {
+                    const confirmed = confirm('Start Recording? Time recording will begin.');
+                    if (confirmed) {
+                        const now = self.getTorontoISOString();
+                        point.startTime = now;
+                        self.saveCurrentFlight();
+                        self.renderTable();
+                        self.updateHackButton();
+                    }
+                } else if (!point.endTime) {
+                    const confirmed = confirm('Stop Recording? Time recording will stop.');
+                    if (confirmed) {
+                        const now = self.getTorontoISOString();
+                        point.endTime = now;
+                        self.saveCurrentFlight();
+                        self.renderTable();
+                        self.updateHackButton();
+                    }
+                } else {
+                    const confirmed = confirm('Restart Recording? This will OVERWRITE existing data.');
+                    if (confirmed) {
+                        const now = self.getTorontoISOString();
+                        point.startTime = now;
+                        point.endTime = null;
+                        self.saveCurrentFlight();
+                        self.renderTable();
+                        self.updateHackButton();
+                    }
+                }
+            },
+
+            openEditDetailsModal() {
+                if (!ftmState.selectedRowId || !ftmState.currentFlight) return;
+                const point = ftmState.currentFlight.testPoints.find(p => p.id === ftmState.selectedRowId);
+                if (!point) return;
+
+                document.getElementById('ftm-modalDescriptionInput').value = point.description || '';
+                document.getElementById('ftm-modalNotesInput').value = point.notes || '';
+                ftmState.currentModalStatus = point.status || null;
+                this.updateModalStatusUI();
+                document.getElementById('ftm-editDetailsModal').style.display = 'flex';
+            },
+
+            closeEditDetailsModal() {
+                document.getElementById('ftm-editDetailsModal').style.display = 'none';
+                ftmState.currentModalStatus = null;
+            },
+
+            saveEditDetails() {
+                if (!ftmState.selectedRowId || !ftmState.currentFlight) return;
+                const point = ftmState.currentFlight.testPoints.find(p => p.id === ftmState.selectedRowId);
+                if (point) {
+                    point.description = document.getElementById('ftm-modalDescriptionInput').value;
+                    point.notes = document.getElementById('ftm-modalNotesInput').value;
+                    point.status = ftmState.currentModalStatus;
+                    this.saveCurrentFlight();
+                    this.renderTable();
+                    this.updateHackButton();
+                }
+                this.closeEditDetailsModal();
+            },
+
+            setModalStatus(status) {
+                if (ftmState.currentModalStatus === status) {
+                    ftmState.currentModalStatus = null;
+                } else {
+                    ftmState.currentModalStatus = status;
+                }
+                this.updateModalStatusUI();
+            },
+
+            updateModalStatusUI() {
+                const completedBtn = document.getElementById('ftm-status-completed');
+                const skippedBtn = document.getElementById('ftm-status-skipped');
+
+                if (completedBtn) {
+                    completedBtn.style.background = ftmState.currentModalStatus === 'COMPLETED' ? '#34C759' : 'white';
+                    completedBtn.style.color = ftmState.currentModalStatus === 'COMPLETED' ? 'white' : '#8E8E93';
+                    completedBtn.style.borderColor = ftmState.currentModalStatus === 'COMPLETED' ? '#34C759' : '#E5E5EA';
+                }
+                if (skippedBtn) {
+                    skippedBtn.style.background = ftmState.currentModalStatus === 'SKIPPED' ? '#FF9500' : 'white';
+                    skippedBtn.style.color = ftmState.currentModalStatus === 'SKIPPED' ? 'white' : '#8E8E93';
+                    skippedBtn.style.borderColor = ftmState.currentModalStatus === 'SKIPPED' ? '#FF9500' : '#E5E5EA';
+                }
+            },
+
+            addEventMarker() {
+                if (!ftmState.currentFlight) return;
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+
+                let nextEventNum = 1;
+                const existingEvents = ftmState.currentFlight.testPoints.filter(p => p.testPoint && p.testPoint.startsWith('Event'));
+                if (existingEvents.length > 0) {
+                    const maxNum = Math.max(...existingEvents.map(p => parseInt(p.testPoint.replace('Event ', '')) || 0));
+                    nextEventNum = maxNum + 1;
+                }
+
+                const newPoint = {
+                    id: Date.now().toString(),
+                    testPoint: `Event ${nextEventNum}`,
+                    description: `[${timeStr}] Event Log`,
+                    startTime: null,
+                    endTime: null,
+                    notes: '',
+                    status: null
+                };
+
+                ftmState.currentFlight.testPoints.push(newPoint);
+                this.saveCurrentFlight();
+                this.renderTable();
+
+                ftmState.selectedRowId = newPoint.id;
+                this.renderTable();
+                this.openEditDetailsModal();
+
+                setTimeout(() => {
+                    const container = document.getElementById('ftm-tableRows');
+                    if (container && container.lastElementChild) {
+                        container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 100);
+            },
+
+            showExportMenu() {
+                const choice = confirm('Export as CSV? (OK = CSV, Cancel = JSON)');
+                if (choice) {
+                    this.exportFlight(ftmState.currentFlight.id);
+                }
+            }
+        };
+
+        function renderFlightTestMaster() {
+            const root = document.getElementById('root');
+            ftmApp.init();
+            root.innerHTML = `
+                <div style="min-height: 100vh; background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; color: #000;">
+                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #E0F7FA 0%, #E3F2FD 100%);">
+                        <div style="position: absolute; top: 20px; left: 20px;">
+                            <button onclick="goBackHome()" style="background: rgba(255,255,255,0.9); border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; color: #007AFF; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">← Back</button>
+                        </div>
+                        <div style="font-size: 72px; margin-bottom: 20px;">✈️</div>
+                        <h1 style="font-size: 42px; font-weight: 800; background: -webkit-linear-gradient(#007AFF, #5856D6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 60px; text-align: center; letter-spacing: -1px; text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">Flight Test Master</h1>
+                        <div style="width: 100%; max-width: 400px;">
+                            <button style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: #FF9500; color: white; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);" onclick="renderFlightTestMasterSetup()">✈️ Start New Flight Test</button>
+                            <button style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: #8E8E93; color: white; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 8px 20px rgba(142, 142, 147, 0.3);" onclick="renderFlightTestMasterFlights()">📂 View Saved Flights</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFlightTestMasterSetup() {
+            const root = document.getElementById('root');
+            const today = new Date().toISOString().split('T')[0];
+            root.innerHTML = `
+                <div style="min-height: 100vh; background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border-bottom: 1px solid #e5e5ea; position: sticky; top: 0; z-index: 100;">
+                        <button style="background: none; border: none; color: #007AFF; font-size: 17px; cursor: pointer; font-weight: 500;" onclick="renderFlightTestMaster()">⬅️ Cancel</button>
+                        <div style="font-size: 17px; font-weight: 600; color: #000;">New Flight Test</div>
+                        <div style="width: 50px;"></div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; display: flex; justify-content: center;">
+                        <div style="width: 100%; max-width: 500px;">
+                            <div style="margin-bottom: 24px; background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);">
+                                <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Aircraft Name (Uçak Modeli - Kuyruk No)</label>
+                                <input type="text" id="ftm-aircraftName" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc;" placeholder="C340 - CGRAS">
+                            </div>
+
+                            <div style="margin-bottom: 24px; padding-left: 12px; border-left: 3px solid #007AFF;">
+                                <div style="margin-bottom: 24px; background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);">
+                                    <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">PIC (N.SURNAME)</label>
+                                    <input type="text" id="ftm-picName" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; margin-bottom: 8px;" placeholder="N.SURNAME">
+                                </div>
+                                <div style="margin-bottom: 24px; background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);">
+                                    <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Crew Members (N.SURNAME)</label>
+                                    <input type="text" id="ftm-crew1" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; margin-bottom: 8px;" placeholder="CREW 1 N.SURNAME">
+                                    <input type="text" id="ftm-crew2" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; margin-bottom: 8px;" placeholder="CREW 2 N.SURNAME">
+                                    <input type="text" id="ftm-crew3" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; margin-bottom: 8px;" placeholder="CREW 3 N.SURNAME">
+                                    <input type="text" id="ftm-crew4" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc;" placeholder="CREW 4 N.SURNAME">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 24px; background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);">
+                                <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Date</label>
+                                <input type="date" id="ftm-flightDate" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc;" value="${today}">
+                            </div>
+                            <div style="margin-bottom: 24px; background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);">
+                                <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Test Card Name</label>
+                                <input type="text" id="ftm-testCardName" style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc;" placeholder="e.g. Climb Performance">
+                            </div>
+
+                            <div style="margin-bottom: 24px; border: 2px dashed #E5E5EA; padding: 12px; border-radius: 12px; background: #f9f9f9;">
+                                <label style="display:flex; justify-content:space-between; align-items:center; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                                    Import Test Points
+                                    <button style="background: none; border: none; color: #007AFF; font-size: 12px; padding: 4px 8px; cursor: pointer; font-weight: 500;" onclick="ftmApp.downloadTemplate()">⬇️ Template</button>
+                                </label>
+                                <input type="file" id="ftm-importFile" accept=".csv,.json" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e5e5ea; border-radius: 8px;" onchange="ftmApp.handleFileImport(this)">
+                                <div id="ftm-importStatus" style="font-size: 12px; color: #34C759; font-weight: 500; margin-top: 4px; display: none;">✅ loaded</div>
+                            </div>
+
+                            <button style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: #007AFF; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);" onclick="ftmApp.createFlight()">Create Flight Log</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFlightTestMasterFlights() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div style="min-height: 100vh; background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border-bottom: 1px solid #e5e5ea; position: sticky; top: 0; z-index: 100;">
+                        <button style="background: none; border: none; color: #007AFF; font-size: 17px; cursor: pointer; font-weight: 500;" onclick="renderFlightTestMaster()">⬅️ Done</button>
+                        <div style="font-size: 17px; font-weight: 600; color: #000;">Saved Flights</div>
+                        <div style="width: 50px;"></div>
+                    </div>
+                    <div id="ftm-flightsList" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center;"></div>
+                </div>
+            `;
+            ftmApp.renderFlightsList();
+        }
+
+        function renderFlightTestMasterRecording() {
+            const root = document.getElementById('root');
+            const flight = ftmState.currentFlight;
+            if (!flight) {
+                renderFlightTestMaster();
+                return;
+            }
+
+            const dateStr = new Date(flight.date).toLocaleDateString();
+            root.innerHTML = `
+                <div style="min-height: 100vh; background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border-bottom: 1px solid #e5e5ea; position: sticky; top: 0; z-index: 100;">
+                        <button style="background: none; border: none; color: #007AFF; font-size: 17px; cursor: pointer; font-weight: 500;" onclick="if(confirm('Exit flight test? All data is saved.')){ ftmState.currentFlight = null; ftmState.selectedRowId = null; renderFlightTestMaster(); }">⬅️ Done</button>
+                        <div style="font-size: 17px; font-weight: 600; color: #000;">Flight Data</div>
+                        <button style="background: none; border: none; color: #007AFF; font-size: 17px; cursor: pointer; font-weight: 500;" onclick="ftmApp.showExportMenu()">📤 Export</button>
+                    </div>
+                    <div style="padding: 12px 20px; background: #f2f2f7; color: #8e8e93; font-size: 13px; font-weight: 600; text-transform: uppercase; text-align: center; border-bottom: 1px solid #e5e5ea;">
+                        ${flight.aircraftName} - ${dateStr} - ${flight.testCardName}
+                    </div>
+
+                    <div style="overflow-x: auto; background: white;">
+                        <div style="min-width: 600px;">
+                            <div style="display: grid; grid-template-columns: 45px 1fr 80px 80px 60px; gap: 6px; padding: 12px; background: #f2f2f7; font-size: 12px; font-weight: 600; color: #8e8e93; border-bottom: 1px solid #e5e5ea; position: sticky; top: 0;">
+                                <div>Test Point</div>
+                                <div>Description</div>
+                                <div>Start</div>
+                                <div>End</div>
+                                <div></div>
+                            </div>
+                            <div id="ftm-tableRows"></div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 0 16px; margin-top: 10px;">
+                        <button style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: white; color: #007AFF; border: 2px solid #e5e5ea; cursor: pointer;" onclick="ftmApp.addRow()">+ Add Test Point</button>
+                    </div>
+
+                    <div style="padding: 16px; background: white; border-top: 1px solid #e5e5ea; margin-top: 20px;">
+                        <div id="ftm-selectedPointInfo" style="background: #fff; padding: 12px; margin: 0 16px; text-align: center; border: 1px solid #007AFF; border-radius: 8px; margin-bottom: 8px; color: #007AFF; font-weight: 600; display: none;">
+                            <span id="ftm-selectedPointName">--</span>
+                        </div>
+                        <button id="ftm-hackButton" style="width: 100%; padding: 24px; font-size: 24px; font-weight: 700; border: none; border-radius: 12px; color: white; cursor: pointer; background: #8E8E93;" disabled onclick="ftmApp.hackButton()">SELECT A ROW</button>
+                        <div style="display: flex; gap: 8px; margin-top: 12px; flex-direction: column;">
+                            <button id="ftm-editDetailsBtn" style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: #007AFF; color: white; cursor: pointer;" disabled onclick="ftmApp.openEditDetailsModal()">
+                                📝 Edit Description & Notes
+                            </button>
+                            <button style="width: 100%; padding: 18px; margin-bottom: 16px; font-size: 18px; font-weight: 600; border: none; border-radius: 16px; background: #D0E8FF; color: #007AFF; cursor: pointer;" onclick="ftmApp.addEventMarker()">
+                                🚩 Mark Event (Now)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Edit Details Modal -->
+                    <div id="ftm-editDetailsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px);">
+                        <div style="background: white; border-radius: 20px; padding: 30px; max-width: 340px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h2 style="font-size: 20px; font-weight: 700;">Edit Details</h2>
+                                <button onclick="ftmApp.closeEditDetailsModal()" style="background:none; border:none; font-size: 24px;">×</button>
+                            </div>
+
+                            <div style="text-align: left; margin-bottom: 16px;">
+                                <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Description</label>
+                                <textarea id="ftm-modalDescriptionInput" rows="2" placeholder="Test point description..." style="width: 100%; padding: 16px; font-size: 17px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; resize: none;"></textarea>
+                            </div>
+
+                            <div style="text-align: left; margin-bottom: 24px;">
+                                <label style="display: block; font-size: 13px; color: #8e8e93; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Event Log</label>
+                                <textarea id="ftm-modalNotesInput" rows="5" placeholder="Events will appear here..." style="width: 100%; padding: 16px; font-size: 13px; border: 1px solid #e5e5ea; border-radius: 12px; background: #fcfcfc; resize: none; font-family: monospace;"></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+                                <button type="button" id="ftm-status-completed" style="flex: 1; padding: 12px; border: 2px solid #E5E5EA; border-radius: 12px; background: white; font-size: 16px; font-weight: 600; color: #8E8E93; cursor: pointer;" onclick="ftmApp.setModalStatus('COMPLETED')">COMPLETED</button>
+                                <button type="button" id="ftm-status-skipped" style="flex: 1; padding: 12px; border: 2px solid #E5E5EA; border-radius: 12px; background: white; font-size: 16px; font-weight: 600; color: #8E8E93; cursor: pointer;" onclick="ftmApp.setModalStatus('SKIPPED')">SKIPPED</button>
+                            </div>
+
+                            <div style="display: flex; gap: 12px;">
+                                <button style="flex: 1; padding: 14px; border-radius: 12px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; background: #f2f2f7; color: #1c1c1e;" onclick="ftmApp.closeEditDetailsModal()">Cancel</button>
+                                <button style="flex: 1; padding: 14px; border-radius: 12px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; background: #34C759; color: white;" onclick="ftmApp.saveEditDetails()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            ftmApp.renderTable();
+            ftmApp.updateHackButton();
         }
 
         let state = {
