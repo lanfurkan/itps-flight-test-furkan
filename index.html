@@ -14,40 +14,78 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #020617;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
             min-height: 100vh;
             color: #1f2937;
             overflow-x: hidden;
             position: relative;
         }
 
-        #drip-container {
+        #stars,
+        #stars2,
+        #stars3 {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            background: transparent;
             z-index: -1;
-            overflow: hidden;
         }
 
-        .drip {
+        #stars {
+            width: 1px;
+            height: 1px;
+            animation: animStar 50s linear infinite;
+        }
+
+        #stars::after {
+            content: " ";
             position: absolute;
-            width: 2px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent, currentColor);
-            filter: blur(1px);
-            animation: fall linear forwards;
+            top: 2000px;
+            width: 1px;
+            height: 1px;
+            background: transparent;
+            box-shadow: inherit;
         }
 
-        @keyframes fall {
+        #stars2 {
+            width: 2px;
+            height: 2px;
+            animation: animStar 100s linear infinite;
+        }
+
+        #stars2::after {
+            content: " ";
+            position: absolute;
+            top: 2000px;
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            box-shadow: inherit;
+        }
+
+        #stars3 {
+            width: 3px;
+            height: 3px;
+            animation: animStar 150s linear infinite;
+        }
+
+        #stars3::after {
+            content: " ";
+            position: absolute;
+            top: 2000px;
+            width: 3px;
+            height: 3px;
+            background: transparent;
+            box-shadow: inherit;
+        }
+
+        @keyframes animStar {
             from {
-                transform: translateY(-120px);
+                transform: translateY(0px);
             }
 
             to {
-                transform: translateY(110vh);
+                transform: translateY(-2000px);
             }
         }
 
@@ -711,41 +749,22 @@
 
 <body>
     <div id="root"></div>
-    <div id="drip-container"></div>
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>
     <script>
-        function createDrip() {
-            const container = document.getElementById('drip-container');
-            if (!container) return;
-            const drip = document.createElement('div');
-            drip.className = 'drip';
-
-            const colors = [
-                '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
-                '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
-            ];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-
-            const left = Math.random() * 100;
-            const duration = 2 + Math.random() * 3;
-            const size = 50 + Math.random() * 150;
-            const opacity = 0.2 + Math.random() * 0.4;
-            const width = 1 + Math.random() * 2;
-
-            drip.style.left = `${left}%`;
-            drip.style.color = color;
-            drip.style.height = `${size}px`;
-            drip.style.width = `${width}px`;
-            drip.style.animationDuration = `${duration}s`;
-            drip.style.opacity = opacity;
-
-            container.appendChild(drip);
-
-            setTimeout(() => {
-                drip.remove();
-            }, duration * 1000);
+        // Star Generator for Sarazond Effect
+        function generateStars(count) {
+            let stars = "";
+            for (let i = 0; i < count; i++) {
+                stars += `${Math.floor(Math.random() * 2000)}px ${Math.floor(Math.random() * 2000)}px #FFF${i < count - 1 ? "," : ""}`;
+            }
+            return stars;
         }
 
-        setInterval(createDrip, 200);
+        document.getElementById('stars').style.boxShadow = generateStars(700);
+        document.getElementById('stars2').style.boxShadow = generateStars(200);
+        document.getElementById('stars3').style.boxShadow = generateStars(100);
 
         const CGRAS_DATA = {
             takeoff: {
