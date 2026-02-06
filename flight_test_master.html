@@ -1,0 +1,2338 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#007AFF">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Flight Test">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/753/753235.png">
+
+    <title>Flight Test Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+            background: #f2f2f7;
+            color: #000;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Screen Container */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Home Screen */
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #E3F2FD 100%);
+            /* Sky-like gradient */
+        }
+
+        .app-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #007AFF;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .button-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .primary-button {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-appearance: none;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .primary-button:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .primary-button.secondary {
+            background: #34C759;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        /* Specific Button Colors */
+        .btn-start {
+            background: #FF9500 !important;
+            /* Orange */
+            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3) !important;
+        }
+
+        .btn-view {
+            background: #8E8E93 !important;
+            /* Grey */
+            box-shadow: 0 8px 20px rgba(142, 142, 147, 0.3) !important;
+        }
+
+        /* Recording Screen Enhancements */
+        .selected-point-info {
+            background: #fff;
+            padding: 12px;
+            margin: 0 16px;
+            text-align: center;
+            border: 1px solid #007AFF;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        .row-action-btn {
+            background: #e5e5ea;
+            border: none;
+            font-size: 11px;
+            /* Reduced from 14px */
+            cursor: pointer;
+            padding: 6px 8px;
+            /* Reduced from 8px 12px */
+            margin: 0 2px;
+            /* Reduced from 4px */
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .row-action-btn:active {
+            background: #d1d1d6;
+        }
+
+        .duplicate-btn {
+            color: #007AFF;
+            background: #e1f0ff;
+        }
+
+        .delete-btn {
+            color: #FF3B30;
+            background: #ffe5e5;
+        }
+
+        .delete-btn:active {
+            background: #ffd1d1;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 45px 1fr 80px 80px 70px;
+            /* 5 columns */
+            gap: 6px;
+            padding: 12px;
+            background: #f2f2f7;
+            font-size: 11px;
+            /* Slightly smaller for mobile */
+            font-weight: 600;
+            color: #8e8e93;
+            border-bottom: 1px solid #e5e5ea;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 45px 1fr 80px 80px 70px;
+            /* Match header */
+            gap: 6px;
+            padding: 12px;
+            border-bottom: 1px solid #e5e5ea;
+            align-items: center;
+            transition: background 0.1s;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background: white;
+        }
+
+        .test-table {
+            min-width: 480px;
+            /* Ensure scrolling on iPhone */
+        }
+
+        /* Home Screen Centering Adjustment */
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #E3F2FD 100%);
+            /* Sky-like gradient */
+        }
+
+        .app-logo {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 4px solid white;
+        }
+
+        .app-title {
+            font-size: 42px;
+            font-weight: 800;
+            background: -webkit-linear-gradient(#007AFF, #5856D6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 60px;
+            text-align: center;
+            letter-spacing: -1px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .primary-button {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            /* Rounder */
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .primary-button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* Specific Button Colors */
+        .btn-start {
+            background: #FF9500 !important;
+            /* Orange */
+            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3) !important;
+        }
+
+        .btn-view {
+            background: #8E8E93 !important;
+            /* Grey */
+            box-shadow: 0 8px 20px rgba(142, 142, 147, 0.3) !important;
+        }
+
+        /* Saved Flight Details */
+        .flight-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #e5e5ea;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1c1c1e;
+            font-family: 'SF Mono', monospace;
+        }
+
+        \n .add-row-button {
+            width: 100%;
+            padding: 24px;
+            /* Further increased for mobile */
+            background: white;
+            border: none;
+            border-top: 1px solid #e5e5ea;
+            color: #007AFF;
+            font-size: 20px;
+            /* Further increased for visibility */
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Hack Button */
+        .hack-button-container {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e5e5ea;
+        }
+
+        /* Setup Form Improvements */
+        .setup-form {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .crew-section {
+            margin-bottom: 24px;
+            padding-left: 12px;
+            border-left: 3px solid #007AFF;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 17px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            background: #fcfcfc;
+            -webkit-appearance: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
+        .small-mb {
+            margin-bottom: 8px;
+        }
+
+        /* Saved Flights List Improvements */
+        .flights-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .flight-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .flight-item:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .flight-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1c1c1e;
+        }
+
+        .flight-info p {
+            font-size: 15px;
+            color: #8e8e93;
+        }
+
+        /* Focus Mode Overlay */
+        .focus-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f2f2f7;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .focus-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .focus-close-btn {
+            font-size: 18px;
+            color: #007AFF;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .focus-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            /* Changed to start to allow scrolling if needed, or better spacing */
+            padding-top: 40px;
+        }
+
+        .focus-point-number {
+            font-size: 80px;
+            font-weight: 800;
+            color: #000;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .focus-point-desc {
+            font-size: 24px;
+            color: #8e8e93;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 500;
+            max-width: 90%;
+        }
+
+        @media screen and (max-height: 700px) {
+            .focus-point-number {
+                font-size: 60px;
+            }
+
+            .focus-point-desc {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+            .focus-hack-button {
+                font-size: 30px;
+            }
+        }
+
+
+
+
+        .focus-hack-button {
+            width: 100%;
+            max-width: 500px;
+            /* Limit width on tablets */
+            flex: 1;
+            /* Take up available space */
+            max-height: 50vh;
+            /* Don't be too tall */
+            border-radius: 20px;
+            font-size: 40px;
+            font-weight: 800;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+        }
+
+        .focus-hack-button.ready {
+            background: #34C759;
+        }
+
+        .focus-hack-button.recording {
+            background: #FF3B30;
+            animation: pulse-focus 2s infinite;
+        }
+
+        .focus-hack-button:active {
+            transform: scale(0.96);
+        }
+
+        @keyframes pulse-focus {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(255, 59, 48, 0.3);
+            }
+
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 20px 50px rgba(255, 59, 48, 0.5);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(255, 59, 48, 0.3);
+            }
+        }
+
+        .focus-timer {
+            margin-top: 20px;
+            font-size: 30px;
+            font-family: 'SF Mono', monospace;
+            color: #1c1c1e;
+            font-variant-numeric: tabular-nums;
+        }
+
+
+        .action-button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .export-btn-ui {
+            background: #f2f2f7;
+            color: #007AFF;
+        }
+
+        .delete-btn-ui {
+            background: #ffe5e5;
+            color: #FF3B30;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e93;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: white;
+            border-bottom: 1px solid #e5e5ea;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #007AFF;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .header-action {
+            background: none;
+            border: none;
+            color: #007AFF;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .test-table {
+            background: white;
+            margin-top: 0;
+        }
+
+        .table-input {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 15px;
+            background: transparent;
+        }
+
+        .table-input:focus {
+            background: #f2f2f7;
+            border-color: #007AFF;
+            outline: none;
+        }
+
+        .time-display {
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 13px;
+            color: #8e8e93;
+            text-align: center;
+        }
+
+        .selected {
+            background: #E5F1FF;
+        }
+
+        .recording-header {
+            padding: 12px 20px;
+            background: #f2f2f7;
+            color: #8e8e93;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px solid #e5e5ea;
+        }
+
+        .hack-button {
+            width: 100%;
+            padding: 24px;
+            font-size: 24px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .hack-button.ready {
+            background: #34C759;
+        }
+
+        .hack-button.recording {
+            background: #FF3B30;
+            animation: pulse 1.5s infinite;
+        }
+
+        .hack-button:disabled {
+            background: #8e8e93;
+            opacity: 0.5;
+        }
+
+        .hack-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Custom Confirmation Modal */
+        .confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .confirm-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.2s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confirm-modal-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .confirm-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1c1c1e;
+        }
+
+        .confirm-modal-message {
+            font-size: 15px;
+            color: #8e8e93;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .confirm-modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .confirm-modal-btn:active {
+            transform: scale(0.96);
+        }
+
+        .confirm-modal-btn.cancel {
+            background: #f2f2f7;
+            color: #1c1c1e;
+        }
+
+        .confirm-modal-btn.confirm {
+            background: #34C759;
+            color: white;
+        }
+
+        .confirm-modal-btn.confirm.danger {
+            background: #FF3B30;
+        }
+
+        /* Username Modal Input Field */
+        .username-input {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #007AFF;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 500;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .username-input:focus {
+            border-color: #5856D6;
+            box-shadow: 0 0 0 4px rgba(88, 86, 214, 0.1);
+        }
+
+        /* Username Badge (Top Right) */
+        .username-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Developer Footer */
+        .dev-footer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #8e8e93;
+            font-weight: 500;
+            opacity: 0.7;
+            z-index: 1000;
+        }
+
+        /* COMPLETED/SKIPPED Status Styles */
+        .status-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #E5E5EA;
+            border-radius: 12px;
+            background: white;
+            font-size: 16px;
+            font-weight: 600;
+            color: #8E8E93;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-btn.completed.active {
+            background: #34C759;
+            border-color: #34C759;
+            color: white;
+        }
+
+        .status-btn.skipped.active {
+            background: #FF9500;
+            /* Orange */
+            border-color: #FF9500;
+            color: white;
+        }
+
+        .row-completed {
+            background-color: rgba(52, 199, 89, 0.15) !important;
+        }
+
+        .row-skipped {
+            background-color: rgba(255, 149, 0, 0.15) !important;
+        }
+
+        /* Adjust input borders for better visibility on colored rows if needed */
+        .row-completed input,
+        .row-skipped input {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Event Log Styles */
+        .event-marker-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- DEVELOPER FOOTER (GLOBAL) -->
+    <div class="dev-footer">Developed by Furkan YK</div>
+
+    <!-- HOME SCREEN -->
+    <div id="homeScreen" class="screen active">
+        <div id="usernameBadge" class="username-badge" style="display: none;">
+            <span>👤</span>
+            <span id="usernameDisplay">User</span>
+        </div>
+        <div class="home-screen">
+            <div style="font-size: 72px; margin-bottom: 20px;">✈️</div>
+            <h1 class="app-title">Flight Test Master</h1>
+            <div class="button-container">
+                <button class="primary-button btn-start" onclick="app.showSetup()">✈️ Start New Flight Test</button>
+                <button class="primary-button btn-view" onclick="app.showFlights()">📂 View Saved Flights</button>
+                <button class="primary-button"
+                    style="background: rgba(0,0,0,0.05); color: #8e8e93; box-shadow: none; border: 1px solid #e5e5ea; border-radius: 16px;"
+                    onclick="window.location.href='index.html'">🏠 Back to Dashboard</button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SETUP SCREEN -->
+    <div id="setupScreen" class="screen">
+        <div class="header-bar">
+            <button class="back-button" onclick="app.showHome()">⬅️ Cancel</button>
+            <div class="header-title">New Flight Test</div>
+            <div style="width: 50px;"></div>
+        </div>
+        <div class="setup-form">
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label">Aircraft Name (Uçak Modeli - Kuyruk No)</label>
+                    <input type="text" id="aircraftName" class="form-input" placeholder="C340 - CGRAS">
+                </div>
+
+                <!-- New Crew Section -->
+                <div class="crew-section">
+                    <div class="form-group">
+                        <label class="form-label">PIC (N.SURNAME)</label>
+                        <input type="text" id="picName" class="form-input" placeholder="N.SURNAME">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Crew Members (N.SURNAME)</label>
+                        <input type="text" id="crew1" class="form-input small-mb" placeholder="CREW 1 N.SURNAME">
+                        <input type="text" id="crew2" class="form-input small-mb" placeholder="CREW 2 N.SURNAME">
+                        <input type="text" id="crew3" class="form-input small-mb" placeholder="CREW 3 N.SURNAME">
+                        <input type="text" id="crew4" class="form-input" placeholder="CREW 4 N.SURNAME">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="flightDate" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Test Card Name</label>
+                    <input type="text" id="testCardName" class="form-input" placeholder="e.g. Climb Performance">
+                </div>
+
+                <!-- Import Test Points (Optional) -->
+                <div class="form-group"
+                    style="border: 2px dashed #E5E5EA; padding: 12px; border-radius: 12px; background: #f9f9f9;">
+                    <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        Import Test Points
+                        <button class="header-action" style="font-size: 12px; padding: 4px 8px;"
+                            onclick="app.downloadTemplate()">
+                            ⬇️ Template
+                        </button>
+                    </label>
+                    <input type="file" id="importFile" accept=".csv,.json" class="form-input"
+                        style="padding: 8px; font-size: 14px;" onchange="app.handleFileImport(this)">
+                    <div id="importStatus"
+                        style="font-size: 12px; color: #34C759; font-weight: 500; margin-top: 4px; display: none;">✅
+                        style="font-size: 12px; color: #34C759; font-weight: 500; margin-top: 4px; display: none;">✅
+                        loaded</div>
+                </div>
+
+                <button class="primary-button" onclick="app.createFlight()">Create Flight Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAVED FLIGHTS SCREEN -->
+    <div id="flightsScreen" class="screen">
+        <div class="header-bar">
+            <button id="flightsBackBtn" class="back-button" onclick="app.showHome()">⬅️ Done</button>
+            <button id="flightsCancelBtn" class="back-button hidden" onclick="app.toggleSelectMode()"
+                style="color: #FF3B30;">Cancel</button>
+
+            <div class="header-title">Saved Flights</div>
+
+            <div id="flightsActions" style="display:flex; gap:10px;">
+                <button id="selectModeBtn" class="header-action" onclick="app.toggleSelectMode()">Select</button>
+                <button id="syncAllBtn" class="header-action" onclick="app.syncManager.syncAll()">☁️ Sync</button>
+            </div>
+
+
+            <button id="deleteSelectedBtn" class="header-action hidden" onclick="app.deleteSelectedFlights()"
+                style="color: #FF3B30; font-weight: 700;">Delete (0)</button>
+        </div>
+        <div id="flightsList" class="flights-list"></div>
+    </div>
+
+    <!-- RECORDING SCREEN -->
+    <div id="recordingScreen" class="screen">
+        <div class="header-bar">
+            <button class="back-button" onclick="app.exitRecording()">⬅️ Done</button>
+            <div class="header-title">Flight Data</div>
+            <button class="header-action" onclick="app.showExportMenu()">📤 Export</button>
+        </div>
+        <div id="recordingHeader" class="recording-header"></div>
+
+        <div class="table-container">
+            <div class="test-table">
+                <div class="table-header">
+                    <div>TP</div>
+                    <div>Description</div>
+                    <div>Start</div>
+                    <div>End</div>
+                    <div>Actions</div>
+                </div>
+                <div id="tableRows"></div>
+            </div>
+        </div>
+
+        <div style="padding: 0 16px; margin-top: 10px;">
+            <button class="primary-button" style="background: white; color: #007AFF; border: 2px solid #e5e5ea;"
+                onclick="app.addRow()">+ Add Test Point</button>
+        </div>
+
+        <div class="hack-button-container">
+            <div id="selectedPointInfo" class="selected-point-info hidden">
+                <span id="selectedPointName">--</span>
+            </div>
+            <button id="hackButton" class="hack-button" disabled onclick="app.hackButton()">SELECT A ROW</button>
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-direction: column;">
+                <button id="editDetailsBtn" class="primary-button"
+                    style="background: #007AFF; color: white; margin-bottom: 0;" disabled
+                    onclick="app.openEditDetailsModal()">
+                    📝 Edit Description & Notes
+                </button>
+                <button id="eventMarkerBtn" class="primary-button"
+                    style="background: #D0E8FF; color: #007AFF; margin-bottom: 0;" onclick="app.addEventMarker()">
+                    🚩 Mark Event (Now)
+                </button>
+            </div>
+            <div style="text-align: center; color: #8e8e93; font-size: 14px; margin-top: 8px;">
+                Or select a row to enter Focus Mode
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Details Modal -->
+    <div id="editDetailsModal" class="confirm-modal-overlay hidden">
+        <div class="confirm-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 20px; font-weight: 700;">Edit Details</h2>
+                <button onclick="app.closeEditDetailsModal()"
+                    style="background:none; border:none; font-size: 24px;">×</button>
+            </div>
+
+            <div style="text-align: left; margin-bottom: 16px;">
+                <label class="form-label">Description</label>
+                <textarea id="modalDescriptionInput" class="form-input" rows="2"
+                    placeholder="Test point description..."></textarea>
+            </div>
+
+            <div style="text-align: left; margin-bottom: 24px;">
+                <label class="form-label">Event Log</label>
+                <textarea id="modalNotesInput" class="form-input" rows="5" placeholder="Events will appear here..."
+                    style="resize: none; font-family: monospace; font-size: 13px;"></textarea>
+            </div>
+
+            <div class="status-btn-group">
+                <button type="button" class="status-btn completed"
+                    onclick="app.setModalStatus('COMPLETED')">COMPLETED</button>
+                <button type="button" class="status-btn skipped"
+                    onclick="app.setModalStatus('SKIPPED')">SKIPPED</button>
+            </div>
+
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="app.closeEditDetailsModal()">Cancel</button>
+                <button class="confirm-modal-btn confirm" onclick="app.saveEditDetails()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS MODE OVERLAY -->
+    <div id="focusOverlay" class="focus-overlay hidden">
+        <div class="focus-header">
+            <button class="focus-close-btn" onclick="app.closeFocusMode()">&larr; Close Focus Mode</button>
+        </div>
+        <div class="focus-content">
+            <div id="focusPointNumber" class="focus-point-number">--</div>
+            <div id="focusPointDesc" class="focus-point-desc">--</div>
+
+            <button id="focusHackButton" class="focus-hack-button ready" onclick="app.hackButton()">
+                HACK (Start)
+            </button>
+
+            <div id="focusTimer" class="focus-timer">00:00:00</div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION MODAL -->
+    <div id="confirmModalOverlay" class="confirm-modal-overlay hidden">
+        <div class="confirm-modal">
+            <div id="confirmModalIcon" class="confirm-modal-icon">⏱️</div>
+            <div id="confirmModalTitle" class="confirm-modal-title">Are you sure?</div>
+            <div id="confirmModalMessage" class="confirm-modal-message">This action cannot be undone.</div>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="app.closeConfirmModal(false)">Cancel</button>
+                <button id="confirmModalBtn" class="confirm-modal-btn confirm"
+                    onclick="app.closeConfirmModal(true)">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- USERNAME INPUT MODAL -->
+    <div id="usernameModalOverlay" class="confirm-modal-overlay hidden">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon">👤</div>
+            <div class="confirm-modal-title">Welcome!</div>
+            <div class="confirm-modal-message">Please enter your username:</div>
+            <input type="text" id="usernameInput" class="username-input" placeholder="Username" maxlength="30">
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn confirm" onclick="app.closeUsernameModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            currentFlight: null,
+            selectedRowId: null,
+            flights: [],
+            timerInterval: null,
+            confirmModalCallback: null,
+            isSelectMode: false,
+            selectedFlightIds: new Set(),
+
+            // Custom Confirm Modal Functions
+            showConfirm(options, callback) {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const icon = document.getElementById('confirmModalIcon');
+                const title = document.getElementById('confirmModalTitle');
+                const message = document.getElementById('confirmModalMessage');
+                const btn = document.getElementById('confirmModalBtn');
+
+                icon.textContent = options.icon || '⏱️';
+                title.textContent = options.title || 'Are you sure?';
+                message.textContent = options.message || 'This action cannot be undone.';
+
+                if (options.danger) {
+                    btn.classList.add('danger');
+                } else {
+                    btn.classList.remove('danger');
+                }
+
+                this.confirmModalCallback = callback;
+                overlay.classList.remove('hidden');
+            },
+
+            closeConfirmModal(confirmed) {
+                const overlay = document.getElementById('confirmModalOverlay');
+                overlay.classList.add('hidden');
+
+                if (this.confirmModalCallback) {
+                    this.confirmModalCallback(confirmed);
+                    this.confirmModalCallback = null;
+                }
+            },
+
+            showUsernameModal() {
+                return new Promise((resolve) => {
+                    const overlay = document.getElementById('usernameModalOverlay');
+                    const input = document.getElementById('usernameInput');
+
+                    input.value = '';
+                    overlay.classList.remove('hidden');
+
+                    // Focus on input after animation
+                    setTimeout(() => input.focus(), 100);
+
+                    // Allow Enter key to submit
+                    const enterHandler = (e) => {
+                        if (e.key === 'Enter') {
+                            input.removeEventListener('keypress', enterHandler);
+                            this.closeUsernameModal();
+                        }
+                    };
+                    input.addEventListener('keypress', enterHandler);
+
+                    // Store resolve function
+                    this.usernameResolve = resolve;
+                });
+            },
+
+            closeUsernameModal() {
+                const overlay = document.getElementById('usernameModalOverlay');
+                const input = document.getElementById('usernameInput');
+                const username = input.value.trim();
+
+                if (!username) {
+                    input.style.borderColor = '#FF3B30';
+                    input.placeholder = '⚠️ Username cannot be empty!';
+                    input.focus();
+                    setTimeout(() => {
+                        input.style.borderColor = '#007AFF';
+                        input.placeholder = 'Username';
+                    }, 2000);
+                    return;
+                }
+
+                overlay.classList.add('hidden');
+
+                if (this.usernameResolve) {
+                    this.usernameResolve(username);
+                    this.usernameResolve = null;
+                }
+            },
+
+            async init() {
+                // Check if username is set (FIRST THING)
+                let username = localStorage.getItem('flightTestUsername');
+                if (!username) {
+                    username = await this.showUsernameModal();
+                    localStorage.setItem('flightTestUsername', username);
+                }
+
+                // Display username in top-right badge
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const usernameBadge = document.getElementById('usernameBadge');
+                if (usernameDisplay && username) {
+                    usernameDisplay.textContent = username;
+                    usernameBadge.style.display = 'flex';
+                }
+
+                // Load flights from localStorage
+                const stored = localStorage.getItem('flightTestMaster');
+                if (stored) {
+                    this.flights = JSON.parse(stored);
+                }
+
+                // Set today's date
+                const dateInput = document.getElementById('flightDate');
+                if (dateInput) {
+                    dateInput.valueAsDate = new Date();
+                }
+
+                this.syncManager.init(this);
+            },
+
+            scriptUrl: 'https://script.google.com/macros/s/AKfycbyjGTCzoJqBezdlYe0O9F_D9Ba-Uu3lAuqJe3LAfIiKqeJyM1nhETHvu_JEiCPItQdF/exec',
+
+            syncManager: {
+                parent: null,
+
+                init(parentApp) {
+                    this.parent = parentApp;
+                },
+
+                async syncAll() {
+                    if (!navigator.onLine) {
+                        alert('No internet connection.');
+                        return;
+                    }
+
+                    const unsyncedHandler = this.parent.flights.filter(f => !f.syncStatus || f.syncStatus !== 'synced');
+
+                    if (unsyncedHandler.length === 0) {
+                        alert('All flights are already synced!');
+                        return;
+                    }
+
+                    const btn = document.getElementById('syncAllBtn');
+                    if (btn) btn.textContent = '⏳ Syncing...';
+
+                    // console.log to debug
+                    console.log('Starting sync for ' + unsyncedHandler.length + ' flights...');
+
+                    let successCount = 0;
+
+                    // Process one by one to ensure reliability
+                    for (const flight of unsyncedHandler) {
+                        const success = await this.syncFlight(flight);
+                        if (success) successCount++;
+                    }
+
+                    if (btn) btn.textContent = 'â˜ï¸ Sync';
+                    alert(`Sync Complete! ${successCount}/${unsyncedHandler.length} flights synced.`);
+                    this.parent.renderFlightsList();
+                },
+
+                async syncFlight(flight) {
+                    try {
+                        // Prepare payload with formatted local times (What You See Is What You Get)
+                        const payload = JSON.parse(JSON.stringify(flight)); // Deep copy
+
+                        // Add current device timestamp for "Date" column
+                        const now = new Date();
+                        payload.syncTimestamp = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', { hour12: false });
+
+                        // Add username for tracking
+                        payload.syncUser = localStorage.getItem('flightTestUsername') || 'Unknown';
+
+                        // Format times locally using device settings
+                        if (payload.testPoints) {
+                            payload.testPoints.forEach(p => {
+                                if (p.startTime) {
+                                    // Use 'tr-TR' or 'en-GB' for HH:mm:ss format
+                                    p.startTime = new Date(p.startTime).toLocaleTimeString('tr-TR', { hour12: false });
+                                }
+                                if (p.endTime) {
+                                    p.endTime = new Date(p.endTime).toLocaleTimeString('tr-TR', { hour12: false });
+                                }
+                            });
+                        }
+
+                        const response = await fetch(this.parent.scriptUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'text/plain',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        // With no-cors, we can't check response.ok, so we assume success if no error thrown
+                        // Ideally we'd validte but for GAS Web Apps this is standard limitation unless using proxies
+
+                        flight.syncStatus = 'synced';
+                        flight.lastSyncDate = new Date().toISOString();
+                        this.parent.saveToStorage();
+                        return true;
+
+                    } catch (error) {
+                        console.error('Sync Error:', error);
+                        return false;
+                    }
+                }
+            },
+
+            saveToStorage() {
+                localStorage.setItem('flightTestMaster', JSON.stringify(this.flights));
+                console.log('✅ Saved to localStorage');
+            },
+
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+            },
+
+            showHome() {
+                this.showScreen('homeScreen');
+            },
+
+            showSetup() {
+                document.getElementById('aircraftName').value = '';
+                document.getElementById('testCardName').value = '';
+                document.getElementById('picName').value = '';
+                document.getElementById('crew1').value = '';
+                document.getElementById('crew2').value = '';
+                document.getElementById('crew3').value = '';
+                document.getElementById('crew4').value = '';
+                const dateInput = document.getElementById('flightDate');
+                if (dateInput) dateInput.valueAsDate = new Date();
+                this.showScreen('setupScreen');
+            },
+
+            showFlights() {
+                this.renderFlightsList();
+                this.showScreen('flightsScreen');
+            },
+
+            createFlight() {
+                try {
+                    const aircraftName = document.getElementById('aircraftName').value;
+                    const date = document.getElementById('flightDate').value;
+                    const testCardName = document.getElementById('testCardName').value;
+
+                    if (!aircraftName || !date || !testCardName) {
+                        alert('Please fill in all fields (Aircraft, Date, Test Card)');
+                        return;
+                    }
+
+                    // Gather Crew
+                    const crew = [];
+                    for (let i = 1; i <= 4; i++) {
+                        const el = document.getElementById('crew' + i);
+                        if (el && el.value.trim()) {
+                            crew.push(el.value.trim());
+                        }
+                    }
+
+                    // Prepare Test Points (Imported or Default)
+                    let initialTestPoints = [];
+                    if (this.importedPoints && this.importedPoints.length > 0) {
+                        // Map imported points
+                        initialTestPoints = this.importedPoints.map((p, i) => ({
+                            id: Date.now().toString() + i,
+                            testPoint: p.testPoint || (i + 1).toString(),
+                            description: p.description || '',
+                            startTime: null,
+                            endTime: null,
+                            notes: '',
+                            status: null
+                        }));
+                    } else {
+                        // Default single point
+                        initialTestPoints.push({
+                            id: Date.now().toString(),
+                            testPoint: '1',
+                            description: '',
+                            startTime: null,
+                            endTime: null,
+                            notes: '',
+                            status: null
+                        });
+                    }
+
+                    const flight = {
+                        id: Date.now().toString(),
+                        aircraftName,
+                        date,
+                        testCardName,
+                        picName: document.getElementById('picName').value || '',
+                        crew: crew, // Storing as array now
+                        testPoints: initialTestPoints
+                    };
+
+                    this.flights.push(flight);
+                    this.saveToStorage();
+                    this.openFlight(flight);
+
+                    // Reset Import
+                    this.importedPoints = null;
+                    const importFileEl = document.getElementById('importFile');
+                    if (importFileEl) importFileEl.value = '';
+                    const statusEl = document.getElementById('importStatus');
+                    if (statusEl) statusEl.style.display = 'none';
+
+                } catch (e) {
+                    alert("Error creating flight: " + e.message);
+                    console.error(e);
+                }
+            },
+
+            downloadTemplate() {
+                const csvContent = "Test Point,Description\n1,Take-off Handling\n2,Climb Check (5000ft)\n3,Level Flight Acceleration";
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'FlightTest_Template.csv';
+                a.style.display = 'none'; // Ensure hidden
+                document.body.appendChild(a);
+                a.click();
+
+                // Timeout to ensure click registers before removal
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            },
+
+            handleFileImport(input) {
+                if (!input.files || input.files.length === 0) return;
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    try {
+                        const content = e.target.result;
+                        let points = [];
+
+                        if (file.name.endsWith('.json')) {
+                            points = JSON.parse(content);
+                        } else {
+                            // CSV Parsing
+                            const lines = content.split(/\r\n|\n/).filter(l => l.trim() !== '');
+                            // Skip header if present
+                            let startIndex = 0;
+                            if (lines[0].toLowerCase().includes('description')) startIndex = 1;
+
+                            for (let i = startIndex; i < lines.length; i++) {
+                                const cols = lines[i].split(',');
+                                if (cols.length >= 2) {
+                                    points.push({
+                                        testPoint: cols[0].trim(),
+                                        description: cols[1].trim()
+                                    });
+                                }
+                            }
+                        }
+
+                        this.importedPoints = points;
+                        const statusEl = document.getElementById('importStatus');
+                        if (statusEl) {
+                            statusEl.style.display = 'block';
+                            statusEl.textContent = `✅ ${points.length} points loaded`;
+                        }
+                    } catch (err) {
+                        alert("Error parsing file: " + err.message);
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+            },
+            renderFlightsList() {
+                const container = document.getElementById('flightsList');
+
+                if (this.flights.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No saved flights yet.<br>Start a new flight test to begin.</div>';
+                    return;
+                }
+
+                // Sort by flight ID (timestamp) descending - most recent first
+                container.innerHTML = this.flights
+                    .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+                    .map(flight => {
+                        // Calculate Stats
+                        const points = flight.testPoints || [];
+                        const count = points.length;
+
+                        // Flight saved date (from ID which is a timestamp)
+                        const savedDate = new Date(parseInt(flight.id)).toLocaleDateString('tr-TR');
+
+                        let startStr = '--:--';
+                        let endStr = '--:--';
+
+                        if (points.length > 0) {
+                            const startTimes = points.map(p => p.startTime ? new Date(p.startTime).getTime() : Infinity).filter(t => t !== Infinity);
+                            const endTimes = points.map(p => p.endTime ? new Date(p.endTime).getTime() : -Infinity).filter(t => t !== -Infinity);
+
+                            if (startTimes.length > 0) {
+                                // 24-hour format
+                                startStr = new Date(Math.min(...startTimes)).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                            }
+                            if (endTimes.length > 0) {
+                                // 24-hour format
+                                endStr = new Date(Math.max(...endTimes)).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                            }
+                        }
+
+                        return `
+                        <div class="flight-item" onclick="app.handleFlightClick('${flight.id}', ${JSON.stringify(flight).replace(/"/g, '&quot;')})">
+                            ${this.isSelectMode ? `
+                                <div style="display:flex; align-items:center; margin-right:12px;">
+                                    <input type="checkbox" 
+                                           style="width:24px; height:24px;" 
+                                           ${this.selectedFlightIds.has(flight.id) ? 'checked' : ''} 
+                                           onclick="event.stopPropagation(); app.toggleFlightSelection('${flight.id}')">
+                                </div>
+                            ` : ''}
+                            <div class="flight-header" style="flex:1;">
+                                <div class="flight-info">
+                                    <h3>${flight.aircraftName}</h3>
+                                    <p>${new Date(flight.date).toLocaleDateString('tr-TR')} — ${flight.testCardName}</p>
+                                    <p style="font-size:12px; margin-top:4px; color:#8e8e93;">
+                                        Kaydedilme: ${savedDate} 
+                                            ${flight.syncStatus === 'synced' ? '☁️' : '💾'}
+                                        </span>
+                                    </p>
+                                    ${flight.pic ? `<p style="font-size:13px; margin-top:4px; color:#007AFF;">PIC: ${flight.pic}</p>` : ''}
+                                    
+                                    <div class="flight-stats">
+                                        <div class="stat-item" style="grid-column: span 3;">
+                                            <div class="stat-label">Total Test Points</div>
+                                            <div class="stat-value" style="font-size: 18px;">${count}</div>
+                                        </div>
+                                        <div class="stat-item" style="grid-column: span 3; display: flex; justify-content: center; gap: 20px; align-items: center; margin-top: 8px;">
+                                            <div>
+                                                 <div class="stat-label">Start Time</div>
+                                                 <div class="stat-value">${startStr}</div>
+                                            </div>
+                                            <div style="height: 20px; width: 1px; background: #e5e5ea;"></div>
+                                            <div>
+                                                 <div class="stat-label">End Time</div>
+                                                 <div class="stat-value">${endStr}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            ${!this.isSelectMode ? `
+                            <div class="flight-actions">
+                                <button class="action-button export-btn-ui" onclick="event.stopPropagation(); app.exportFlight('${flight.id}')">📤 Export</button>
+                                <button class="action-button delete-btn-ui" onclick="event.stopPropagation(); app.deleteFlight('${flight.id}')">🗑️ Delete</button>
+                            </div>` : ''}
+                        </div>
+                    `}).join('');
+            },
+
+            toggleSelectMode() {
+                this.isSelectMode = !this.isSelectMode;
+                this.selectedFlightIds.clear();
+                this.updateSelectUI();
+                this.renderFlightsList();
+            },
+
+            handleFlightClick(id, flight) {
+                if (this.isSelectMode) {
+                    this.toggleFlightSelection(id);
+                } else {
+                    this.openFlight(flight);
+                }
+            },
+
+            toggleFlightSelection(id) {
+                if (this.selectedFlightIds.has(id)) {
+                    this.selectedFlightIds.delete(id);
+                } else {
+                    this.selectedFlightIds.add(id);
+                }
+                this.updateSelectUI();
+                this.renderFlightsList();
+            },
+
+            updateSelectUI() {
+                const backBtn = document.getElementById('flightsBackBtn');
+                const cancelBtn = document.getElementById('flightsCancelBtn');
+                const actionsDiv = document.getElementById('flightsActions');
+                const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+                if (this.isSelectMode) {
+                    backBtn.classList.add('hidden');
+                    cancelBtn.classList.remove('hidden');
+                    actionsDiv.classList.add('hidden'); // Hide Select/Sync buttons
+                    deleteBtn.classList.remove('hidden');
+                    deleteBtn.textContent = `Delete (${this.selectedFlightIds.size})`;
+                } else {
+                    backBtn.classList.remove('hidden');
+                    cancelBtn.classList.add('hidden');
+                    actionsDiv.classList.remove('hidden');
+                    deleteBtn.classList.add('hidden');
+                }
+            },
+
+            deleteSelectedFlights() {
+                if (this.selectedFlightIds.size === 0) return;
+
+                this.showConfirm({
+                    icon: 'ðŸ—‘ï¸',
+                    title: `Delete ${this.selectedFlightIds.size} Flights?`,
+                    message: 'This action cannot be undone.',
+                    danger: true
+                }, (confirmed) => {
+                    if (confirmed) {
+                        this.flights = this.flights.filter(f => !this.selectedFlightIds.has(f.id));
+                        this.saveToStorage();
+                        this.toggleSelectMode(); // Exit select mode
+                        alert('Selected flights deleted.');
+                    }
+                });
+            },
+
+            openFlight(flight) {
+                this.currentFlight = flight;
+                this.selectedRowId = null;
+
+                // Ensure screen is shown BEFORE trying to update its elements
+                this.showScreen('recordingScreen');
+
+                // Update header - SAFELY with simple standard ID check
+                // We do it immediately as showScreen removes hidden classes
+                const headerEl = document.getElementById('recordingHeader');
+                if (headerEl) {
+                    const dateStr = new Date(flight.date).toLocaleDateString();
+                    headerEl.textContent = `${flight.aircraftName} - ${dateStr} - ${flight.testCardName}`;
+                } else {
+                    console.error("Critical: recordingHeader element missing");
+                    // Fallback attempt after 50ms just in case
+                    setTimeout(() => {
+                        const retryEl = document.getElementById('recordingHeader');
+                        if (retryEl) {
+                            retryEl.textContent = `${flight.aircraftName} - ${dateStr} - ${flight.testCardName}`;
+                        }
+                    }, 50);
+                }
+
+                // Render table
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            // ... (Other methods are fine, re-anchoring updateHackButton below caused issues previously, so doing it separately if needed or just letting it be if it works)
+
+
+            renderTable() {
+                const container = document.getElementById('tableRows');
+
+                if (!this.currentFlight.testPoints || this.currentFlight.testPoints.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = this.currentFlight.testPoints.map((point, index) => {
+                    let rowClass = 'table-row';
+                    if (this.selectedRowId === point.id) rowClass += ' selected';
+                    if (point.status === 'COMPLETED') rowClass += ' row-completed';
+                    if (point.status === 'SKIPPED') rowClass += ' row-skipped';
+
+                    return `
+                    <div class="${rowClass}" 
+                         onclick="app.selectRow('${point.id}')">
+                        <input type="number" 
+                               step="any"
+                               class="table-input" 
+                               value="${point.testPoint || ''}"
+                               placeholder="#"
+                               oninput="app.updatePoint('${point.id}', 'testPoint', this.value)"
+                               onclick="event.stopPropagation()">
+                        
+                        <!-- Description as Text Only -->
+                        <div class="description-text" style="font-size: 14px; font-weight: 500; color: #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${point.description || '<span style="color:#c7c7cc; font-weight:400">(No Desc)</span>'}
+                        </div>
+
+                        <div class="time-display">${point.startTime ? this.formatTime(point.startTime) : '--:--'}</div>
+                        <div class="time-display">${point.endTime ? this.formatTime(point.endTime) : '--:--'}</div>
+                        
+                        <div style="display:flex; justify-content:center; gap: 4px;">
+                            <button class="row-action-btn duplicate-btn" title="Duplicate" onclick="event.stopPropagation(); app.duplicateRow('${point.id}')">COPY</button>
+                            <button class="row-action-btn delete-btn" title="Delete" onclick="event.stopPropagation(); app.deleteRow('${point.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            },
+
+            duplicateRow(pointId) {
+                if (!this.currentFlight) return;
+
+                const parentIndex = this.currentFlight.testPoints.findIndex(p => p.id === pointId);
+                if (parentIndex === -1) return;
+
+                const parentPoint = this.currentFlight.testPoints[parentIndex];
+
+                // Calculate new test point number
+                let newTestPointNum = '';
+                const currentNumStr = parentPoint.testPoint.toString();
+
+                if (currentNumStr) {
+                    // Check if it's an integer or float
+                    if (currentNumStr.includes('.')) {
+                        // It's a float, e.g., 1.1 -> 1.2
+                        const parts = currentNumStr.split('.');
+                        // Increment the last part
+                        const lastPart = parseInt(parts[parts.length - 1]);
+                        if (!isNaN(lastPart)) {
+                            parts[parts.length - 1] = lastPart + 1;
+                            newTestPointNum = parts.join('.');
+                        } else {
+                            newTestPointNum = currentNumStr + ".1";
+                        }
+                    } else {
+                        // It's an integer, e.g., 1 -> 1.1
+                        newTestPointNum = currentNumStr + ".1";
+                    }
+                }
+
+                const newPoint = {
+                    id: Date.now().toString() + Math.random(),
+                    testPoint: newTestPointNum,
+                    description: parentPoint.description, // Copy description
+                    startTime: null,
+                    endTime: null
+                };
+
+                // Insert after the parent
+                this.currentFlight.testPoints.splice(parentIndex + 1, 0, newPoint);
+
+                // Select the new row
+                this.selectedRowId = newPoint.id;
+
+                this.saveCurrentFlight();
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            addRow() {
+                if (!this.currentFlight) return;
+
+                // Auto-increment logic for new blank row
+                let nextNum = '1';
+                if (this.currentFlight.testPoints.length > 0) {
+                    const lastPoint = this.currentFlight.testPoints[this.currentFlight.testPoints.length - 1];
+                    const lastNum = parseFloat(lastPoint.testPoint);
+                    if (!isNaN(lastNum)) {
+                        nextNum = (Math.floor(lastNum) + 1).toString();
+                    }
+                }
+
+                const newPoint = {
+                    id: Date.now().toString() + Math.random(),
+                    testPoint: nextNum,
+                    description: '',
+                    startTime: null,
+                    endTime: null
+                };
+
+                this.currentFlight.testPoints.push(newPoint);
+                this.selectedRowId = newPoint.id;
+                this.saveCurrentFlight();
+                this.renderTable();
+                this.updateHackButton();
+            },
+
+            deleteRow(pointId) {
+                if (!this.currentFlight) return;
+
+                if (confirm('Delete this test point?')) {
+                    this.currentFlight.testPoints = this.currentFlight.testPoints.filter(p => p.id !== pointId);
+                    if (this.selectedRowId === pointId) {
+                        this.selectedRowId = null;
+                    }
+                    this.saveCurrentFlight();
+                    this.renderTable();
+                    this.updateHackButton();
+                }
+            },
+
+            selectRow(pointId) {
+                this.selectedRowId = pointId;
+                this.renderTable();
+                this.updateHackButton(); // Update button info immediately!
+                // Focus mode now only activated via HACK button
+            },
+
+            openFocusMode(pointId) {
+                const point = this.currentFlight.testPoints.find(p => p.id === pointId);
+                if (!point) return;
+
+                document.getElementById('focusOverlay').classList.remove('hidden');
+                let dispVal = point.testPoint || '#';
+                let numVal = parseFloat(dispVal);
+                if (!isNaN(numVal) && isFinite(dispVal)) {
+                    if (Number.isInteger(numVal)) {
+                        dispVal = 'TP ' + numVal.toFixed(1);
+                    } else {
+                        dispVal = 'TP ' + dispVal;
+                    }
+                }
+                document.getElementById('focusPointNumber').textContent = dispVal;
+                document.getElementById('focusPointDesc').textContent = point.description || '(No Description)';
+
+                this.updateHackButton(); // Updates the focus button too
+                this.startFocusTimer();
+            },
+
+            closeFocusMode() {
+                document.getElementById('focusOverlay').classList.add('hidden');
+                this.selectedRowId = null;
+                this.stopFocusTimer();
+                this.renderTable();
+            },
+
+            updatePoint(pointId, field, value) {
+                if (!this.currentFlight) return;
+
+                const point = this.currentFlight.testPoints.find(p => p.id === pointId);
+                if (point) {
+                    point[field] = value;
+                    this.saveCurrentFlight();
+                }
+            },
+
+            startFocusTimer() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                this.updateTimerDisplay(); // Immediate update
+                this.timerInterval = setInterval(() => this.updateTimerDisplay(), 30);
+            },
+
+            stopFocusTimer() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            },
+
+            updateTimerDisplay() {
+                if (!this.selectedRowId || !this.currentFlight) return;
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (!point) return;
+
+                const timerEl = document.getElementById('focusTimer');
+
+                if (point.startTime && !point.endTime) {
+                    // Running
+                    const duration = new Date() - new Date(point.startTime);
+                    // Show HH:MM:SS.ms (2 decimals for "salise")
+                    timerEl.textContent = new Date(duration).toISOString().substr(11, 11);
+                } else if (point.startTime && point.endTime) {
+                    // Finished
+                    const duration = new Date(point.endTime) - new Date(point.startTime);
+                    timerEl.textContent = new Date(duration).toISOString().substr(11, 11);
+                } else {
+                    // Not started
+                    timerEl.textContent = "00:00:00.00";
+                }
+            },
+
+            hackButton() {
+                if (!this.currentFlight || !this.selectedRowId) return;
+
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (!point) return;
+
+                const self = this;
+
+                if (!point.startTime) {
+                    // SAFETY CONFIRMATION: START
+                    this.showConfirm({
+                        icon: '',
+                        title: 'Start Recording?',
+                        message: 'Time recording will begin when you press OK.',
+                        danger: false
+                    }, function (confirmed) {
+                        if (confirmed) {
+                            const now = new Date().toISOString();
+                            point.startTime = now;
+                            self.saveCurrentFlight();
+                            self.renderTable();
+                            self.updateHackButton();
+                            self.updateTimerDisplay();
+                            // Open focus mode after starting
+                            self.openFocusMode(self.selectedRowId);
+                        }
+                    });
+                } else if (!point.endTime) {
+                    // SAFETY CONFIRMATION: STOP
+                    this.showConfirm({
+                        icon: '⏹️',
+                        title: 'Stop Recording?',
+                        message: 'Time recording will stop when you press OK.',
+                        danger: true
+                    }, function (confirmed) {
+                        if (confirmed) {
+                            const now = new Date().toISOString();
+                            point.endTime = now;
+                            self.saveCurrentFlight();
+                            self.renderTable();
+                            self.updateHackButton();
+                            self.updateTimerDisplay();
+                        }
+                    });
+                } else {
+                    // Restarting logic
+                    this.showConfirm({
+                        icon: '🔄',
+                        title: 'Restart Recording?',
+                        message: 'This will OVERWRITE existing data. Are you sure?',
+                        danger: true
+                    }, function (confirmed) {
+                        if (confirmed) {
+                            const now = new Date().toISOString();
+                            point.startTime = now;
+                            point.endTime = null;
+                            self.saveCurrentFlight();
+                            self.renderTable();
+                            self.updateHackButton();
+                            self.updateTimerDisplay();
+                            // Open focus mode after restarting
+                            self.openFocusMode(self.selectedRowId);
+                        }
+                    });
+                }
+            },
+
+            updateHackButton() {
+                const button = document.getElementById('hackButton');
+                const focusBtn = document.getElementById('focusHackButton');
+                const infoDiv = document.getElementById('selectedPointInfo');
+                const infoText = document.getElementById('selectedPointName');
+
+                // Determine current state
+                let state = 'idle'; // idle, ready, recording, completed
+                let point = null;
+
+                if (this.selectedRowId && this.currentFlight) {
+                    point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                    if (point) {
+                        if (!point.startTime) {
+                            state = 'ready'; // Ready to start
+                        } else if (!point.endTime) {
+                            state = 'recording'; // Currently recording
+                        } else {
+                            state = 'completed'; // Has data, can restart
+                        }
+                    }
+                }
+
+                const editBtn = document.getElementById('editDetailsBtn');
+                const eventBtn = document.getElementById('eventMarkerBtn');
+
+                // Update Main Hack Button (if exists)
+                if (button) {
+                    // ALWAYS update info text if we have a point
+                    if (infoDiv && infoText) {
+                        if (point) {
+                            infoDiv.classList.remove('hidden');
+                            infoText.textContent = `Test Point ${point.testPoint || '?'} - ${point.description || '(No Description)'}`;
+                        } else {
+                            infoDiv.classList.add('hidden');
+                        }
+                    }
+
+                    // Update Edit Details Button
+                    if (editBtn) {
+                        editBtn.disabled = !point;
+                        editBtn.style.opacity = point ? '1' : '0.5';
+                    }
+                    // Event Marker is always enabled if we have a current flight (which we do if we are here)
+                    if (eventBtn) {
+                        eventBtn.disabled = false;
+                        if (button && state !== 'idle') {
+                            // Update state-based styles
+                            if (state === 'ready') {
+                                button.textContent = "HACK (START)";
+                                button.style.background = "#34C759"; // Green
+                                button.disabled = false;
+                            } else if (state === 'recording') {
+                                const style = getComputedStyle(document.body);
+                                const isLight = style.backgroundColor !== 'rgb(0, 0, 0)';
+                                button.textContent = "STOP";
+                                button.style.background = "#FF3B30"; // Red
+                                button.disabled = false;
+                            } else if (state === 'completed') {
+                                button.textContent = "RESTART";
+                                button.style.background = "#FF9500"; // Orange
+                                button.disabled = false;
+                            }
+
+                            // Special Check: If point is an Event, disable Timer/Hack functionality
+                            // Events are instant logs, not timed points
+                            if (point && point.testPoint && point.testPoint.startsWith('Event')) {
+                                button.textContent = "EVENT LOGGED";
+                                button.style.background = "#8E8E93"; // Gray
+                                button.disabled = true;
+                            }
+                        } else if (button && state === 'idle') {
+                            button.textContent = "SELECT A ROW";
+                            button.style.background = "#8E8E93";
+                            button.disabled = true;
+                        }
+                    }
+                }
+
+                // Update Focus Mode Hack Button (if exists)
+                if (focusBtn) {
+                    if (state === 'ready') {
+                        focusBtn.className = 'focus-hack-button ready';
+                        focusBtn.textContent = '▶ HACK (Start)';
+                    } else if (state === 'recording') {
+                        focusBtn.className = 'focus-hack-button recording';
+                        focusBtn.textContent = '⏹️ HACK (Stop)';
+                    } else if (state === 'completed') {
+                        focusBtn.className = 'focus-hack-button ready';
+                        focusBtn.textContent = '🔄 RE-HACK (Restart)';
+                    } else {
+                        focusBtn.className = 'focus-hack-button ready';
+                        focusBtn.textContent = '▶ HACK (Start)';
+                    }
+                }
+            },
+
+            // --- Edit Details Modal Logic ---
+            openEditDetailsModal() {
+                if (!this.selectedRowId || !this.currentFlight) return;
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (!point) return;
+
+                document.getElementById('modalDescriptionInput').value = point.description || '';
+                document.getElementById('modalNotesInput').value = point.notes || '';
+                document.getElementById('editDetailsModal').classList.remove('hidden');
+                document.getElementById('modalDescriptionInput').focus();
+            },
+
+            closeEditDetailsModal() {
+                document.getElementById('editDetailsModal').classList.add('hidden');
+            },
+
+            saveEditDetails() {
+                if (!this.selectedRowId || !this.currentFlight) return;
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (!point) return;
+
+                const newDesc = document.getElementById('modalDescriptionInput').value.trim();
+                const newNotes = document.getElementById('modalNotesInput').value.trim();
+
+                point.description = newDesc;
+                point.notes = newNotes;
+
+                this.saveCurrentFlight();
+                this.renderTable();
+                this.updateHackButton(); // Update info text
+                this.closeEditDetailsModal();
+            },
+
+            saveCurrentFlight() {
+                if (!this.currentFlight) return;
+
+                const index = this.flights.findIndex(f => f.id === this.currentFlight.id);
+                if (index !== -1) {
+                    this.flights[index] = this.currentFlight;
+                    this.saveToStorage();
+                }
+            },
+
+            exitRecording() {
+                if (confirm('Exit flight test? All data is saved.')) {
+                    this.currentFlight = null;
+                    this.selectedRowId = null;
+                    this.showHome();
+                }
+            },
+
+            deleteFlight(flightId) {
+                if (confirm('Delete this flight? This cannot be undone.')) {
+                    this.flights = this.flights.filter(f => f.id !== flightId);
+                    this.saveToStorage();
+                    this.renderFlightsList();
+                }
+            },
+
+            showExportMenu() {
+                const choice = confirm('Export as CSV? (OK = CSV, Cancel = JSON)');
+                if (choice) {
+                    this.exportFlight(this.currentFlight.id, 'csv');
+                } else {
+                    this.exportFlight(this.currentFlight.id, 'json');
+                }
+            },
+
+            exportFlight(flightId) {
+                const flight = this.flights.find(f => f.id === flightId);
+                if (!flight) return;
+
+                // CSV Header
+                const headers = "Test Point,Description,Start Time,End Time,Duration,Notes,Status\n";
+                let csvRows = "";
+
+                // CSV Rows
+                flight.testPoints.forEach(p => {
+                    const duration = (p.startTime && p.endTime) ?
+                        ((new Date(p.endTime) - new Date(p.startTime)) / 1000).toFixed(1) : '';
+
+                    // Handle Description to escape commas/quotes
+                    // Wrap in quotes and escape existing quotes by doubling them
+                    const safeDesc = p.description ? `"${p.description.replace(/"/g, '""')}"` : "";
+                    const safeNotes = p.notes ? `"${p.notes.replace(/"/g, '""')}"` : "";
+
+                    // Status Logic: If event, or no status -> N/A
+                    let status = 'N/A';
+                    if (p.testPoint && !p.testPoint.startsWith('Event') && p.status) {
+                        status = p.status;
+                    }
+
+                    csvRows += `${p.testPoint},${safeDesc},${p.startTime || ''},${p.endTime || ''},${duration},${safeNotes},${status}\n`;
+                });
+
+                const csvContent = headers + csvRows;
+                // Add BOM for Excel UTF-8 compatibility
+                const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                // Filename: Flight_Aircraft_Date.csv
+                const safeName = flight.aircraftName.replace(/[^a-z0-9]/gi, '_');
+                link.setAttribute("download", `Flight_${safeName}_${flight.date}.csv`);
+                document.body.appendChild(link);
+                link.click();
+
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            },
+
+            formatTime(isoString) {
+                if (!isoString) return '--:--:--';
+                const date = new Date(isoString);
+                return date.toLocaleTimeString('en-US', { hour12: false });
+            },
+
+            openEditDetailsModal() {
+                if (!this.selectedRowId || !this.currentFlight) return;
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (!point) return;
+
+                document.getElementById('modalDescriptionInput').value = point.description || '';
+                document.getElementById('modalNotesInput').value = point.notes || '';
+
+                // Handle Status Buttons Visibility
+                const statusGroup = document.querySelector('.status-btn-group');
+                const isEvent = point.testPoint && point.testPoint.startsWith('Event');
+
+                if (isEvent) {
+                    if (statusGroup) statusGroup.style.display = 'none';
+                    this.currentModalStatus = null; // Ensure no status for events
+                } else {
+                    if (statusGroup) statusGroup.style.display = 'grid'; // Restore grid
+                    // Set initial status
+                    this.currentModalStatus = point.status || null;
+                    this.updateModalStatusUI();
+                }
+
+                document.getElementById('editDetailsModal').classList.remove('hidden');
+            },
+
+            closeEditDetailsModal() {
+                document.getElementById('editDetailsModal').classList.add('hidden');
+                this.currentModalStatus = null;
+            },
+
+            addEventMarker() {
+                if (!this.currentFlight) return;
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+
+                // Calculate next Event number
+                let nextEventNum = 1;
+                const existingEvents = this.currentFlight.testPoints.filter(p => p.testPoint && p.testPoint.startsWith('Event'));
+                if (existingEvents.length > 0) {
+                    const maxNum = Math.max(...existingEvents.map(p => parseInt(p.testPoint.replace('Event ', '')) || 0));
+                    nextEventNum = maxNum + 1;
+                }
+
+                // Create new point
+                const newPoint = {
+                    id: Date.now().toString(),
+                    testPoint: `Event ${nextEventNum}`,
+                    description: `[${timeStr}] Event Log`,
+                    startTime: null,
+                    endTime: null,
+                    notes: '',
+                    status: null
+                };
+
+                this.currentFlight.testPoints.push(newPoint);
+                this.saveCurrentFlight();
+                this.renderTable();
+
+                // Select the new row and open modal
+                this.selectedRowId = newPoint.id;
+                this.renderTable(); // Update selection highlight
+                this.openEditDetailsModal();
+
+                // Scroll to bottom
+                setTimeout(() => {
+                    const container = document.getElementById('tableRows');
+                    if (container && container.lastElementChild) {
+                        container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 100);
+            },
+
+            setModalStatus(status) {
+                // Toggle behavior: if clicking the same status, clear it
+                if (this.currentModalStatus === status) {
+                    this.currentModalStatus = null;
+                } else {
+                    this.currentModalStatus = status;
+                }
+                this.updateModalStatusUI();
+            },
+
+            updateModalStatusUI() {
+                const completedBtn = document.querySelector('.status-btn.completed');
+                const skippedBtn = document.querySelector('.status-btn.skipped');
+
+                if (completedBtn) completedBtn.classList.remove('active');
+                if (skippedBtn) skippedBtn.classList.remove('active');
+
+                if (this.currentModalStatus === 'COMPLETED' && completedBtn) completedBtn.classList.add('active');
+                if (this.currentModalStatus === 'SKIPPED' && skippedBtn) skippedBtn.classList.add('active');
+            },
+
+            saveEditDetails() {
+                if (!this.selectedRowId || !this.currentFlight) return;
+                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
+                if (point) {
+                    point.description = document.getElementById('modalDescriptionInput').value;
+                    point.notes = document.getElementById('modalNotesInput').value;
+                    point.status = this.currentModalStatus; // Save status
+                    this.saveCurrentFlight();
+                    this.renderTable();
+                    this.updateHackButton(); // Update display if needed
+                }
+                this.closeEditDetailsModal();
+            }
+        };
+
+        // Initialize app
+        app.init();
+
+        // Register Service Worker for PWA offline support
+        if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered:', registration))
+                    .catch(error => console.log('SW registration failed:', error));
+            });
+        }
+    </script>
+</body>
+
+</html>
