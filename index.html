@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aircraft Performance & Personnel W&B</title>
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap");
+
         * {
             margin: 0;
             padding: 0;
@@ -844,6 +846,195 @@
             border-color: #007AFF;
             outline: none;
         }
+
+        /* Split-Hover Title Effect */
+        .split-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+            z-index: 2;
+            margin-bottom: 0.25rem;
+            overflow: visible;
+        }
+
+        .split-title {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            font-size: 3.5rem;
+            color: transparent;
+            text-transform: uppercase;
+            font-family: 'Consolas', monospace;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .split-title span:nth-child(1) {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #f8fafc;
+            transition: 0.5s;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            overflow: hidden;
+            width: 100%;
+            text-align: center;
+        }
+
+        .split-title:hover span:nth-child(1) {
+            transform: translateY(-18px);
+        }
+
+        .split-title span:nth-child(2) {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #f8fafc;
+            transition: 0.5s;
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            overflow: hidden;
+            width: 100%;
+            text-align: center;
+        }
+
+        .split-title:hover span:nth-child(2) {
+            transform: translateY(18px);
+        }
+
+        .split-title span:nth-child(3) {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scaleY(0);
+            width: 100%;
+            color: #000;
+            background: #ff0;
+            font-size: 0.25em;
+            font-weight: 900;
+            letter-spacing: 0.7em;
+            text-align: center;
+            padding: 5px 0;
+            transition: 0.5s;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .split-title:hover span:nth-child(3) {
+            transform: translate(-50%, -50%) scaleY(1);
+        }
+
+        @media (max-width: 768px) {
+            .split-title {
+                font-size: 2rem;
+            }
+
+            .split-container {
+                height: 60px;
+            }
+        }
+
+        /* Ghost Animation for Developer Text */
+        .ghost-container {
+            width: 100%;
+            height: 60px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            position: relative;
+            margin-top: 0.25rem;
+        }
+
+        .ghost-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            width: 100%;
+        }
+
+        .ghost-title h1 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            font-family: "Montserrat", sans-serif;
+            color: #f8fafc;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .ghost {
+            width: 4vmin;
+            height: 6vmin;
+            background-color: rgba(255, 255, 255, 0.9);
+            background-image: radial-gradient(ellipse at 35% 40%, #000 8%, transparent 0%),
+                radial-gradient(ellipse at 65% 40%, #000 8%, transparent 0%),
+                radial-gradient(ellipse at 50% 60%, #000 8%, transparent 0%);
+            border-radius: 100% / 70% 70% 0% 0%;
+            transform: translateX(100em) rotateZ(-90deg);
+            position: relative;
+            opacity: 0.6;
+            mix-blend-mode: exclusion;
+            animation: ghostMove 4s ease-out infinite;
+            z-index: 11;
+        }
+
+        @keyframes ghostMove {
+            0% {
+                transform: translateX(20em) rotateZ(-90deg);
+            }
+
+            100% {
+                transform: translateX(-25em) rotateZ(-90deg);
+            }
+        }
+
+        .ghost div {
+            position: absolute;
+            width: 20%;
+            background-color: inherit;
+        }
+
+        .ghost div:nth-of-type(1) {
+            height: 3.5vmin;
+            left: 0;
+            bottom: -3vmin;
+            border-radius: 100% / 0% 0% 50% 50%;
+        }
+
+        .ghost div:nth-of-type(2),
+        .ghost div:nth-of-type(4) {
+            height: 2vmin;
+            left: 20%;
+            bottom: -1.5vmin;
+            border-radius: 100% / 50% 50% 0% 0%;
+            background-color: transparent;
+        }
+
+        .ghost div:nth-of-type(3) {
+            height: 2vmin;
+            left: 40%;
+            bottom: -2vmin;
+            border-radius: 100% / 0% 0% 60% 60%;
+            background-color: inherit;
+        }
+
+        .ghost div:nth-of-type(4) {
+            left: 60%;
+        }
+
+        .ghost div:nth-of-type(5) {
+            height: 1.5vmin;
+            left: 80%;
+            bottom: -1.45vmin;
+            border-radius: 100% / 0% 0% 70% 70%;
+            background-color: inherit;
+        }
     </style>
 </head>
 
@@ -1063,8 +1254,15 @@
                             <a href="mailto:furkan.kilicer@itpscanada.com?subject=ITPS App Feedback/Bug Report" class="btn-feedback">
                                 📧 Suggestion or Bug Report?
                             </a>
-                            <h1 style="margin-bottom: 0.2rem;">🐵 Flight Test Tools</h1>
-                            <p style="margin-bottom: 0.5rem; opacity: 0.7; font-size: 0.9rem;">Select a module</p>
+                            <div class="split-container">
+                                <h2 class="split-title">
+                                    Flight Test Tools
+                                    <span>Flight Test Tools</span>
+                                    <span>Flight Test Tools</span>
+                                    <span>Bad juju</span>
+                                </h2>
+                            </div>
+                            <p style="margin-bottom: 0.75rem; opacity: 0.7; font-size: 0.9rem;">Select a module</p>
                             <div class="dashboard-grid">
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(30, 64, 175, 0.5));" onclick="startWeather()">
                                     <span class="btn-icon">📡</span>
@@ -1094,7 +1292,14 @@
                                 <div class="disclaimer-title">⚠️ Disclaimer</div>
                                 For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
                             </div>
-                            <div style="font-weight: 800; font-size: 1.15rem; color: white; margin-top: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Developed by Furkan Yusuf Kılıçer</div>
+                            <div class="ghost-container">
+                                <div class="ghost-title">
+                                    <h1>Developed by Furkan Yusuf Kılıçer</h1>
+                                </div>
+                                <div class="ghost">
+                                    <div></div><div></div><div></div><div></div><div></div>
+                                </div>
+                            </div>
                             <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem;">Last Updated: 09/02/2026</div>
                         </div>
                     </div>
