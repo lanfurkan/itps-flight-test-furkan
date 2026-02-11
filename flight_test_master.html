@@ -1166,6 +1166,7 @@
             selectedRowId: null,
             flights: [],
             timerInterval: null,
+            wakeLock: null,
             confirmModalCallback: null,
             isSelectMode: false,
             selectedFlightIds: new Set(),
@@ -1383,6 +1384,7 @@
             },
 
             showHome() {
+                this.releaseWakeLock();
                 this.showScreen('homeScreen');
             },
 
@@ -1400,6 +1402,7 @@
             },
 
             showFlights() {
+                this.releaseWakeLock();
                 this.renderFlightsList();
                 this.showScreen('flightsScreen');
             },
@@ -1692,6 +1695,7 @@
 
                 // Ensure screen is shown BEFORE trying to update its elements
                 this.showScreen('recordingScreen');
+                this.requestWakeLock();
 
                 // Update header - SAFELY with simple standard ID check
                 // We do it immediately as showScreen removes hidden classes
@@ -2338,8 +2342,37 @@
                     this.updateHackButton(); // Update display if needed
                 }
                 this.closeEditDetailsModal();
+            },
+
+            // Wake Lock Methods
+            async requestWakeLock() {
+                if ('wakeLock' in navigator) {
+                    try {
+                        this.wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('✅ Wake Lock Active');
+                        this.wakeLock.addEventListener('release', () => {
+                            console.log('🔓 Wake Lock Released');
+                        });
+                    } catch (err) {
+                        console.error(`${err.name}, ${err.message}`);
+                    }
+                }
+            },
+
+            releaseWakeLock() {
+                if (this.wakeLock) {
+                    this.wakeLock.release();
+                    this.wakeLock = null;
+                }
             }
         };
+
+        // Re-request wake lock when page returns from background
+        document.addEventListener('visibilitychange', async () => {
+            if (app.wakeLock !== null && document.visibilityState === 'visible') {
+                await app.requestWakeLock();
+            }
+        });
 
         // Initialize app
         app.init();

@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aircraft Performance & Personnel W&B</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ITPS Tools">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/753/753235.png">
+    <link rel="manifest" href="manifest.json">
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap");
 
@@ -1185,11 +1190,13 @@
             state.allResults = null;
             state.weights = {};
             render();
+            saveState();
         }
 
         function startWB() {
             state.screen = 'wb';
             render();
+            saveState();
         }
 
         function goBackHome() {
@@ -1197,12 +1204,14 @@
             state.selectedAircraft = null;
             state.weatherData = null;
             render();
+            saveState();
         }
 
         function startWeather() {
             state.screen = 'weather';
             fetchWeather();
             render();
+            saveState();
         }
 
         async function fetchWeather() {
@@ -1677,11 +1686,13 @@
         function updateWBField(field, value) {
             state.wb[field] = value;
             render();
+            saveState();
         }
 
         function updateManualWeight(personId, weight) {
             state.wb.manualWeights[personId] = weight;
             render();
+            saveState();
         }
 
         function updatePersonnelSearch(query) {
@@ -1825,6 +1836,7 @@
         function proceedToCalculator() {
             state.screen = 'calculator';
             render();
+            saveState();
         }
 
         function calculateWB() {
@@ -1939,6 +1951,7 @@
             state.runwayMode = mode;
             state.altitude = mode === 'cyxu' ? '912' : '';
             render();
+            saveState();
         }
 
         function renderFleet() {
@@ -2043,6 +2056,7 @@
             }
             state.allResults = allResults;
             render();
+            saveState();
         }
 
         // Placeholder for SR22 calcs - can be filled if needed
@@ -2075,7 +2089,7 @@
             let elevationHtml = `
                 <div class="input-group">
                     <label>Elevation (ft) ${state.runwayMode === 'cyxu' ? '- CYXU' : ''}</label>
-                    <input type="number" value="${state.altitude}" ${state.runwayMode === 'cyxu' ? 'disabled' : ''} onchange="state.altitude=this.value;render()">
+                    <input type="number" value="${state.altitude}" ${state.runwayMode === 'cyxu' ? 'disabled' : ''} onchange="state.altitude=this.value;render();saveState()">
                 </div>
             `;
 
@@ -2091,7 +2105,7 @@
                 weightInputsHtml = modules.map(m => `
                     <div class="input-group">
                         <label>${m.name} Weight (lb)</label>
-                        <select onchange="state.weights['${m.id}']=this.value;render()">
+                        <select onchange="state.weights['${m.id}']=this.value;render();saveState()">
                             <option value="">Select Weight</option>
                             ${m.weights.map(w => `<option value="${w}" ${state.weights[m.id] == w ? 'selected' : ''}>${w} lb</option>`).join('')}
                         </select>
@@ -2101,7 +2115,7 @@
                 weightInputsHtml = `
                     <div class="input-group">
                         <label>Accel-Stop Weight (lb)</label>
-                        <select onchange="state.weights['accelstop']=this.value;render()">
+                        <select onchange="state.weights['accelstop']=this.value;render();saveState()">
                             <option value="">Select Weight</option>
                             ${data.accelstop.weights.map(w => `<option value="${w}" ${state.weights.accelstop == w ? 'selected' : ''}>${w} lb</option>`).join('')}
                         </select>
@@ -2109,7 +2123,7 @@
                     ${data.oei ? `
                     <div class="input-group">
                         <label>OEI Climb Weight (lb)</label>
-                        <select onchange="state.weights['oei']=this.value;render()">
+                        <select onchange="state.weights['oei']=this.value;render();saveState()">
                             <option value="">Select Weight</option>
                             ${data.oei.weights.map(w => `<option value="${w}" ${state.weights.oei == w ? 'selected' : ''}>${w} lb</option>`).join('')}
                         </select>
@@ -2142,7 +2156,7 @@
                         ${elevationHtml}
                         <div class="input-group">
                             <label>Temperature (°C)</label>
-                            <input type="number" value="${state.temperature}" onchange="state.temperature=this.value;render()" placeholder="e.g. 15">
+                            <input type="number" value="${state.temperature}" onchange="state.temperature=this.value;render();saveState()" placeholder="e.g. 15">
                         </div>
                         ${weightInputsHtml}
                         <button class="btn-primary" onclick="calculateAll()">Calculate All</button>
@@ -2416,7 +2430,41 @@
             sidebarHidden: false,
             fleetSearch: ''
         };
+
+        function saveState() {
+            localStorage.setItem('itps_tools_state', JSON.stringify({
+                runway: state.runway,
+                fleet: state.fleet,
+                altitude: state.altitude,
+                temperature: state.temperature,
+                weights: state.weights
+            }));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('itps_tools_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.runway = { ...state.runway, ...parsed.runway };
+                    state.fleet = { ...state.fleet, ...parsed.fleet };
+                    state.altitude = parsed.altitude || '';
+                    state.temperature = parsed.temperature || '';
+                    state.weights = parsed.weights || {};
+                } catch (e) { console.error("Load state failed", e); }
+            }
+        }
+        loadState();
         render();
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
     </script>
 </body>
 
