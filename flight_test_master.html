@@ -1018,6 +1018,9 @@
             <div class="header-title">Saved Flights</div>
 
             <div id="flightsActions" style="display:flex; gap:10px;">
+                <button id="excelBtn" class="header-action"
+                    onclick="window.open('https://docs.google.com/spreadsheets/d/1Pv6tyE6Or128GnR7mCXl3UB38EeOFIHhiphpjSOYxnI/edit?usp=sharing', '_blank')"
+                    style="background-color: #1D6F42; border-color: #1D6F42;">📗 Saved Flights Excel</button>
                 <button id="selectModeBtn" class="header-action" onclick="app.toggleSelectMode()">Select</button>
                 <button id="syncAllBtn" class="header-action" onclick="app.syncManager.syncAll()">☁️ Sync</button>
             </div>
@@ -2163,37 +2166,54 @@
                 const flight = this.flights.find(f => f.id === flightId);
                 if (!flight) return;
 
-                // CSV Header
-                const headers = "Test Point,Description,Start Time,End Time,Duration,Notes,Status\n";
-                let csvRows = "";
+                // Headers
+                let headers = "User,Date,Aircraft,Pilot,Crew 1,Crew 2,Crew 3,Crew 4,Card Name,Points Count";
+                for (let i = 1; i <= 15; i++) {
+                    headers += `,TP ${i} No,TP ${i} Desc,TP ${i} Start,TP ${i} End,TP ${i} Note`;
+                }
+                headers += "\n";
 
-                // CSV Rows
-                flight.testPoints.forEach(p => {
-                    const duration = (p.startTime && p.endTime) ?
-                        ((new Date(p.endTime) - new Date(p.startTime)) / 1000).toFixed(1) : '';
+                // Mapping Data
+                const user = "User"; // Placeholder if not found elsewhere
+                const date = flight.date || '';
+                const aircraft = `"${(flight.aircraftName || '').replace(/"/g, '""')}"`;
+                const pilot = `"${(flight.picName || flight.pic || '').replace(/"/g, '""')}"`;
 
-                    // Handle Description to escape commas/quotes
-                    // Wrap in quotes and escape existing quotes by doubling them
-                    const safeDesc = p.description ? `"${p.description.replace(/"/g, '""')}"` : "";
-                    const safeNotes = p.notes ? `"${p.notes.replace(/"/g, '""')}"` : "";
+                const crew = flight.crew || [];
+                const crew1 = `"${(crew[0] || '').replace(/"/g, '""')}"`;
+                const crew2 = `"${(crew[1] || '').replace(/"/g, '""')}"`;
+                const crew3 = `"${(crew[2] || '').replace(/"/g, '""')}"`;
+                const crew4 = `"${(crew[3] || '').replace(/"/g, '""')}"`;
 
-                    // Status Logic: If event, or no status -> N/A
-                    let status = 'N/A';
-                    if (p.testPoint && !p.testPoint.startsWith('Event') && p.status) {
-                        status = p.status;
+                const cardName = `"${(flight.testCardName || '').replace(/"/g, '""')}"`;
+                const pointsCount = (flight.testPoints || []).length;
+
+                let row = `${user},${date},${aircraft},${pilot},${crew1},${crew2},${crew3},${crew4},${cardName},${pointsCount}`;
+
+                // Test Points
+                const pts = flight.testPoints || [];
+                for (let i = 0; i < 15; i++) {
+                    const p = pts[i];
+                    if (p) {
+                        const no = `"${(p.testPoint || '').toString().replace(/"/g, '""')}"`;
+                        const desc = `"${(p.description || '').replace(/"/g, '""')}"`;
+                        const start = p.startTime || '';
+                        const end = p.endTime || '';
+                        const note = `"${(p.notes || '').replace(/"/g, '""')}"`;
+                        row += `,${no},${desc},${start},${end},${note}`;
+                    } else {
+                        row += ",,,,"; // 5 empty fields for missing TP
                     }
+                }
+                row += "\n";
 
-                    csvRows += `${p.testPoint},${safeDesc},${p.startTime || ''},${p.endTime || ''},${duration},${safeNotes},${status}\n`;
-                });
-
-                const csvContent = headers + csvRows;
+                const csvContent = headers + row;
                 // Add BOM for Excel UTF-8 compatibility
                 const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
 
                 const link = document.createElement("a");
                 link.setAttribute("href", url);
-                // Filename: Flight_Aircraft_Date.csv
                 const safeName = flight.aircraftName.replace(/[^a-z0-9]/gi, '_');
                 link.setAttribute("download", `Flight_${safeName}_${flight.date}.csv`);
                 document.body.appendChild(link);
