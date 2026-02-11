@@ -88,12 +88,19 @@
 
         @keyframes animStar {
             from {
-                transform: translateY(0px);
+                transform: translate3d(0, 0, 0);
             }
 
             to {
-                transform: translateY(-2000px);
+                transform: translate3d(0, -2000px, 0);
             }
+        }
+
+        #stars,
+        #stars2,
+        #stars3 {
+            will-change: transform;
+            contain: strict;
         }
 
         .container {
@@ -103,13 +110,16 @@
         }
 
         .card {
-            background: rgba(241, 245, 249, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(241, 245, 249, 0.98);
+            backdrop-filter: blur(5px);
             border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
             padding: 2rem;
             margin-bottom: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            contain: content;
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 300px;
         }
 
         .btn-primary {
@@ -147,56 +157,20 @@
             justify-content: center;
             gap: 0.6rem;
             overflow: visible;
-            /* Allow particles to float outside */
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             width: 100%;
             height: 100%;
             z-index: 1;
+            contain: layout paint;
+            transform: translateZ(0);
         }
 
         .btn-premium-dashboard:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 45px 0 rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.4);
             border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .particles-field {
-            position: absolute;
-            inset: -40%;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .btn-premium-dashboard:hover .particles-field {
-            opacity: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: particleFloat var(--duration, 3s) ease-in-out infinite;
-            top: 50%;
-            left: 50%;
-        }
-
-        @keyframes particleFloat {
-            0% {
-                transform: translate(var(--x), var(--y)) scale(0);
-            }
-
-            50% {
-                transform: translate(calc(var(--x) * -0.5), calc(var(--y) * -0.5)) scale(1.5);
-            }
-
-            100% {
-                transform: translate(var(--x), var(--y)) scale(0);
-            }
-        }
 
         .btn-premium-dashboard .btn-icon {
             font-size: 2rem;
@@ -226,7 +200,6 @@
             font-size: 1rem;
             font-weight: 900;
         }
-
 
         .btn-back {
             color: #60a5fa;
@@ -916,105 +889,6 @@
                 height: 60px;
             }
         }
-
-        /* Ghost Animation for Developer Text */
-        .ghost-container {
-            width: 100%;
-            height: 60px;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            position: relative;
-            margin-top: 0.25rem;
-        }
-
-        .ghost-title {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            width: 100%;
-        }
-
-        .ghost-title h1 {
-            font-size: 1.25rem;
-            font-weight: 900;
-            font-family: "Montserrat", sans-serif;
-            color: #f8fafc;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .ghost {
-            width: 4vmin;
-            height: 6vmin;
-            background-color: rgba(255, 255, 255, 0.9);
-            background-image: radial-gradient(ellipse at 35% 40%, #000 8%, transparent 0%),
-                radial-gradient(ellipse at 65% 40%, #000 8%, transparent 0%),
-                radial-gradient(ellipse at 50% 60%, #000 8%, transparent 0%);
-            border-radius: 100% / 70% 70% 0% 0%;
-            transform: translateX(100em) rotateZ(-90deg);
-            position: relative;
-            opacity: 0.6;
-            mix-blend-mode: exclusion;
-            animation: ghostMove 4s ease-out infinite;
-            z-index: 11;
-        }
-
-        @keyframes ghostMove {
-            0% {
-                transform: translateX(20em) rotateZ(-90deg);
-            }
-
-            100% {
-                transform: translateX(-25em) rotateZ(-90deg);
-            }
-        }
-
-        .ghost div {
-            position: absolute;
-            width: 20%;
-            background-color: inherit;
-        }
-
-        .ghost div:nth-of-type(1) {
-            height: 3.5vmin;
-            left: 0;
-            bottom: -3vmin;
-            border-radius: 100% / 0% 0% 50% 50%;
-        }
-
-        .ghost div:nth-of-type(2),
-        .ghost div:nth-of-type(4) {
-            height: 2vmin;
-            left: 20%;
-            bottom: -1.5vmin;
-            border-radius: 100% / 50% 50% 0% 0%;
-            background-color: transparent;
-        }
-
-        .ghost div:nth-of-type(3) {
-            height: 2vmin;
-            left: 40%;
-            bottom: -2vmin;
-            border-radius: 100% / 0% 0% 60% 60%;
-            background-color: inherit;
-        }
-
-        .ghost div:nth-of-type(4) {
-            left: 60%;
-        }
-
-        .ghost div:nth-of-type(5) {
-            height: 1.5vmin;
-            left: 80%;
-            bottom: -1.45vmin;
-            border-radius: 100% / 0% 0% 70% 70%;
-            background-color: inherit;
-        }
     </style>
 </head>
 
@@ -1033,9 +907,9 @@
             return stars;
         }
 
-        document.getElementById('stars').style.boxShadow = generateStars(200);
-        document.getElementById('stars2').style.boxShadow = generateStars(70);
-        document.getElementById('stars3').style.boxShadow = generateStars(30);
+        document.getElementById('stars').style.boxShadow = generateStars(100);
+        document.getElementById('stars2').style.boxShadow = generateStars(40);
+        document.getElementById('stars3').style.boxShadow = generateStars(20);
 
         const CGRAS_DATA = {
             takeoff: {
@@ -1245,64 +1119,24 @@
                             <p style="margin-bottom: 0.75rem; opacity: 0.7; font-size: 0.9rem;">Select a module</p>
                             <div class="dashboard-grid">
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.6), rgba(30, 64, 175, 0.8));" onclick="startWeather()">
-                                    <div class="particles-field">
-                                        <span class="particle" style="--x: -80px; --y: -50px; --duration: 3.5s;"></span>
-                                        <span class="particle" style="--x: 70px; --y: 60px; --duration: 2.8s;"></span>
-                                        <span class="particle" style="--x: -40px; --y: 90px; --duration: 4.2s;"></span>
-                                        <span class="particle" style="--x: 90px; --y: -30px; --duration: 3.1s;"></span>
-                                        <span class="particle" style="--x: -60px; --y: -80px; --duration: 2.5s;"></span>
-                                        <span class="particle" style="--x: 50px; --y: 30px; --duration: 3.9s;"></span>
-                                    </div>
                                     <span class="btn-icon">📡</span>
                                     <span class="btn-text">Weather</span>
                                 </button>
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(124, 45, 18, 0.6), rgba(68, 25, 11, 0.8));" onclick="state.screen = 'wbmenu'; render()">
-                                    <div class="particles-field">
-                                        <span class="particle" style="--x: -90px; --y: 20px; --duration: 3.3s;"></span>
-                                        <span class="particle" style="--x: 40px; --y: -70px; --duration: 2.9s;"></span>
-                                        <span class="particle" style="--x: 80px; --y: 40px; --duration: 4.5s;"></span>
-                                        <span class="particle" style="--x: -30px; --y: -50px; --duration: 3.7s;"></span>
-                                        <span class="particle" style="--x: 60px; --y: 80px; --duration: 2.7s;"></span>
-                                        <span class="particle" style="--x: -50px; --y: -90px; --duration: 4.1s;"></span>
-                                    </div>
                                     <span class="btn-icon">⚖️</span>
                                     <span class="btn-text">Weight & Balance</span>
                                 </button>
                                 
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(31, 41, 55, 0.6), rgba(17, 24, 39, 0.8));" onclick="window.location.href = 'flight_test_master.html'">
-                                    <div class="particles-field">
-                                        <span class="particle" style="--x: -70px; --y: -60px; --duration: 3.8s;"></span>
-                                        <span class="particle" style="--x: 90px; --y: 30px; --duration: 2.6s;"></span>
-                                        <span class="particle" style="--x: -20px; --y: 80px; --duration: 4.4s;"></span>
-                                        <span class="particle" style="--x: 50px; --y: -40px; --duration: 3.2s;"></span>
-                                        <span class="particle" style="--x: -80px; --y: 50px; --duration: 2.9s;"></span>
-                                        <span class="particle" style="--x: 40px; --y: -90px; --duration: 4.7s;"></span>
-                                    </div>
                                     <span class="btn-icon">✈️</span>
                                     <span class="btn-text">Flight Test Master</span>
                                 </button>
 
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(6, 78, 59, 0.6), rgba(6, 95, 70, 0.8));" onclick="state.screen = 'documents'; render()">
-                                    <div class="particles-field">
-                                        <span class="particle" style="--x: -60px; --y: -30px; --duration: 3.4s;"></span>
-                                        <span class="particle" style="--x: 80px; --y: 60px; --duration: 2.7s;"></span>
-                                        <span class="particle" style="--x: -90px; --y: 90px; --duration: 4.6s;"></span>
-                                        <span class="particle" style="--x: 30px; --y: -80px; --duration: 3.5s;"></span>
-                                        <span class="particle" style="--x: -40px; --y: 40px; --duration: 2.8s;"></span>
-                                        <span class="particle" style="--x: 70px; --y: -50px; --duration: 4.3s;"></span>
-                                    </div>
                                     <span class="btn-icon">📄</span>
                                     <span class="btn-text">Documents</span>
                                 </button>
                                  <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(153, 27, 27, 0.6), rgba(127, 29, 29, 0.8));" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">
-                                    <div class="particles-field">
-                                        <span class="particle" style="--x: -50px; --y: -90px; --duration: 3.6s;"></span>
-                                        <span class="particle" style="--x: 60px; --y: 40px; --duration: 2.5s;"></span>
-                                        <span class="particle" style="--x: -80px; --y: 20px; --duration: 4.8s;"></span>
-                                        <span class="particle" style="--x: 40px; --y: -60px; --duration: 3.3s;"></span>
-                                        <span class="particle" style="--x: -30px; --y: 80px; --duration: 2.9s;"></span>
-                                        <span class="particle" style="--x: 90px; --y: -30px; --duration: 4.5s;"></span>
-                                    </div>
                                     <span class="btn-icon">🌐</span>
                                     <span class="btn-text">ITPS Portal</span>
                                 </button>
@@ -1312,13 +1146,8 @@
                                 <div class="disclaimer-title">⚠️ Disclaimer</div>
                                 For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
                             </div>
-                            <div class="ghost-container">
-                                <div class="ghost-title">
-                                    <h1>Developed by Furkan Yusuf Kılıçer</h1>
-                                </div>
-                                <div class="ghost">
-                                    <div></div><div></div><div></div><div></div><div></div>
-                                </div>
+                            <div style="margin-top: 1.5rem; text-align: center;">
+                                <h1 style="font-size: 1.25rem; font-weight: 900; font-family: 'Montserrat', sans-serif; color: #f8fafc; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); margin: 0; text-transform: uppercase; letter-spacing: 0.1em;">Developed by Furkan Yusuf Kılıçer</h1>
                             </div>
                             <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem;">Last Updated: 09/02/2026</div>
                         </div>
@@ -1698,7 +1527,7 @@
                 const notamUrl = "https://notam.ca/?point=CYXU%7Csite%7C-81.151%2C43.033&point=CYSA%7Csite%7C-80.934%2C43.416&point=CYKF%7Csite%7C-80.379%2C43.461&point=CYQS%7Csite%7C-81.110%2C42.770&point=CYCE%7Csite%7C-81.506%2C43.286&point=CYTB%7Csite%7C-80.747%2C42.926";
                 const awcUrl = "https://aviationweather.gov/data/metar/?ids=CYXU%2CCYSA%2CCYKF%2CCYQS%2CCYCE%2CCYTB&taf=1";
                 const sidebarLeft = state.sidebarHidden ? '' : `
-                    <div style="position: fixed; left: 0.5rem; top: 10%; width: 70px; min-height: 48px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; padding: 0.6rem; color: white; z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 0.6rem; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: fixed; left: 0.5rem; top: 10%; width: 70px; min-height: 48px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; padding: 0.6rem; color: white; z-index: 1000; box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 0.6rem; overflow: hidden; transition: all 0.3s ease;">
                         <a href="${notamUrl}" target="_blank" style="text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #7c3aed; padding: 10px 4px; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transform: scale(1.1); margin-bottom: 5px;">
                             <span style="font-size: 1.5rem;">📜</span>
                             <span style="font-size: 0.5rem; font-weight: 950; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">NOTAMs</span>
@@ -1743,7 +1572,7 @@
                 `;
 
                 const sidebarRight = (state.sidebarHidden || !state.bananaMode) ? '' : `
-                    <div style="position: fixed; right: 0.5rem; top: 10%; width: 190px; background: rgba(255,255,255,0.08); backdrop-filter: blur(28px); padding: 0.85rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.15); font-size: 0.75rem; color: #f8fafc; box-shadow: 0 12px 24px rgba(0,0,0,0.4); z-index: 1000;">
+                    <div style="position: fixed; right: 0.5rem; top: 10%; width: 190px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 0.85rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.15); font-size: 0.75rem; color: #f8fafc; box-shadow: 0 12px 24px rgba(0,0,0,0.4); z-index: 1000;">
                         <div style="font-weight: 950; color: #f1f5f9; margin-bottom: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; font-size: 0.75rem; text-align: center;">🚩 CATEGORIES</div>
                             <div style="display: flex; align-items: flex-start; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 0.75rem; margin-bottom: 0.5rem;">
                                 <div style="width: 14px; height: 14px; background: #22c55e; border-radius: 3px; margin-top: 2px; flex-shrink: 0;"></div>
@@ -2323,8 +2152,8 @@
             root.innerHTML = `
                 <div class="container" style="padding-top: 2rem;">
                     <button class="btn-back" onclick="goBackHome()">← Back Home</button>
-                    <div class="card">
-                        <h2>📄 Documents</h2>
+                <div class="card" style="content-visibility: auto; contain-intrinsic-size: 1px 1000px;">
+                    <h2>📄 Documents</h2>
                         <div class="input-group" style="margin-bottom: 1.5rem;">
                             <label>🔍 Search Documents</label>
                             <input type="text" id="docSearch" placeholder="Type document name..." onkeyup="filterDocuments()" style="width: 100%; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1.1rem;">
@@ -2409,6 +2238,32 @@
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
                                     <span class="btn-icon">📚</span>
                                     <span class="btn-text">Avionic Lectures</span>
+                                </button>
+                            </a>
+
+                            <!-- Special Data Reduction Excels -->
+                            <a href="https://docs.google.com/spreadsheets/d/1c5bXEuHv4igPvpJ9wuDrQU6wfn-MSeRq/edit?usp=sharing&ouid=107800747874909130471&rtpof=true&sd=true" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Level Flight Data Reduction Excel">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                                    <span class="btn-icon">📊</span>
+                                    <span class="btn-text">Data Reduction Level Flight</span>
+                                </button>
+                            </a>
+                            <a href="https://docs.google.com/spreadsheets/d/1uRuGo9gs7DPGNLruZzp4m7EVaG7n0QNu/edit?usp=sharing&ouid=107800747874909130471&rtpof=true&sd=true" target="_blank" style="text-decoration: none;" class="doc-item" data-name="PEC Data Reduction Excel">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                                    <span class="btn-icon">📊</span>
+                                    <span class="btn-text">Data Reduction PEC</span>
+                                </button>
+                            </a>
+                            <a href="https://docs.google.com/spreadsheets/d/1z-AWNpwBIpQFc280hivktrMKi5cBPVeU/edit?usp=sharing&ouid=107800747874909130471&rtpof=true&sd=true" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Stall Speeds Data Reduction Excel">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                                    <span class="btn-icon">📊</span>
+                                    <span class="btn-text">Data Reduction Stall Speeds</span>
+                                </button>
+                            </a>
+                            <a href="https://docs.google.com/spreadsheets/d/1CMViOq_zcYTg_Ie0D2qHtSUpHEO8zL2q/edit?usp=sharing&ouid=107800747874909130471&rtpof=true&sd=true" target="_blank" style="text-decoration: none;" class="doc-item" data-name="Take off Landing Data Reduction Excel">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                                    <span class="btn-icon">📊</span>
+                                    <span class="btn-text">Data Reduction Take off Landing</span>
                                 </button>
                             </a>
 
