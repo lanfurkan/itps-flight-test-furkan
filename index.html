@@ -3064,10 +3064,130 @@
                                 <span class="btn-icon">🛩️</span>
                                 <span class="btn-text">IAR823-CFPIU</span>
                             </button>
+                            <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #0369a1, #0c4a6e);" onclick="renderMinFuelsAltitudes()">
+                                <span class="btn-icon">⛽</span>
+                                <span class="btn-text">Min Fuels VFR & Min Altitudes AGL</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function renderMinFuelsAltitudes() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container" style="padding-top: 2rem;">
+                    <button class="btn-back" onclick="renderWBMenu()">← Back</button>
+
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <input id="minFuelAltSearch" type="text" placeholder="🔍  Search maneuver or aircraft..."
+                            oninput="filterMinFuelAlt()"
+                            style="width:100%; padding:0.9rem 1.2rem; border-radius:0.75rem; border:2px solid #e2e8f0;
+                                   font-size:1rem; outline:none; transition:border-color 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+
+                    <!-- Minimum Fuels Day VFR -->
+                    <div class="card" id="fuelCard">
+                        <h2 style="font-size:1.4rem; margin-bottom:0.5rem;">⛽ Minimum Fuels Day VFR</h2>
+                        <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.25rem; font-style:italic;">
+                            To be onboard when joining the pattern at destination.
+                        </p>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;" id="fuelTable">
+                                <thead>
+                                    <tr style="background:#1e293b; color:#38bdf8;">
+                                        <th style="padding:12px 14px; text-align:left; border-radius:8px 0 0 0; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Aircraft</th>
+                                        <th style="padding:12px 14px; text-align:center; border-radius:0 8px 0 0; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Minimum Fuel — 1000 AGL CYXU</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${[
+                                        ['SR22', '10 USG'],
+                                        ['SU29', '30 liters'],
+                                        ['IAR83', '30 liters'],
+                                        ['LONG EZ', '5 USG'],
+                                        ['C414/C340', '15 USG'],
+                                        ['L29', '300 liters'],
+                                        ['L39', '350 liters'],
+                                        ['HUNTER', '1 200 Lbs.'],
+                                    ].map(([ac, fuel], i) => `
+                                        <tr class="fuel-row" data-name="${ac.toLowerCase()}"
+                                            style="background:${i % 2 === 0 ? 'rgba(241,245,249,0.6)' : 'white'}; transition:background 0.15s;">
+                                            <td style="padding:11px 14px; font-weight:700; color:#1e293b; border-bottom:1px solid #e2e8f0;">${ac}</td>
+                                            <td style="padding:11px 14px; text-align:center; font-weight:700; color:#059669; border-bottom:1px solid #e2e8f0;">${fuel}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Minimum Altitudes AGL -->
+                    <div class="card" id="altCard" style="margin-top:1.5rem;">
+                        <h2 style="font-size:1.4rem; margin-bottom:1.25rem;">🏔️ Minimum Altitudes AGL</h2>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;" id="altTable">
+                                <thead>
+                                    <tr style="background:#1e293b; color:#38bdf8;">
+                                        <th style="padding:12px 14px; text-align:left; border-radius:8px 0 0 0; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">FTT / Maneuver</th>
+                                        <th style="padding:12px 14px; text-align:center; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">With IP</th>
+                                        <th style="padding:12px 14px; text-align:center; border-radius:0 8px 0 0; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Solo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${[
+                                        ['PFL', '1 000', '2 000'],
+                                        ['Aerobatics and WUT', '3 000', '4 000'],
+                                        ['Power off Stall KIO', '3 000', '4 000'],
+                                        ['Power on Stall KIO', '4 000', '5 000'],
+                                        ['Any TP below 1.2 Vs', '3 000', '4 000'],
+                                        ['Climb Perf set up', '500', '1 000'],
+                                        ['TFB above runway', '80', '100'],
+                                        ['EGPWS/GPS Ground Course above runway', '150', '200'],
+                                        ['LMS/LDDS', '2 000', '3 000'],
+                                        ['VMCA dynamic and static', '3 000', '4 000'],
+                                        ['SPINS departure JET', '14 000', '15 000'],
+                                        ['SPINS recovery initiation JET', '10 000', '10 000'],
+                                        ['SPINS departure NON-JET', '4 000', '5 000'],
+                                        ['SPINS recovery initiation NON-JET', '3 000', '4 000'],
+                                        ['HQ with Target', '3 000', '4 000'],
+                                        ['Unusual attitude', '3 000', '4 000'],
+                                    ].map(([maneuver, ip, solo], i) => `
+                                        <tr class="alt-row" data-name="${maneuver.toLowerCase()}"
+                                            style="background:${i % 2 === 0 ? 'rgba(241,245,249,0.6)' : 'white'}; transition:background 0.15s;">
+                                            <td style="padding:11px 14px; font-weight:600; color:#1e293b; border-bottom:1px solid #e2e8f0;">${maneuver}</td>
+                                            <td style="padding:11px 14px; text-align:center; font-weight:700; color:#0369a1; border-bottom:1px solid #e2e8f0;">${ip} ft</td>
+                                            <td style="padding:11px 14px; text-align:center; font-weight:700; color:#be123c; border-bottom:1px solid #e2e8f0;">${solo} ft</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterMinFuelAlt() {
+            const q = document.getElementById('minFuelAltSearch').value.toLowerCase().trim();
+
+            document.querySelectorAll('.alt-row').forEach(row => {
+                row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+            });
+            document.querySelectorAll('.fuel-row').forEach(row => {
+                row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+            });
+
+            // Hide entire card if all rows hidden
+            const altVisible = [...document.querySelectorAll('.alt-row')].some(r => r.style.display !== 'none');
+            const fuelVisible = [...document.querySelectorAll('.fuel-row')].some(r => r.style.display !== 'none');
+            const altCard = document.getElementById('altCard');
+            const fuelCard = document.getElementById('fuelCard');
+            if (altCard) altCard.style.display = altVisible ? '' : 'none';
+            if (fuelCard) fuelCard.style.display = fuelVisible ? '' : 'none';
         }
 
         // Global App State
