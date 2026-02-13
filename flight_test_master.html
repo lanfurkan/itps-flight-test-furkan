@@ -496,14 +496,303 @@
         .hidden {
             display: none !important;
         }
+
+        /* Hack Button Container */
+        .hack-button-container {
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.6);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .hack-button {
+            width: 100%;
+            padding: 22px;
+            font-size: 22px;
+            font-weight: 900;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: #8E8E93;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .hack-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .hack-button:not(:disabled):active {
+            transform: scale(0.97);
+        }
+
+        .selected-point-info {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        /* Table Container */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .test-table {
+            width: 100%;
+        }
+
+        /* Row Status Colors */
+        .row-completed {
+            background: rgba(52, 199, 89, 0.12) !important;
+        }
+
+        .row-skipped {
+            background: rgba(255, 149, 0, 0.12) !important;
+        }
+
+        /* Username Badge */
+        .username-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Username Input */
+        .username-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--white);
+            outline: none;
+            margin: 12px 0;
+        }
+
+        .username-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* Confirm Modal Overlay */
+        .confirm-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirm-modal {
+            width: 100%;
+            max-width: 380px;
+            border-radius: 20px;
+            padding: 28px 24px;
+        }
+
+        .confirm-modal-icon {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .confirm-modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .confirm-modal-message {
+            font-size: 14px;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .confirm-modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .confirm-modal-btn.confirm {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .confirm-modal-btn.confirm.danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        /* Status Buttons */
+        .status-btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-btn {
+            padding: 12px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .status-btn.completed {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--accent-green);
+            border-color: rgba(52, 199, 89, 0.3);
+        }
+
+        .status-btn.completed.active {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+        }
+
+        .status-btn.skipped {
+            background: rgba(255, 149, 0, 0.15);
+            color: var(--accent-orange);
+            border-color: rgba(255, 149, 0, 0.3);
+        }
+
+        .status-btn.skipped.active {
+            background: var(--accent-orange);
+            color: white;
+            border-color: var(--accent-orange);
+        }
+
+        /* Focus Mode Styles */
+        .focus-header {
+            display: flex;
+            justify-content: flex-start;
+            padding: 10px 0 20px 0;
+        }
+
+        .focus-close-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .focus-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .focus-timer {
+            font-size: 36px;
+            font-family: 'SF Mono', monospace;
+            font-weight: 900;
+            color: var(--white);
+            letter-spacing: 2px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text);
+            font-size: 16px;
+            opacity: 0.7;
+            line-height: 1.6;
+        }
+
+        /* Flight Action Buttons */
+        .flight-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .export-btn-ui {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+        }
+
+        .delete-btn-ui {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--accent-red);
+        }
     </style>
 </head>
 
 <body>
     <button class="back-to-dashboard" onclick="window.location.href='index.html'">🏠 Back to Dashboard</button>
-
-    <!-- DEVELOPER FOOTER (GLOBAL) -->
-    <div class="dev-footer">Developed by Furkan YK</div>
+    <div class="dev-footer" style="position:fixed;bottom:6px;right:10px;z-index:999;font-size:11px;">Developed by Furkan YK</div>
 
     <!-- HOME SCREEN -->
     <div id="homeScreen" class="screen active">
@@ -561,7 +850,7 @@
 
                 <!-- Import Test Points (Optional) -->
                 <div class="form-group"
-                    style="border: 2px dashed #E5E5EA; padding: 12px; border-radius: 12px; background: #f9f9f9;">
+                    style="border: 2px dashed var(--border); padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.02);">
                     <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
                         Import Test Points
                         <button class="header-action" style="font-size: 12px; padding: 4px 8px;"
@@ -572,12 +861,12 @@
                     <input type="file" id="importFile" accept=".csv,.json" class="form-input"
                         style="padding: 8px; font-size: 14px;" onchange="app.handleFileImport(this)">
                     <div id="importStatus"
-                        style="font-size: 12px; color: #34C759; font-weight: 500; margin-top: 4px; display: none;">✅
-                        style="font-size: 12px; color: #34C759; font-weight: 500; margin-top: 4px; display: none;">✅
+                        style="font-size: 12px; color: var(--accent-green); font-weight: 500; margin-top: 4px; display: none;">
+                        ✅
                         loaded</div>
                 </div>
 
-                <button class="primary-button" onclick="app.createFlight()">Create Flight Log</button>
+                <button class="primary-button btn-start" onclick="app.createFlight()">Create Flight Log</button>
             </div>
         </div>
     </div>
@@ -640,12 +929,12 @@
             <button id="hackButton" class="hack-button" disabled onclick="app.hackButton()">SELECT A ROW</button>
             <div style="display: flex; gap: 8px; margin-top: 12px; flex-direction: column;">
                 <button id="editDetailsBtn" class="primary-button"
-                    style="background: #007AFF; color: white; margin-bottom: 0;" disabled
+                    style="background: #007AFF; color: white; margin-top: 0; margin-bottom: 0;" disabled
                     onclick="app.openEditDetailsModal()">
-                    📝 Edit Description & Notes
+                    📝 Edit Description &amp; Notes
                 </button>
                 <button id="eventMarkerBtn" class="primary-button"
-                    style="background: #D0E8FF; color: var(--accent); margin-bottom: 0;" onclick="app.addEventMarker()">
+                    style="background: #D0E8FF; color: var(--accent); margin-top: 0; margin-bottom: 0;" onclick="app.addEventMarker()">
                     🚩 Mark Event (Now)
                 </button>
             </div>
@@ -1618,39 +1907,35 @@
                         editBtn.disabled = !point;
                         editBtn.style.opacity = point ? '1' : '0.5';
                     }
-                    // Event Marker is always enabled if we have a current flight (which we do if we are here)
-                    if (eventBtn) {
-                        eventBtn.disabled = false;
-                        if (button && state !== 'idle') {
-                            // Update state-based styles
-                            if (state === 'ready') {
-                                button.textContent = "HACK (START)";
-                                button.style.background = "#34C759"; // Green
-                                button.disabled = false;
-                            } else if (state === 'recording') {
-                                const style = getComputedStyle(document.body);
-                                const isLight = style.backgroundColor !== 'rgb(0, 0, 0)';
-                                button.textContent = "STOP";
-                                button.style.background = "#FF3B30"; // Red
-                                button.disabled = false;
-                            } else if (state === 'completed') {
-                                button.textContent = "RESTART";
-                                button.style.background = "#FF9500"; // Orange
-                                button.disabled = false;
-                            }
 
-                            // Special Check: If point is an Event, disable Timer/Hack functionality
-                            // Events are instant logs, not timed points
-                            if (point && point.testPoint && point.testPoint.startsWith('Event')) {
-                                button.textContent = "EVENT LOGGED";
-                                button.style.background = "#8E8E93"; // Gray
-                                button.disabled = true;
-                            }
-                        } else if (button && state === 'idle') {
-                            button.textContent = "SELECT A ROW";
+                    // Event Marker always enabled
+                    if (eventBtn) eventBtn.disabled = false;
+
+                    // Update Hack Button state
+                    if (state !== 'idle') {
+                        if (state === 'ready') {
+                            button.textContent = "HACK (START)";
+                            button.style.background = "#34C759";
+                            button.disabled = false;
+                        } else if (state === 'recording') {
+                            button.textContent = "STOP";
+                            button.style.background = "#FF3B30";
+                            button.disabled = false;
+                        } else if (state === 'completed') {
+                            button.textContent = "RESTART";
+                            button.style.background = "#FF9500";
+                            button.disabled = false;
+                        }
+                        // Event rows are instant logs, not timed
+                        if (point && point.testPoint && String(point.testPoint).startsWith('Event')) {
+                            button.textContent = "EVENT LOGGED";
                             button.style.background = "#8E8E93";
                             button.disabled = true;
                         }
+                    } else {
+                        button.textContent = "SELECT A ROW";
+                        button.style.background = "#8E8E93";
+                        button.disabled = true;
                     }
                 }
 
@@ -1670,39 +1955,6 @@
                         focusBtn.textContent = '▶ HACK (Start)';
                     }
                 }
-            },
-
-            // --- Edit Details Modal Logic ---
-            openEditDetailsModal() {
-                if (!this.selectedRowId || !this.currentFlight) return;
-                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
-                if (!point) return;
-
-                document.getElementById('modalDescriptionInput').value = point.description || '';
-                document.getElementById('modalNotesInput').value = point.notes || '';
-                document.getElementById('editDetailsModal').classList.remove('hidden');
-                document.getElementById('modalDescriptionInput').focus();
-            },
-
-            closeEditDetailsModal() {
-                document.getElementById('editDetailsModal').classList.add('hidden');
-            },
-
-            saveEditDetails() {
-                if (!this.selectedRowId || !this.currentFlight) return;
-                const point = this.currentFlight.testPoints.find(p => p.id === this.selectedRowId);
-                if (!point) return;
-
-                const newDesc = document.getElementById('modalDescriptionInput').value.trim();
-                const newNotes = document.getElementById('modalNotesInput').value.trim();
-
-                point.description = newDesc;
-                point.notes = newNotes;
-
-                this.saveCurrentFlight();
-                this.renderTable();
-                this.updateHackButton(); // Update info text
-                this.closeEditDetailsModal();
             },
 
             saveCurrentFlight() {
@@ -1820,7 +2072,7 @@
 
                 // Handle Status Buttons Visibility
                 const statusGroup = document.querySelector('.status-btn-group');
-                const isEvent = point.testPoint && point.testPoint.startsWith('Event');
+                const isEvent = point.testPoint && String(point.testPoint).startsWith('Event');
 
                 if (isEvent) {
                     if (statusGroup) statusGroup.style.display = 'none';
@@ -1848,7 +2100,7 @@
 
                 // Calculate next Event number
                 let nextEventNum = 1;
-                const existingEvents = this.currentFlight.testPoints.filter(p => p.testPoint && p.testPoint.startsWith('Event'));
+                const existingEvents = this.currentFlight.testPoints.filter(p => p.testPoint && String(p.testPoint).startsWith('Event'));
                 if (existingEvents.length > 0) {
                     const maxNum = Math.max(...existingEvents.map(p => parseInt(p.testPoint.replace('Event ', '')) || 0));
                     nextEventNum = maxNum + 1;
