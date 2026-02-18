@@ -101,6 +101,10 @@
             }
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         #stars,
         #stars2,
         #stars3 {
@@ -1434,114 +1438,304 @@
                     return result;
                 };
 
-                const decodeMetar = (m) => {
-                    if (!m) return 'No data available.';
-                    const wind = m.wspd === 0 ? 'Calm' : `from the ${m.wdir}° at <b>${m.wspd} knots</b>${m.wgst ? ` (Gusting to ${m.wgst} kt)` : ''}`;
-                    const vis = m.visib === "6+" ? 'More than 6 miles' : `<b>${m.visib} miles</b>`;
+                // ── FTE Analysis Engine (fully client-side, no API needed) ─────────────
+                const fteAnalyze = (metar, taf, lang) => {
+                    const m = metar;
+                    const t = taf;
+                    const isTR = lang === 'tr';
+                    const wxEN = { 'SN':'Snow','RA':'Rain','DZ':'Drizzle','SH':'Showers','TS':'Thunderstorm','FG':'Fog','BR':'Mist','HZ':'Haze','FU':'Smoke','FZRA':'Freezing Rain','FZDZ':'Freezing Drizzle','PL':'Ice Pellets','GR':'Hail','SQ':'Squall','FC':'Funnel Cloud','BLSN':'Blowing Snow','BLDU':'Blowing Dust','BCFG':'Patchy Fog','MIFG':'Shallow Fog','VCFG':'Fog in Vicinity' };
+                    const wxTR = { 'SN':'Kar','RA':'Yağmur','DZ':'Çisenti','SH':'Sağanak','TS':'Gökgürültülü Fırtına','FG':'Sis','BR':'Pus','HZ':'Duman-sis','FU':'Duman','FZRA':'Don Yağmuru','FZDZ':'Don Çisenti','PL':'Buz Peletleri','GR':'Dolu','SQ':'Squall','FC':'Hortum','BLSN':'Sürüklenen Kar','BLDU':'Sürüklenen Toz','BCFG':'Yamalar Sis','MIFG':'Sığ Sis','VCFG':'Yakın Sis' };
+                    const wxCodes = isTR ? wxTR : wxEN;
+                    const coverNames = isTR
+                        ? { SKC:'Açık',CLR:'Açık',FEW:'Az Bulutlu',SCT:'Parçalı',BKN:'Çoğunlukla Bulutlu',OVC:'Kapalı (Overcast)',OVX:'Belirsiz Tavan',NSC:'Önemsiz Bulut',CAVOK:'CAVOK' }
+                        : { SKC:'Clear',CLR:'Clear',FEW:'Few',SCT:'Scattered',BKN:'Broken',OVC:'Overcast',OVX:'Indefinite Ceiling',NSC:'No Sig Cloud',CAVOK:'CAVOK' };
+                    const dirName = (deg) => {
+                        if(deg===null||deg===undefined) return '---';
+                        const dEN=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+                        const dTR=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];
+                        return (isTR?dTR:dEN)[Math.round(deg/22.5)%16]+' ('+deg+'°)';
+                    };
 
-                    const clouds = decodeClouds(m.clouds);
-                    const wx = decodeWeather(m.wxString);
-                    const lowestCloud = m.clouds && m.clouds.length > 0 ? Math.min(...m.clouds.map(c => c.base || 10000)) : 10000;
-                    const visibilityVal = parseFloat(m.visib) || 10;
-
-                    const category = (lowestCloud < 1000 || visibilityVal < 3) ? 'IFR' : (lowestCloud <= 3000 || visibilityVal <= 5 ? 'MVFR' : 'VFR');
-                    const catColor = category === 'VFR' ? '#16a34a' : (category === 'MVFR' ? '#2563eb' : '#dc2626');
-
-                    const d = new Date(m.reportTime);
-                    const hms = d.getUTCHours().toString().padStart(2, '0') + d.getUTCMinutes().toString().padStart(2, '0');
-                    const fullTimeStr = `${hms} UTC ${d.getUTCDate()} ${d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', year: 'numeric', timeZone: 'UTC' })}`;
-                    const ageStr = getTimeAgo(m.reportTime);
-
-                    // Convert hPa to inHg: 1017.4 -> 30.04
-                    const inHg = m.altim ? (m.altim * 0.02953).toFixed(2) : '---';
-
-                    return `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 0.4rem;">
-                            <div style="display:inline-flex; flex-direction: column; gap: 2px;">
-                                <div style="display:inline-block; padding: 2px 10px; border-radius: 4px; background: ${catColor}; color: white; font-size: 0.8rem; font-weight: 950; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: fit-content;">${category}</div>
-                                <div style="font-size: 0.6rem; font-weight: 850; color: #dc2626; background: #fee2e2; padding: 1px 6px; border-radius: 3px; border: 1px solid #fecaca; width: fit-content;">⏱️ ${ageStr}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 0.7rem; font-weight: 900; color: #1e293b; margin-bottom: 1px;">${m.name || 'Station Data'}</div>
-                                <div style="font-size: 0.55rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Conditions at:</div>
-                                <div style="font-size: 0.7rem; font-weight: 800; color: #475569;">${fullTimeStr}</div>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.88rem; line-height: 1.4; color: #1e293b;">
-                            <div style="margin-bottom: 2px;"><b>Wind</b>: ${wind}</div>
-                            <div style="margin-bottom: 2px;"><b>Visibility</b>: ${vis}</div>
-                            ${wx ? `<div style="margin-bottom: 2px;"><b>Weather</b>: <span style="background: #fef2f2; color: #be123c; padding: 0px 4px; border-radius: 3px; border: 1px solid #fee2e2; font-weight: 700;">${wx}</span></div>` : ''}
-                            <div style="margin-bottom: 2px;"><b>Sky</b>: ${clouds}</div>
-                            <div style="margin-bottom: 2px;"><b>Temp</b>: ${m.temp}°C (Dew: ${m.dewp}°C)</div>
-                            <div style="margin-bottom: 0px;"><b>Altimeter</b>: ${m.altim} hPa (${inHg} inHg)</div>
-                        </div>
-                    `;
-                };
-
-                const decodeTaf = (t) => {
-                    if (!t || !t.fcsts) return 'No forecast available.';
-
-                    const pad = (n) => n.toString().padStart(2, '0');
-                    const formatUtcFull = (iso) => {
+                    // Canada local time helper (Eastern: EST=UTC-5, EDT=UTC-4)
+                    const toCanadaTime = (iso) => {
                         if (!iso) return 'N/A';
                         const d = new Date(iso);
-                        return `${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}Z`;
+                        // Determine EST vs EDT: EDT Mar 2nd Sun → Nov 1st Sun (approx)
+                        const jan = new Date(d.getFullYear(), 0, 1);
+                        const jul = new Date(d.getFullYear(), 6, 1);
+                        const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+                        const isDST = d.getTimezoneOffset() < stdOff;
+                        const offset = isDST ? -4 : -5; // EDT or EST
+                        const local = new Date(d.getTime() + offset*3600000);
+                        const pad = n => n.toString().padStart(2,'0');
+                        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                        return days[local.getUTCDay()]+' '+pad(local.getUTCHours())+':'+pad(local.getUTCMinutes())+(isDST?' EDT':' EST')+' ('+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+'Z)';
                     };
 
-                    const formatUtcDayTime = (iso) => {
+                    const toCanadaTimeShort = (iso) => {
                         if (!iso) return '';
                         const d = new Date(iso);
-                        const day = d.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' });
-                        const time = `${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}Z`;
-                        return `${day} ${time}`;
+                        const jan = new Date(d.getFullYear(), 0, 1);
+                        const jul = new Date(d.getFullYear(), 6, 1);
+                        const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+                        const isDST = d.getTimezoneOffset() < stdOff;
+                        const offset = isDST ? -4 : -5;
+                        const local = new Date(d.getTime() + offset*3600000);
+                        const pad = n => n.toString().padStart(2,'0');
+                        return pad(local.getUTCDate())+'/'+pad(local.getUTCHours())+(isDST?'EDT':'EST');
                     };
 
-                    const issueTime = formatUtcFull(t.issueTime);
-                    const issueAge = getTimeAgo(t.issueTime);
+                    // ── Parsed values ──
+                    const vis = parseFloat(m?.visib) || (m?.visib === '6+' ? 10 : 0);
+                    const visLabel = m?.visib === '6+' ? '>6 SM' : (m?.visib ? m.visib+' SM' : 'N/A');
+                    const visNM = vis * 0.868976;
+                    const clouds = m?.clouds || [];
+                    const lowestCeiling = clouds.reduce((min, c) => { if(['BKN','OVC','OVX'].includes(c.cover)) return Math.min(min, c.base||9999); return min; }, 9999);
+                    const hasFog = m?.wxString?.includes('FG');
+                    const hasTS  = m?.wxString?.includes('TS');
+                    const hasSN  = m?.wxString?.includes('SN');
+                    const hasFZ  = m?.wxString?.includes('FZ');
+                    const wspd = m?.wspd || 0;
+                    const wgst = m?.wgst || 0;
+                    const temp = m?.temp ?? null;
+                    const dewp = m?.dewp ?? null;
+                    const altim = m?.altim || null;
+                    const inHg = altim ? (altim*0.02953).toFixed(2) : null;
+                    const dewSpread = (temp!==null && dewp!==null) ? temp-dewp : 99;
 
-                    const header = `
-                        <div style="margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1.5px solid #ccfbf1; display: flex; justify-content: space-between; align-items: center;">
-                            <div style="font-size: 0.7rem; font-weight: 850; color: #065f46;">
-                                📅 <b>Issued:</b> ${issueTime} <span style="margin-left:6px; color:#047857; background:#defcf5; padding:1px 6px; border-radius:3px; font-size: 0.6rem;">⏱️ ${issueAge}</span>
-                            </div>
-                            <div style="font-size: 0.75rem; font-weight: 950; color: #064e1b; background: #ccfbf1; padding: 2px 8px; border-radius: 4px;">${t.icaoId}</div>
-                        </div>
-                    `;
+                    const cloudStr = clouds.length === 0
+                        ? (isTR ? 'Bulut yok' : 'No clouds reported')
+                        : clouds.map(c => (coverNames[c.cover]||c.cover) + (c.base ? (isTR?' '+c.base+' ft':' at '+c.base+' ft') : '')).join(', ');
 
-                    const changeMappings = {
-                        'FM': 'Starting',
-                        'BECMG': 'Becoming',
-                        'TEMPO': 'Temporary',
-                        'PROB': 'Prob'
-                    };
+                    const wxDecoded = (() => {
+                        if (!m?.wxString) return null;
+                        let wx = m.wxString;
+                        let prefix = wx.startsWith('-') ? (isTR?'Hafif ':'Light ') : wx.startsWith('+') ? (isTR?'Şiddetli ':'Heavy ') : '';
+                        wx = wx.replace(/^[+-]/,'');
+                        const decoded = wx.match(/[A-Z]{2,4}/g)?.map(c => wxCodes[c]||c).join(' ') || wx;
+                        return prefix + decoded;
+                    })();
 
-                    const forecasts = t.fcsts.map(f => {
-                        const fromTime = formatUtcDayTime(f.timeFrom);
-                        const toTime = (f.timeTo && f.timeTo !== f.timeFrom) ? ' → ' + formatUtcDayTime(f.timeTo) : '';
+                    // ── VFR Status ──
+                    const vfrVisOk  = vis >= 3;
+                    const vfrCeilOk = lowestCeiling >= 1000;
+                    let flightCat, catColor, catBg;
+                    if (vis < 1 || lowestCeiling < 500) { flightCat='IFR'; catColor='#dc2626'; catBg='#fef2f2'; }
+                    else if (vis < 3 || lowestCeiling < 1000) { flightCat='MVFR'; catColor='#2563eb'; catBg='#eff6ff'; }
+                    else { flightCat='VFR'; catColor='#16a34a'; catBg='#f0fdf4'; }
 
-                        const technicalType = f.fcstChange || 'Basic';
-                        const humanType = changeMappings[technicalType] || technicalType;
+                    // ── Section 1: Decode ──
+                    const windLine = wspd===0
+                        ? (isTR ? 'Saakin (0 kt)' : 'Calm (0 kt)')
+                        : dirName(m?.wdir)+(isTR?' yönünden ':' at ')+'<b>'+wspd+' kt</b>'+(wgst ? ', gusts <b>'+wgst+' kt</b>' : '');
+                    let decode = (isTR?'<b>Rüzgar:</b> ':'<b>Wind:</b> ')+windLine+'<br>';
+                    decode += (isTR?'<b>Görüş:</b> ':'<b>Visibility:</b> ')+visLabel+' (≈'+visNM.toFixed(1)+' NM)<br>';
+                    if (wxDecoded) decode += (isTR?'<b>Hava Hadisesi:</b> ':'<b>Weather:</b> ')+'<span style="color:#be123c;font-weight:700">'+wxDecoded+'</span><br>';
+                    decode += (isTR?'<b>Bulutlar:</b> ':'<b>Clouds:</b> ')+cloudStr+'<br>';
+                    if (lowestCeiling < 9999) decode += (isTR?'<b>Tavan:</b> ':'<b>Ceiling:</b> ')+lowestCeiling+' ft AGL<br>';
+                    if (altim) decode += '<b>QNH:</b> '+altim+' hPa ('+inHg+' inHg)<br>';
+                    if (temp!==null) decode += (isTR?'<b>Sıcaklık / Çiy noktası:</b> ':'<b>Temp / Dew point:</b> ')+temp+'°C / '+dewp+'°C (spread: '+dewSpread.toFixed(1)+'°C)<br>';
 
-                        const wind = f.wspd === null ? 'Same' : (f.wspd === 0 ? 'Calm' : `<b>${f.wspd}kt</b> @ ${f.wdir}°${f.wgst ? ` (G${f.wgst}kt)` : ''}`);
-                        const vis = f.visib === null ? 'Same' : (f.visib === "6+" ? '>6SM' : `<b>${f.visib}SM</b>`);
+                    // ── Section 2: VFR/IFR ──
+                    const met = isTR?'✓ KARŞILANIYOR':'✓ MET';
+                    const notMet = isTR?'✗ KARŞILANMIYOR':'✗ NOT MET';
+                    let vfrLines = (isTR?'<b>Kontrollü Hava Sahası (Class C/D) Limitleri:</b>':'<b>Controlled Airspace (Class C/D) Limits:</b>')+'<br>';
+                    vfrLines += (isTR?'· Görüş ≥ 3 SM: ':'· Visibility ≥ 3 SM: ')+'<b style="color:'+(vis>=3?'#16a34a':'#dc2626')+'">'+(vis>=3?met:notMet)+' ('+visLabel+')</b><br>';
+                    vfrLines += (isTR?'· Tavan > 1000 ft AGL: ':'· Ceiling > 1000 ft AGL: ')+'<b style="color:'+(lowestCeiling>=1000?'#16a34a':'#dc2626')+'">'+(lowestCeiling>=1000?met:notMet)+(lowestCeiling<9999?' ('+lowestCeiling+' ft)':isTR?' (Sınırsız)':' (Unlimited)')+'</b><br>';
+                    vfrLines += '<br><b>'+(isTR?'Sonuç: ':'Result: ')+'<span style="background:'+catBg+';color:'+catColor+';padding:1px 6px;border-radius:3px">'+flightCat+'</span></b> — ';
+                    if (flightCat==='VFR') vfrLines += isTR?'Mevcut koşullar VFR uçuşuna izin vermektedir.':'Current conditions meet VFR minima in controlled airspace.';
+                    else if (flightCat==='MVFR') vfrLines += isTR?'Marjinal VFR: Görüş veya tavan minimuma yakın — dikkatli ol.':'Marginal VFR: Visibility or ceiling near VFR minima — proceed with caution.';
+                    else vfrLines += isTR?'IFR koşulları. VFR uçuşu için minimum koşullar KARŞILANMIYOR.':'IFR conditions. VFR minima NOT met — instrument flight rules apply.';
+                    if (hasFog) vfrLines += '<br>⚠️ '+(isTR?'<b>Sis raporu var</b> — görüş hızla düşebilir.':'<b>Fog reported</b> — visibility may drop rapidly.');
 
-                        const clouds = decodeClouds(f.clouds);
-                        const wx = decodeWeather(f.wxString);
-                        return `<div style="padding: 4px 0; border-bottom: 1px dashed rgba(15, 23, 42, 0.08); font-size: 0.8rem; line-height: 1.25;">
-                                    <div style="margin-bottom: 2px; display: flex; align-items: center; gap: 6px;">
-                                        <span style="background: #1e293b; color: white; padding: 0px 4px; border-radius: 2px; font-weight: 950; font-size: 0.55rem; text-transform: uppercase;">${humanType}</span>
-                                        <span style="color: #475569; font-weight: 800; font-size: 0.65rem;">${fromTime}${toTime}</span>
-                                    </div>
-                                    <div style="color: #1e293b; padding-left: 6px; border-left: 2px solid #5eead4; display: grid; grid-template-columns: 1.1fr 1fr; gap: 0px 6px;">
-                                        <div><b>Wind</b>: ${wind}</div>
-                                        <div><b>Vis</b>: ${vis}${wx ? ` <b>(${wx})</b>` : ''}</div>
-                                        <div style="grid-column: span 2; color: #475569; font-size: 0.7rem;"><b>Sky</b>: ${clouds}</div>
-                                    </div>
-                                </div>`;
-                    }).join('');
+                    // ── Section 3: Operational Warnings ──
+                    const warns = [];
+                    if (wgst >= 20) warns.push(isTR?'💨 <b>Gusts '+wgst+' kt</b> — rüzgar makaslama riski. Yaklaşma hızına gust düzeltmesi ekle.':'💨 <b>Gusts '+wgst+' kt</b> — wind shear risk on approach/departure. Add gust correction to Vapp.');
+                    if (wgst >= 15 && wgst < 20) warns.push(isTR?'🌬️ Gusts '+wgst+' kt — crosswind bileşenini kontrol et.':'🌬️ Gusts '+wgst+' kt — monitor crosswind component and stabilised approach criteria.');
+                    if (wspd >= 25) warns.push(isTR?'💨 Sürekli rüzgar <b>'+wspd+' kt</b> — kontrollü meydan 10 NM içi 3000 ft AGL altı <b>max 200 kt</b>.':'💨 Sustained wind <b>'+wspd+' kt</b> — max 200 kt within 10 NM of controlled aerodrome below 3,000 ft AGL.');
+                    if (hasTS) warns.push(isTR?'⛈️ <b>GÖKGÜRÜLTÜLÜ FIRTINA AKTİF</b> — operasyon askıya alın. TS hücresinden min 5 NM, tercihen 20 NM. Şiddetli türbülans ve şimşek.':'⛈️ <b>THUNDERSTORM ACTIVE</b> — suspend operations. Maintain min 5 NM (prefer 20 NM) from TS cell. Severe turbulence and lightning risk.');
+                    if (hasFZ) warns.push(isTR?'🧊 <b>Don yağmuru/çisenti</b> — airframe icing riski. Anti/de-ice sistemleri aktif et. SLD mümkün.':'🧊 <b>Freezing precipitation</b> — airframe icing risk. Anti/de-ice systems required. SLD possible.');
+                    if (hasSN && temp !== null && temp <= 2) warns.push(isTR?'❄️ Kar + düşük sıcaklık ('+temp+'°C) — pist kirliliği ve yüzey icing. Zemin de-icing gerekebilir.':'❄️ Snow + low temp ('+temp+'°C) — runway contamination and surface icing. Ground de-icing may be required.');
+                    if (dewSpread <= 2 && !hasFog) warns.push(isTR?'🌫️ Çiy noktası spreadi '+dewSpread.toFixed(1)+'°C — sis oluşum riski, görüş hızla bozulabilir.':'🌫️ Dew point spread only '+dewSpread.toFixed(1)+'°C — fog formation risk, visibility may deteriorate rapidly.');
+                    if (lowestCeiling < 1000 && lowestCeiling > 0) warns.push(isTR?'☁️ Tavan <b>'+lowestCeiling+' ft AGL</b> — VFR minimumu altında. 500 ft engel klirensle birlikte manevra alanı kısıtlı.':'☁️ Ceiling <b>'+lowestCeiling+' ft AGL</b> — below VFR minima. Limited manoeuvre space above 500 ft obstacle clearance.');
+                    if (lowestCeiling >= 1000 && lowestCeiling < 3000) warns.push(isTR?'☁️ Tavan '+lowestCeiling+' ft AGL — MVFR seviyesi. Test manevralarında tavana dikkat.':'☁️ Ceiling '+lowestCeiling+' ft AGL — MVFR level. Monitor ceiling during test manoeuvres.');
+                    if (vis < 3 && vis > 0) warns.push(isTR?'👁️ Görüş <b>'+visLabel+'</b> — VFR minimumunun altında. Yer referans noktaları tanımlanamayabilir.':'👁️ Visibility <b>'+visLabel+'</b> — below VFR minimum. Ground reference points may not be identifiable.');
+                    warns.push(isTR?'⚡ Hız kısıtı: 10,000 ft AMSL altı <b>max 250 kt IAS</b>. Kontrollü meydan 10 NM içi ve 3,000 ft AGL altı <b>max 200 kt</b>.':'⚡ Speed limits: Below 10,000 ft AMSL <b>max 250 kt IAS</b>. Within 10 NM of controlled aerodrome below 3,000 ft AGL <b>max 200 kt</b>.');
+                    warns.push(isTR?'🏠 Minimum irtifa: Seyrek yerleşim 500 ft AGL; yoğun yerleşim en yüksek engel üstünde 1,000 ft.':'🏠 Minimum altitude: 500 ft above persons/structures (sparse); 1,000 ft above highest obstacle (congested).');
+                    const warnHtml = warns.map(w => '<div style="padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.05)">'+w+'</div>').join('');
 
-                    return header + forecasts;
+                    // ── Section 4: Trend ──
+                    let trend = '';
+                    if (!t || !t.fcsts || t.fcsts.length < 2) {
+                        trend = isTR ? 'TAF verisi yetersiz — trend analizi yapılamıyor.' : 'Insufficient TAF data — trend analysis unavailable.';
+                    } else {
+                        const becmg = t.fcsts.filter(f => f.fcstChange==='BECMG');
+                        const tempo = t.fcsts.filter(f => f.fcstChange==='TEMPO');
+                        const prob  = t.fcsts.filter(f => f.fcstChange==='PROB');
+
+                        if (becmg.length) {
+                            trend += '<b>BECMG ('+(isTR?'Kalıcı Değişim':'Permanent Change')+'):</b><br>';
+                            becmg.forEach(f => {
+                                const fv = f.visib===null?null:f.visib==='6+'?'>6SM':f.visib+'SM';
+                                const fw = f.wspd===null?null:f.wdir+'°/'+f.wspd+'kt'+(f.wgst?'G'+f.wgst:'');
+                                const fc = f.clouds?.filter(c=>['BKN','OVC'].includes(c.cover)).map(c=>c.cover+' '+c.base+' ft').join(', ');
+                                trend += '&nbsp;&nbsp;'+toCanadaTimeShort(f.timeFrom)+(f.timeTo?' → '+toCanadaTimeShort(f.timeTo):'')+': ';
+                                if (fw) trend += (isTR?'Rüzgar→':'Wind→')+fw+' ';
+                                if (fv) trend += (isTR?'Görüş→':'Vis→')+fv+' ';
+                                if (fc) trend += (isTR?'Tavan→':'Ceiling→')+fc;
+                                const newVis = f.visib ? (f.visib==='6+'?10:parseFloat(f.visib)) : vis;
+                                const newCeil = f.clouds?.reduce((mn,c)=>['BKN','OVC'].includes(c.cover)?Math.min(mn,c.base||9999):mn,9999) || lowestCeiling;
+                                const newCat = (newVis<1||newCeil<500)?'IFR':(newVis<3||newCeil<1000)?'MVFR':'VFR';
+                                const nc = newCat==='VFR'?'#16a34a':newCat==='MVFR'?'#2563eb':'#dc2626';
+                                trend += ' → <b style="color:'+nc+'">'+newCat+'</b><br>';
+                            });
+                        }
+                        if (tempo.length) {
+                            trend += (becmg.length?'<br>':'')+'<b>TEMPO ('+(isTR?'Geçici bozulma, &lt;60 dk':'Brief deterioration, &lt;60 min')+'):</b><br>';
+                            tempo.forEach(f => {
+                                const fwx = f.wxString || '';
+                                const fv = f.visib ? (f.visib==='6+'?'>6SM':f.visib+'SM') : '';
+                                const fc = f.clouds?.filter(c=>['BKN','OVC'].includes(c.cover)).map(c=>c.cover+' '+c.base+' ft').join(', ') || '';
+                                trend += '&nbsp;&nbsp;'+toCanadaTimeShort(f.timeFrom)+(f.timeTo?' → '+toCanadaTimeShort(f.timeTo):'')+': ';
+                                if (fwx) trend += '<span style="color:#be123c;font-weight:700">'+(wxCodes[fwx.replace(/^[+-]/,'')]||fwx)+'</span> ';
+                                if (fv) trend += (isTR?'Görüş:':'Vis:')+fv+' ';
+                                if (fc) trend += fc;
+                                trend += ' — <i>'+(isTR?'Test geçiş noktaları için kritik pencere':'Critical window for test flight transitions')+'</i><br>';
+                            });
+                        }
+                        if (prob.length) {
+                            trend += (becmg.length||tempo.length?'<br>':'')+'<b>PROB ('+(isTR?'Olasılıklı koşullar':'Probability forecast')+'):</b><br>';
+                            prob.forEach(f => {
+                                const fwx = f.wxString || '';
+                                trend += '&nbsp;&nbsp;'+toCanadaTimeShort(f.timeFrom)+(f.timeTo?' → '+toCanadaTimeShort(f.timeTo):'')+': ';
+                                if (fwx) trend += '<span style="color:#be123c">'+(wxCodes[fwx.replace(/^[+-]/,'')]||fwx)+'</span> ';
+                                trend += '— '+(isTR?'alternatif plan gerekebilir':'plan contingency')+'<br>';
+                            });
+                        }
+                        if (!becmg.length && !tempo.length && !prob.length) {
+                            trend = isTR
+                                ? 'TAF tahmin döneminde belirgin değişiklik öngörülmüyor. Koşullar stabil seyredecek.'
+                                : 'No significant condition changes forecast. Conditions expected to remain stable throughout the TAF period.';
+                        }
+                        const lastFcst = t.fcsts[t.fcsts.length-1];
+                        const lastVis = lastFcst?.visib ? (lastFcst.visib==='6+'?10:parseFloat(lastFcst.visib)) : vis;
+                        const lastCeil = lastFcst?.clouds?.reduce((mn,c)=>['BKN','OVC'].includes(c.cover)?Math.min(mn,c.base||9999):mn,9999) ?? lowestCeiling;
+                        const improving = lastVis > vis || lastCeil > lowestCeiling;
+                        const worsening = lastVis < vis || lastCeil < lowestCeiling;
+                        trend += '<br><b>'+(isTR?'Genel Trend: ':'Overall: ')+'</b>';
+                        if (improving) trend += '<span style="color:#16a34a;font-weight:700">📈 '+(isTR?'İyileşiyor':'Improving')+'</span> — '+(isTR?'Koşulların ilerleyen saatlerde düzelmesi bekleniyor.':'Conditions expected to improve during the forecast period.');
+                        else if (worsening) trend += '<span style="color:#dc2626;font-weight:700">📉 '+(isTR?'Bozuluyor':'Deteriorating')+'</span> — '+(isTR?'Uçuşu öne al veya alternatif aerodrom belirle.':'Schedule flight earlier or designate alternate aerodrome.');
+                        else trend += '<span style="color:#475569;font-weight:700">➡️ '+(isTR?'Stabil':'Stable')+'</span> — '+(isTR?'Mevcut koşullar tahmin süresi boyunca devam ediyor.':'Current conditions persist through the forecast period.');
+                    }
+
+                    return { decode, vfrLines, warnHtml, trend, flightCat, catColor, catBg };
                 };
+
+                const renderFTEAnalysis = (stationId, metar, taf, lang) => {
+                    if (!metar && !taf) return '<div style="color:#94a3b8;font-size:0.8rem">No data.</div>';
+                    const isTR = lang === 'tr';
+                    const r = fteAnalyze(metar, taf, lang);
+                    const sections = [
+                        { title: isTR?'1. METAR/TAF Deşifre':'1. METAR/TAF Decode', icon:'📡', color:'#1d4ed8', bg:'#eff6ff', border:'#bfdbfe', html: r.decode },
+                        { title: isTR?'2. VFR/IFR Durumu':'2. VFR/IFR Status', icon:'🛫', color: r.catColor, bg: r.catBg, border: r.catColor+'55', html: r.vfrLines },
+                        { title: isTR?'3. Operasyonel Uyarılar':'3. Operational Warnings', icon:'⚠️', color:'#b45309', bg:'#fffbeb', border:'#fde68a', html: r.warnHtml },
+                        { title: isTR?'4. Trend Analizi':'4. Trend Analysis', icon:'📈', color:'#7c3aed', bg:'#faf5ff', border:'#e9d5ff', html: r.trend }
+                    ];
+                    return '<div style="display:grid;gap:8px">' +
+                        sections.map(s =>
+                            '<div style="background:'+s.bg+';border:1px solid '+s.border+';border-radius:0.5rem;padding:0.6rem 0.75rem">' +
+                            '<div style="font-size:0.65rem;font-weight:900;color:'+s.color+';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px">'+s.icon+' '+s.title+'</div>' +
+                            '<div style="font-size:0.78rem;line-height:1.6;color:#1e293b">'+s.html+'</div>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>';
+                };
+
+                // ── Canada time helper (standalone, for raw display) ──
+                const toCanadaTime = (iso) => {
+                    if (!iso) return 'N/A';
+                    const d = new Date(iso);
+                    const jan = new Date(d.getFullYear(), 0, 1);
+                    const jul = new Date(d.getFullYear(), 6, 1);
+                    const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+                    const isDST = d.getTimezoneOffset() < stdOff;
+                    const offset = isDST ? -4 : -5;
+                    const local = new Date(d.getTime() + offset*3600000);
+                    const pad = n => n.toString().padStart(2,'0');
+                    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    return days[local.getUTCDay()]+' '+pad(local.getUTCHours())+':'+pad(local.getUTCMinutes())+(isDST?' EDT':' EST')+' ('+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+'Z)';
+                };
+
+                // ── Glossary panels HTML ──
+                const glossaryMetarId = 'glossary-metar-taf';
+                const glossaryNotamId = 'glossary-notam';
+                const glossaryMetarHtml = state.bananaMode ? `
+                <div id="${glossaryMetarId}" style="display:none;margin-top:0.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.6rem;padding:0.85rem;font-size:0.75rem;line-height:1.6;color:#1e293b">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+                        <div><b>METAR</b> — Current weather observation, updated hourly (or more)</div>
+                        <div><b>TAF</b> — Terminal Aerodrome Forecast, covers 24–30 hrs ahead</div>
+                        <div><b>VFR</b> — Visual Flight Rules: pilot navigates by sight</div>
+                        <div><b>IFR</b> — Instrument Flight Rules: pilot flies by instruments only</div>
+                        <div><b>MVFR</b> — Marginal VFR: near minimums, caution required</div>
+                        <div><b>SKC / CLR</b> — Sky Clear (no clouds reported)</div>
+                        <div><b>FEW</b> — Few clouds: 1–2 oktas (1/8–2/8 of sky)</div>
+                        <div><b>SCT</b> — Scattered: 3–4 oktas (3/8–4/8 of sky)</div>
+                        <div><b>BKN</b> — Broken: 5–7 oktas → this sets the <i>ceiling</i></div>
+                        <div><b>OVC</b> — Overcast: 8/8 sky covered → this sets the <i>ceiling</i></div>
+                        <div><b>Ceiling</b> — Lowest BKN or OVC layer — limits VFR flight</div>
+                        <div><b>TS</b> — Thunderstorm — SUSPEND OPERATIONS</div>
+                        <div><b>RA</b> — Rain &nbsp;&nbsp; <b>SN</b> — Snow &nbsp;&nbsp; <b>DZ</b> — Drizzle</div>
+                        <div><b>FG</b> — Fog (&lt;5/8 SM) &nbsp;&nbsp; <b>BR</b> — Mist (5/8–6 SM)</div>
+                        <div><b>FZ</b> — Freezing (prefix): e.g. FZRA = Freezing Rain</div>
+                        <div><b>−/+</b> prefix — Light / Heavy intensity (e.g. −RA = light rain)</div>
+                        <div><b>BECMG</b> — Becoming: permanent gradual change</div>
+                        <div><b>TEMPO</b> — Temporary: conditions last &lt;60 min at a time</div>
+                        <div><b>PROB30/40</b> — 30% or 40% probability of conditions</div>
+                        <div><b>FM</b> — From: conditions change abruptly at this time</div>
+                        <div><b>QNH</b> — Altimeter setting (hPa/inHg): set before takeoff</div>
+                        <div><b>KT</b> — Knots (1 kt ≈ 1.15 mph ≈ 1.85 km/h)</div>
+                        <div><b>SM</b> — Statute miles (visibility unit in North America)</div>
+                        <div><b>AGL</b> — Above Ground Level (cloud heights in METAR)</div>
+                        <div><b>AMSL</b> — Above Mean Sea Level (altitude reference)</div>
+                        <div><b>Dew point</b> — Temp at which air becomes saturated → fog/cloud forms when spread ≤2°C</div>
+                    </div>
+                </div>` : '';
+
+                const glossaryNotamHtml = state.bananaMode ? `
+                <div id="${glossaryNotamId}" style="display:none;margin-top:0.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.6rem;padding:0.85rem;font-size:0.75rem;line-height:1.6;color:#1e293b">
+                    <div style="margin-bottom:6px;font-size:0.7rem;color:#64748b"><b>NOTAM</b> = Notice to Air Missions. Issued for temporary hazards, closed runways, restricted airspace, equipment outages, etc.</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+                        <div><b>NOTAM D</b> — Distributed: standard operational notice</div>
+                        <div><b>NOTAM L</b> — Local: only relevant to one aerodrome</div>
+                        <div><b>FDC NOTAM</b> — Regulatory: changes to charts/procedures</div>
+                        <div><b>PIREP</b> — Pilot report of actual conditions encountered</div>
+                        <div><b>A)</b> — Location (ICAO code)</div>
+                        <div><b>B)</b> — Effective FROM date/time (UTC)</div>
+                        <div><b>C)</b> — Effective TO date/time (UTC) or PERM/UFN</div>
+                        <div><b>E)</b> — Free text description of the NOTAM</div>
+                        <div><b>F) / G)</b> — Lower / Upper altitude limits</div>
+                        <div><b>RWY</b> — Runway &nbsp;&nbsp; <b>TWY</b> — Taxiway</div>
+                        <div><b>CLSD</b> — Closed &nbsp;&nbsp; <b>U/S</b> — Unserviceable</div>
+                        <div><b>WIP</b> — Work In Progress (construction on field)</div>
+                        <div><b>MNT</b> — Maintenance &nbsp;&nbsp; <b>OPR</b> — Operational</div>
+                        <div><b>TFC</b> — Traffic &nbsp;&nbsp; <b>ACT</b> — Active</div>
+                        <div><b>TEMPO</b> — Temporary condition</div>
+                        <div><b>PERM</b> — Permanent change</div>
+                        <div><b>UFN</b> — Until Further Notice</div>
+                        <div><b>SFC</b> — Surface &nbsp;&nbsp; <b>UNL</b> — Unlimited altitude</div>
+                        <div><b>FL</b> — Flight Level (FL100 = 10,000 ft pressure altitude)</div>
+                        <div><b>NM / KM</b> — Nautical miles / Kilometres (radius of area)</div>
+                        <div><b>LGTD</b> — Lighted &nbsp;&nbsp; <b>UNLGTD</b> — Unlighted</div>
+                        <div><b>NAV</b> — Navigation aid &nbsp;&nbsp; <b>ILS</b> — Instrument Landing System</div>
+                        <div><b>GP</b> — Glide Path &nbsp;&nbsp; <b>LOC</b> — Localizer</div>
+                        <div><b>DME</b> — Distance Measuring Equipment</div>
+                        <div><b>OBST</b> — Obstacle (crane, tower, etc.) — check height!</div>
+                        <div><b>PARACHUTE / ACROBATICS</b> — Aerial activity in area</div>
+                        <div><b>TFR</b> — Temporary Flight Restriction (avoid entirely)</div>
+                        <div><b>LGT</b> — Light(s) &nbsp;&nbsp; <b>PAPI</b> — Precision Approach Path Indicator</div>
+                    </div>
+                </div>` : '';
+
 
 
                 const notamUrl = "https://notam.ca/?point=CYXU%7Csite%7C-81.151%2C43.033&point=CYSA%7Csite%7C-80.934%2C43.416&point=CYKF%7Csite%7C-80.379%2C43.461&point=CYQS%7Csite%7C-81.110%2C42.770&point=CYCE%7Csite%7C-81.506%2C43.286&point=CYTB%7Csite%7C-80.747%2C42.926";
@@ -1622,10 +1816,11 @@
                                         <h2 style="margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.04em;">🌤️ Flight Test Tools</h2>
                                         <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">🕒 Version 2.0 • Updated: 12/02 • Refresh: ${state.lastUpdated || 'Never'}</div>
                                     </div>
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.bananaMode = !state.bananaMode; render()">
-                                            ${state.bananaMode ? '👑 Princess Mode' : "🍌 I'm not Pilot I want Banana Mode"}
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                        <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.bananaMode = !state.bananaMode; if(!state.bananaMode){state.analysisCache={};} render()">
+                                            ${state.bananaMode ? '📋 Raw METAR/TAF' : "🍌 I'm not Pilot I want Banana"}
                                         </button>
+                                        ${state.bananaMode ? `<button style="width:auto;padding:0.45rem 0.85rem;margin:0;font-size:0.8rem;font-weight:900;border-radius:0.6rem;background:${state.bananaLang==='en'?'#fef9c3':'#dbeafe'};border:1.5px solid ${state.bananaLang==='en'?'#fde047':'#93c5fd'};color:${state.bananaLang==='en'?'#854d0e':'#1e40af'};cursor:pointer" onclick="state.bananaLang=state.bananaLang==='en'?'tr':'en';render()">${state.bananaLang==='en'?'🇬🇧 EN → 🇹🇷 TR':'🇹🇷 TR → 🇬🇧 EN'}</button>` : ''}
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="state.sidebarHidden = !state.sidebarHidden; render()">
                                             ${state.sidebarHidden ? '👁️ Show Sidebars' : '🙈 Hide Sidebars'}
                                         </button>
@@ -1633,18 +1828,44 @@
                                             🌐 Windy
                                         </button>
                                         <button class="btn-primary" style="width: auto; padding: 0.45rem 1rem; margin: 0; font-size: 0.85rem; font-weight: 800; border-radius: 0.6rem;" onclick="fetchWeather()">🔄 Refresh</button>
+                                        ${state.bananaMode ? `
+                                        <button style="width:auto;padding:0.45rem 0.9rem;margin:0;font-size:0.8rem;font-weight:800;border-radius:0.6rem;background:#eff6ff;border:1.5px solid #bfdbfe;color:#1d4ed8;cursor:pointer" onclick="(function(){var el=document.getElementById('glossary-metar-taf');el.style.display=el.style.display==='none'?'block':'none';})()">📖 METAR/TAF Guide</button>
+                                        <button style="width:auto;padding:0.45rem 0.9rem;margin:0;font-size:0.8rem;font-weight:800;border-radius:0.6rem;background:#fdf4ff;border:1.5px solid #e9d5ff;color:#7c3aed;cursor:pointer" onclick="(function(){var el=document.getElementById('glossary-notam');el.style.display=el.style.display==='none'?'block':'none';})()">📜 NOTAM Guide</button>
+                                        ` : ''}
                                     </div>
                                 </div>
-                                
+                                ${glossaryMetarHtml}
+                                ${glossaryNotamHtml}
+                                ${state.bananaMode ? '<div style="font-size:0.68rem;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.4rem;padding:4px 10px;margin-bottom:0.75rem;display:inline-block">🇨🇦 All times shown in Eastern Time (EST/EDT) — Canada local time</div>' : ''}
 
-                                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
-                                    ${stationsList.map(st => {
+                                <div style="display: flex; flex-direction: column; gap: 0;">
+                                    ${stationsList.map((st, stIdx) => {
                     const m = Array.isArray(state.weatherData?.metars) ? state.weatherData.metars.find(x => x.icaoId === st) : null;
                     const t = Array.isArray(state.weatherData?.tafs) ? state.weatherData.tafs.find(x => x.icaoId === st) : null;
+
+                    // Canada local time
+                    const canadaTime = (iso) => {
+                        if (!iso) return 'N/A';
+                        const d = new Date(iso);
+                        const jan = new Date(d.getFullYear(), 0, 1);
+                        const jul = new Date(d.getFullYear(), 6, 1);
+                        const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+                        const isDST = d.getTimezoneOffset() < stdOff;
+                        const offset = isDST ? -4 : -5;
+                        const local = new Date(d.getTime() + offset*3600000);
+                        const pad = n => n.toString().padStart(2,'0');
+                        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                        return days[local.getUTCDay()]+' '+pad(local.getUTCHours())+':'+pad(local.getUTCMinutes())+(isDST?' EDT':' EST');
+                    };
+
+                    const metarTime = m?.reportTime ? canadaTime(m.reportTime) : null;
+                    const tafTime   = t?.issueTime  ? canadaTime(t.issueTime)  : null;
+
                     return `
-                                            <div class="module-result" style="margin: 0; padding: 1.25rem; border-left: 6px solid #3b82f6; background: #fafafa; border-radius: 0 0.85rem 0.85rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.6rem;">
-                                                    <div style="font-weight: 950; color: #0f172a; font-size: 1.25rem; letter-spacing: -0.04em;">📍 ${st}</div>
+                                            ${stIdx > 0 ? '<div style="height:1px;background:#e2e8f0;margin:0.5rem 0"></div>' : ''}
+                                            <div style="padding: 1.25rem 0.25rem;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.6rem;">
+                                                    <div style="font-weight: 950; color: #0f172a; font-size: 1.2rem; letter-spacing: -0.03em;">📍 ${st}</div>
                                                     ${st === 'CYXU' ? (() => {
                             const rw = getRunwayWinds(m?.wdir, m?.wspd);
                             if (!rw) return '';
@@ -1661,22 +1882,29 @@
                                                         </div>`;
                         })() : ''}
                                                 </div>
-                                                
-                                                <div style="margin-bottom: 1rem;">
-                                                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.4rem;">
-                                                        <div style="font-size: 0.75rem; font-weight: 900; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">📡 METAR</div>
-                                                        <div style="font-size: 0.65rem; font-weight: 850; color: #dc2626; background: #fee2e2; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecaca; margin-bottom: 2px;">⏱️ ${getTimeAgo(m?.reportTime)}</div>
+
+                                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:${state.bananaMode ? '0.85rem' : '0'};">
+                                                    <div>
+                                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+                                                            <div style="font-size:0.7rem;font-weight:900;color:#2563eb;text-transform:uppercase;letter-spacing:0.08em;">📡 METAR</div>
+                                                            ${metarTime ? `<div style="font-size:0.6rem;font-weight:800;color:#64748b">${metarTime} &nbsp;<span style="color:#dc2626">${getTimeAgo(m?.reportTime)}</span></div>` : ''}
+                                                        </div>
+                                                        <div style="font-family:monospace;font-size:0.78rem;color:#1e293b;background:#f8fafc;padding:0.6rem;border-radius:0.5rem;border:1px solid #e2e8f0;line-height:1.5;word-break:break-word">${m ? m.rawOb.trim() : '[N/A]'}</div>
                                                     </div>
-                                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #1e293b; background: #f8fafc; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #e2e8f0; line-height: 1.5;">${state.bananaMode ? decodeMetar(m) : (m ? m.rawOb.trim() : '[N/A]')}</div>
+                                                    <div>
+                                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+                                                            <div style="font-size:0.7rem;font-weight:900;color:#059669;text-transform:uppercase;letter-spacing:0.08em;">📅 TAF</div>
+                                                            ${tafTime ? `<div style="font-size:0.6rem;font-weight:800;color:#64748b">${tafTime} &nbsp;<span style="color:#065f46">${getTimeAgo(t?.issueTime)}</span></div>` : ''}
+                                                        </div>
+                                                        <div style="font-family:monospace;font-size:0.78rem;color:#064e3b;background:#f0fdf9;padding:0.6rem;border-radius:0.5rem;border:1px solid #ccfbf1;line-height:1.5;white-space:pre-wrap;word-break:break-word">${t ? t.rawTAF.trim() : '[N/A]'}</div>
+                                                    </div>
                                                 </div>
 
+                                                ${state.bananaMode ? `
                                                 <div>
-                                                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.4rem;">
-                                                        <div style="font-size: 0.75rem; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 0.1em;">📅 TAF</div>
-                                                        <div style="font-size: 0.65rem; font-weight: 850; color: #065f46; background: #defcf5; padding: 1px 6px; border-radius: 4px; border: 1px solid #ccfbf1; margin-bottom: 2px;">⏱️ ${getTimeAgo(t?.issueTime)}</div>
-                                                    </div>
-                                                    <div style="font-family: ${state.bananaMode ? 'inherit' : 'monospace'}; font-size: 0.85rem; color: #064e3b; background: #f0fdf9; padding: 0.75rem; border-radius: 0.6rem; border: 1px solid #ccfbf1; white-space: pre-line; line-height: 1.5;">${state.bananaMode ? decodeTaf(t) : (t ? t.rawTAF.trim() : '[N/A]')}</div>
-                                                </div>
+                                                    <div style="font-size:0.7rem;font-weight:900;color:#7c3aed;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">🍌 ${state.bananaLang==='tr'?'Muz Analizi':'Banana Analysis'}</div>
+                                                    <div style="border:1px solid #e9d5ff;border-radius:0.6rem;padding:0.75rem;background:#fdfbff">${renderFTEAnalysis(st, m, t, state.bananaLang)}</div>
+                                                </div>` : ''}
                                             </div>
                                         `;
                 }).join('')}
@@ -3218,9 +3446,11 @@
             weatherData: null,
             weatherLoading: false,
             bananaMode: false,
+            bananaLang: 'en',
             showWindy: false,
             sidebarHidden: false,
-            fleetSearch: ''
+            fleetSearch: '',
+            analysisCache: {}
         };
 
         function saveState() {
