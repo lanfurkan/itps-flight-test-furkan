@@ -1,8 +1,8 @@
 const CACHE_NAME = 'ftm-cache-v2';
 const ASSETS = [
-    'index.html',
-    'flight_test_master.html',
-    'manifest.json',
+    './index.html',
+    './flight_test_master.html',
+    './manifest.json',
     'https://cdn-icons-png.flaticon.com/512/753/753235.png'
 ];
 
