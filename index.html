@@ -1197,11 +1197,18 @@
                                 </button>
                             </div>
 
+                            <div style="margin-top: 1rem; text-align: center;">
+                                <button onclick="openChangelog()" style="background: linear-gradient(135deg, #1e3a5f, #1a1a2e); border: 1px solid rgba(255,255,255,0.15); color: #f1f5f9; font-size: 0.78rem; font-weight: 700; padding: 0.5rem 1.2rem; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; letter-spacing: 0.03em; box-shadow: 0 2px 12px rgba(0,0,0,0.3); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                    <span style="font-size:0.8rem;">🛩️</span>
+                                    <span>What's New</span>
+                                    <span style="font-size:0.55rem; font-weight:900; background:linear-gradient(90deg,#f59e0b,#ef4444); color:white; padding:2px 7px; border-radius:10px; letter-spacing:1px;">UPDATE</span>
+                                </button>
+                            </div>
                             <div class="disclaimer-card">
                                 <div class="disclaimer-title">⚠️ Disclaimer</div>
                                 For supportive use only. Verify all values with official POH/AFM. The owner assumes no liability for errors or outcomes.
                             </div>
-                            <div style="margin-top: 1.5rem; text-align: center;">
+                            <div style="margin-top: 1rem; text-align: center;">
                                 <h1 style="font-size: 0.625rem; font-weight: 900; font-family: 'Montserrat', sans-serif; color: #f8fafc; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); margin: 0; text-transform: uppercase; letter-spacing: 0.1em;">Developed by Furkan Yusuf Kılıçer</h1>
                             </div>
                             <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.5rem; display: flex; justify-content: center; gap: 1rem;">
@@ -3646,7 +3653,7 @@
         z-index:999999;
         background:rgba(5,10,20,0.92);
         backdrop-filter:blur(12px);
-        display:flex;align-items:center;justify-content:center;
+        display:none;align-items:center;justify-content:center;
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     ">
         <div id="cl-card" style="
@@ -3789,11 +3796,19 @@
                     d.style.background = i === current ? '#3b82f6' : 'rgba(255,255,255,0.2)';
                     d.style.width = i === current ? '20px' : '8px';
                 });
-                document.getElementById('cl-next').textContent = current === total - 1 ? "Start 🚀" : "Next →";
+                document.getElementById('cl-next').textContent = current === total - 1 ? "Done ✓" : "Next →";
             }
             window.clNext = function () {
                 if (current < total - 1) { current++; updateSlide(); }
                 else { document.getElementById('changelog-overlay').style.display = 'none'; }
+            };
+            window.openChangelog = function () {
+                current = 0;
+                updateSlide();
+                var ol = document.getElementById('changelog-overlay');
+                ol.style.display = 'flex';
+                ol.style.alignItems = 'center';
+                ol.style.justifyContent = 'center';
             };
             updateSlide();
         })();
