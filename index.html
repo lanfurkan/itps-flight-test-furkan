@@ -1182,6 +1182,10 @@
                                     <span class="btn-icon">📄</span>
                                     <span class="btn-text">Documents</span>
                                 </button>
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #0d9488, #0f766e); position: relative;" onclick="openGoProTelemetry()">
+                                    <span class="btn-icon">📈</span>
+                                    <span class="btn-text">Go Pro Data to Graph</span>
+                                </button>
                                 <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #7c3aed, #4c1d95); position: relative;" onclick="renderTracker2026()">
                                     <span style="position: absolute; top: 0.35rem; right: 0.5rem; font-size: 0.55rem; font-weight: 900; background: linear-gradient(90deg,#f59e0b,#ef4444); color: white; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;">BETA</span>
                                     <span class="btn-icon">📋</span>
@@ -3337,6 +3341,14 @@
                                     <span class="btn-text">B787 Users Manual</span>
                                 </button>
                             </a>
+
+                            <!-- GoPro Telemetry Tool -->
+                            <div class="doc-item" data-name="Go Pro Data to Graph GoPro Telemetry GPS" style="cursor: pointer;" onclick="openGoProTelemetry()">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #0d9488, #0f766e); width: 100%;">
+                                    <span class="btn-icon">📈</span>
+                                    <span class="btn-text">Go Pro Data to Graph</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3787,6 +3799,28 @@
     </div>
 
     <script>
+        // ── GoPro Telemetry Tool ──────────────────────────────────────────────
+        function openGoProTelemetry() {
+            var base = window.location.href.replace(/\/[^\/]*$/, '/');
+            var targetUrl = base + 'gopro_data_telemetry.html';
+            // On file:// protocol fetch will fail - just open directly
+            if (window.location.protocol === 'file:') {
+                window.open(targetUrl, '_blank');
+                return;
+            }
+            fetch(targetUrl, { method: 'HEAD' })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.open(targetUrl, '_blank');
+                    } else {
+                        alert('⚠️ gopro_data_telemetry.html bulunamadı.\n\nDosyanın index.html ile aynı klasörde olduğundan emin ol.');
+                    }
+                })
+                .catch(function() {
+                    window.open(targetUrl, '_blank');
+                });
+        }
+
         (function () {
             var total = 4;
             var current = 0;
