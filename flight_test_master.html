@@ -68,10 +68,6 @@
         }
 
         .back-to-dashboard {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
             color: var(--accent);
@@ -791,11 +787,13 @@
 </head>
 
 <body>
-    <button class="back-to-dashboard" onclick="window.location.href='index.html'">🏠 Back to Dashboard</button>
     <div class="dev-footer" style="position:fixed;bottom:6px;right:10px;z-index:999;font-size:11px;">Developed by Furkan YK</div>
 
     <!-- HOME SCREEN -->
-    <div id="homeScreen" class="screen active">
+    <div id="homeScreen" class="screen active" style="position:relative;">
+        <div style="position:absolute;top:16px;left:16px;z-index:10;">
+            <button class="back-to-dashboard" onclick="window.location.href='index.html'">🏠 Back to Dashboard</button>
+        </div>
         <div id="usernameBadge" class="username-badge" style="display: none;">
             <span>👤</span>
             <span id="usernameDisplay">User</span>

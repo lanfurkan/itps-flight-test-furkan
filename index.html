@@ -3342,14 +3342,7 @@
                                 </button>
                             </a>
 
-                            <!-- GoPro Telemetry Tool -->
-                            <div class="doc-item" data-name="Go Pro Data to Graph GoPro Telemetry GPS" style="cursor: pointer;" onclick="openGoProTelemetry()">
-                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #0d9488, #0f766e); width: 100%;">
-                                    <span class="btn-icon">📈</span>
-                                    <span class="btn-text">Go Pro Data to Graph</span>
-                                </button>
-                            </div>
-                        </div>
+                                                 </div>
                     </div>
                 </div>
             `;
@@ -3803,21 +3796,21 @@
         function openGoProTelemetry() {
             var base = window.location.href.replace(/\/[^\/]*$/, '/');
             var targetUrl = base + 'gopro_data_telemetry.html';
-            // On file:// protocol fetch will fail - just open directly
+            // On file:// protocol fetch will fail - just navigate directly
             if (window.location.protocol === 'file:') {
-                window.open(targetUrl, '_blank');
+                window.location.href = targetUrl;
                 return;
             }
             fetch(targetUrl, { method: 'HEAD' })
                 .then(function(res) {
                     if (res.ok) {
-                        window.open(targetUrl, '_blank');
+                        window.location.href = targetUrl;
                     } else {
                         alert('⚠️ gopro_data_telemetry.html bulunamadı.\n\nDosyanın index.html ile aynı klasörde olduğundan emin ol.');
                     }
                 })
                 .catch(function() {
-                    window.open(targetUrl, '_blank');
+                    window.location.href = targetUrl;
                 });
         }
 
