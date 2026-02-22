@@ -162,7 +162,7 @@
         /* Magnetic Field Dashboard Buttons */
         .btn-premium-dashboard {
             position: relative;
-            padding: 1rem 0.75rem;
+            padding: 0.75rem 0.5rem;
             border-radius: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
@@ -190,7 +190,7 @@
 
 
         .btn-premium-dashboard .btn-icon {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             transition: transform 0.3s ease;
         }
 
@@ -407,12 +407,11 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.7rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
             margin-top: 1rem;
             width: 100%;
-            max-width: 380px;
-            /* Narrower for single column */
+            max-width: 480px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -428,8 +427,8 @@
             }
 
             .dashboard-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
             }
 
             .btn-hero .btn-icon {
@@ -1191,11 +1190,15 @@
                                     <span class="btn-icon">📋</span>
                                     <span class="btn-text">2026 Tracker</span>
                                 </button>
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #b91c1c, #7f1d1d); position: relative;" onclick="openPdfDesignTool()">
+                                    <span class="btn-icon">📄</span>
+                                    <span class="btn-text">PDF Design Tool</span>
+                                </button>
                                  <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, rgba(153, 27, 27, 0.6), rgba(127, 29, 29, 0.8));" onclick="window.open('https://portal.itpscanada.com/dashboard/my_calendar', '_blank')">
                                     <span class="btn-icon">🌐</span>
                                     <span class="btn-text">ITPS Portal</span>
                                 </button>
-                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #34d399, #059669); grid-column: span 1;" onclick="window.open('https://www.windy.com/43.030/-81.156/meteogram?43.030,-81.156,9', '_blank')">
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #34d399, #059669);" onclick="window.open('https://www.windy.com/43.030/-81.156/meteogram?43.030,-81.156,9', '_blank')">
                                     <span class="btn-icon">🌐</span>
                                     <span class="btn-text">Windy</span>
                                 </button>
@@ -3792,6 +3795,27 @@
     </div>
 
     <script>
+        // ── PDF Design Tool ──────────────────────────────────────────────────
+        function openPdfDesignTool() {
+            var base = window.location.href.replace(/\/[^\/]*$/, '/');
+            var targetUrl = base + 'pdfdesigntool/index.html';
+            if (window.location.protocol === 'file:') {
+                window.location.href = targetUrl;
+                return;
+            }
+            fetch(targetUrl, { method: 'HEAD' })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.location.href = targetUrl;
+                    } else {
+                        alert('⚠️ PDF Design Tool bulunamadı.\n\npdfdesigntool/ klasörünün index.html ile aynı dizinde olduğundan emin ol.');
+                    }
+                })
+                .catch(function() {
+                    window.location.href = targetUrl;
+                });
+        }
+
         // ── GoPro Telemetry Tool ──────────────────────────────────────────────
         function openGoProTelemetry() {
             var base = window.location.href.replace(/\/[^\/]*$/, '/');
