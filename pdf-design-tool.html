@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PDF Design Tool</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo"><span class="logo-icon">⬡</span><span class="logo-text">PDF Design</span></div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-tool="merge"><span class="nav-icon">⊞</span><span>Merge PDF</span></li>
+      <li class="nav-item" data-tool="split"><span class="nav-icon">⊟</span><span>Split PDF</span></li>
+      <li class="nav-item" data-tool="transform"><span class="nav-icon">✦</span><span>Rotate / Crop / Resize</span></li>
+      <li class="nav-item" data-tool="word"><span class="nav-icon">W</span><span>Word → PDF</span></li>
+      <li class="nav-item" data-tool="compress"><span class="nav-icon">⊡</span><span>Compress PDF</span></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-badge">Client-Side Only</div>
+      <p>Dosyalar cihazınızdan çıkmaz</p>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    <!-- ======== MERGE ======== -->
+    <section id="tool-merge" class="tool-section active">
+      <div class="tool-header">
+        <h1>Merge PDF</h1>
+        <p>Birden fazla PDF yükle, dosya veya sayfa sırasını sürükleyerek ayarla, birleştir.</p>
+      </div>
+      <div class="drop-zone" id="merge-drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">⊞</div>
+          <p class="drop-title">PDF dosyalarını buraya bırak</p>
+          <p class="drop-sub">veya tıkla — birden fazla seçilebilir</p>
+          <input type="file" id="merge-file-input" multiple accept=".pdf" hidden/>
+        </div>
+      </div>
+      <div id="merge-workspace" style="display:none">
+        <div class="toolbar-bar">
+          <span id="merge-file-count" class="badge">0 dosya</span>
+          <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
+            <button class="btn btn-ghost" id="merge-view-toggle">🔲 Sayfa Görünümü</button>
+            <button class="btn btn-ghost" id="merge-clear-btn">Temizle</button>
+            <button class="btn btn-primary" id="merge-btn">⊞ Birleştir &amp; İndir</button>
+          </div>
+        </div>
+        <div id="merge-file-view">
+          <p class="hint-text" style="margin-bottom:10px">⠿ İşaretine tutup sürükle → sırayı değiştir &nbsp;|&nbsp; ✕ Dosyayı kaldır</p>
+          <div id="merge-file-list" class="sortable-list"></div>
+        </div>
+        <div id="merge-page-view" style="display:none">
+          <p class="hint-text" style="margin-bottom:10px">Sayfaları sürükle-bırak ile sırala &nbsp;|&nbsp; ✕ Sayfayı sil</p>
+          <div id="merge-page-grid" class="page-sort-grid"></div>
+        </div>
+      </div>
+      <div id="merge-progress" class="progress-container" style="display:none">
+        <div class="progress-bar"><div class="progress-fill" id="merge-progress-fill"></div></div>
+        <p id="merge-progress-text">İşleniyor...</p>
+      </div>
+      <div id="merge-result" class="result-box" style="display:none"></div>
+    </section>
+
+    <!-- ======== SPLIT ======== -->
+    <section id="tool-split" class="tool-section">
+      <div class="tool-header">
+        <h1>Split PDF</h1>
+        <p>Sayfalara tıkla, seç, tek PDF veya ZIP olarak indir.</p>
+      </div>
+      <div class="drop-zone" id="split-drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">⊟</div>
+          <p class="drop-title">PDF dosyasını buraya bırak</p>
+          <p class="drop-sub">veya tıkla</p>
+          <input type="file" id="split-file-input" accept=".pdf" hidden/>
+        </div>
+      </div>
+      <div id="split-workspace" style="display:none">
+        <div class="toolbar-bar">
+          <span id="split-info" class="badge"></span>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button class="btn btn-ghost" id="split-select-all">Tümünü Seç</button>
+            <button class="btn btn-ghost" id="split-select-none">Seçimi Temizle</button>
+          </div>
+        </div>
+        <div id="split-sel-bar" class="selection-bar" style="display:none">
+          <span id="split-sel-count" class="sel-count-text"></span>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button class="btn btn-primary" id="split-dl-one">⬇ Tek PDF</button>
+            <button class="btn btn-secondary" id="split-dl-zip">⬇ ZIP</button>
+          </div>
+        </div>
+        <div id="split-grid" class="page-sort-grid"></div>
+      </div>
+      <div id="split-progress" class="progress-container" style="display:none">
+        <div class="progress-bar"><div class="progress-fill" id="split-progress-fill"></div></div>
+        <p id="split-progress-text">İşleniyor...</p>
+      </div>
+      <div id="split-result" class="result-box" style="display:none"></div>
+    </section>
+
+    <!-- ======== COMPRESS ======== -->
+    <section id="tool-compress" class="tool-section">
+      <div class="tool-header"><h1>Compress PDF</h1><p>Dosya boyutunu küçült.</p></div>
+      <div class="drop-zone" id="compress-drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">⊡</div>
+          <p class="drop-title">PDF dosyasını buraya bırak</p>
+          <p class="drop-sub">veya tıkla</p>
+          <input type="file" id="compress-file-input" accept=".pdf" hidden/>
+        </div>
+      </div>
+      <div id="compress-options" style="display:none">
+        <div class="file-info-bar">
+          <span id="compress-filename" class="file-name-label"></span>
+          <span id="compress-original-size" class="badge"></span>
+        </div>
+        <div class="options-card">
+          <h3>Sıkıştırma Seviyesi</h3>
+          <div class="compression-levels">
+            <label class="level-card"><input type="radio" name="compress-level" value="low"/>
+              <div class="level-content"><div class="level-title">Düşük</div><div class="level-desc">~%20 küçülme</div></div></label>
+            <label class="level-card selected"><input type="radio" name="compress-level" value="medium" checked/>
+              <div class="level-content"><div class="level-title">Orta</div><div class="level-desc">~%40 küçülme</div></div></label>
+            <label class="level-card"><input type="radio" name="compress-level" value="high"/>
+              <div class="level-content"><div class="level-title">Yüksek</div><div class="level-desc">~%60 küçülme</div></div></label>
+          </div>
+          <label class="check-label" style="margin-top:14px">
+            <input type="checkbox" id="compress-metadata" checked/><span class="check-custom"></span>Metadata kaldır
+          </label>
+        </div>
+        <div class="action-bar"><button class="btn btn-primary" id="compress-btn">Sıkıştır &amp; İndir</button></div>
+      </div>
+      <div id="compress-progress" class="progress-container" style="display:none">
+        <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill"></div></div>
+        <p id="compress-progress-text">Sıkıştırılıyor...</p>
+      </div>
+      <div id="compress-result" class="result-box" style="display:none"></div>
+    </section>
+
+    <!-- ======== TRANSFORM (Rotate + Crop + Resize) ======== -->
+    <section id="tool-transform" class="tool-section">
+      <div class="tool-header">
+        <h1>Rotate / Crop / Resize</h1>
+        <p>Click pages to select them. Choose an operation with the tabs below.</p>
+      </div>
+      <div class="drop-zone" id="tf-drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">✦</div>
+          <p class="drop-title">Drop a PDF file here</p>
+          <p class="drop-sub">or click to browse</p>
+          <input type="file" id="tf-file-input" accept=".pdf" hidden/>
+        </div>
+      </div>
+
+      <div id="tf-workspace" style="display:none">
+        <div class="toolbar-bar">
+          <span id="tf-info" class="badge"></span>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button class="btn btn-ghost" id="tf-sel-all">Select All</button>
+            <button class="btn btn-ghost" id="tf-sel-none">Clear Selection</button>
+          </div>
+        </div>
+        <div id="tf-sel-bar" class="selection-bar" style="display:none">
+          <span id="tf-sel-count" class="sel-count-text"></span>
+          <span style="color:var(--text-muted);font-size:12px;margin-left:4px">(if none selected, all pages are affected)</span>
+        </div>
+
+        <div class="tf-main-layout">
+          <div class="tf-left">
+            <p class="hint-text" style="margin-bottom:8px">Click a page → preview &amp; select</p>
+            <div id="tf-grid" class="page-sort-grid tf-grid"></div>
+          </div>
+
+          <div class="tf-right">
+            <div class="preview-nav">
+              <button class="btn btn-ghost" id="tf-prev-page">‹</button>
+              <span id="tf-page-ind" style="font-size:13px;color:var(--text-muted)">1 / 1</span>
+              <button class="btn btn-ghost" id="tf-next-page">›</button>
+              <span class="hint-text" style="margin-left:8px">Preview</span>
+            </div>
+            <div class="tf-canvas-wrap">
+              <canvas id="tf-preview-canvas"></canvas>
+            </div>
+
+            <!-- Tabs -->
+            <div class="op-tabs">
+              <button class="op-tab-btn active" data-panel="rotate">↻ Rotate</button>
+              <button class="op-tab-btn" data-panel="crop">⊠ Crop</button>
+              <button class="op-tab-btn" data-panel="resize">⇲ Resize</button>
+            </div>
+
+            <!-- ROTATE Panel -->
+            <div class="op-panel active" id="op-panel-rotate">
+              <div class="op-card">
+                <div class="op-card-header">
+                  <span class="op-title">↻ Rotate</span>
+                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                    <button class="rot-deg-btn" data-deg="90">90°</button>
+                    <button class="rot-deg-btn" data-deg="180">180°</button>
+                    <button class="rot-deg-btn" data-deg="270">270°</button>
+                    <button class="btn btn-ghost btn-sm" id="rot-reset-btn">↺ Reset</button>
+                    <button class="btn btn-primary btn-sm" id="rot-apply-btn">Apply</button>
+                    <button class="btn btn-download btn-sm" id="rot-dl-btn" disabled>⬇ Download</button>
+                  </div>
+                </div>
+                <div style="display:flex;gap:16px;margin-top:8px;align-items:center">
+                  <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;margin:0">
+                    <input type="radio" name="rot-scope" value="all" checked/> All pages
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;margin:0">
+                    <input type="radio" name="rot-scope" value="selected"/> Selected pages only
+                  </label>
+                </div>
+                <div id="rot-progress" class="progress-container" style="display:none;margin-top:8px">
+                  <div class="progress-bar"><div class="progress-fill" id="rot-progress-fill"></div></div>
+                  <p id="rot-progress-text"></p>
+                </div>
+                <div id="rot-result" style="display:none;margin-top:8px"></div>
+              </div>
+            </div>
+
+            <!-- CROP Panel -->
+            <div class="op-panel" id="op-panel-crop">
+              <div class="op-card">
+                <div class="op-card-header">
+                  <span class="op-title">⊠ Crop</span>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <button class="btn btn-ghost btn-sm" id="crop-clear-btn">Clear</button>
+                    <button class="btn btn-primary btn-sm" id="crop-apply-btn">Apply</button>
+                    <button class="btn btn-download btn-sm" id="crop-dl-btn" disabled>⬇ Download</button>
+                  </div>
+                </div>
+                <p class="hint-text" style="margin:6px 0 10px">Drag on the canvas or enter margin values (pt)</p>
+                <div class="margin-grid">
+                  <div></div>
+                  <div class="margin-input-wrap"><label>Top</label><input type="number" id="tf-top" class="margin-input" value="0" min="0"/></div>
+                  <div></div>
+                  <div class="margin-input-wrap"><label>Left</label><input type="number" id="tf-left" class="margin-input" value="0" min="0"/></div>
+                  <div class="margin-center">✦</div>
+                  <div class="margin-input-wrap"><label>Right</label><input type="number" id="tf-right" class="margin-input" value="0" min="0"/></div>
+                  <div></div>
+                  <div class="margin-input-wrap"><label>Bottom</label><input type="number" id="tf-bottom" class="margin-input" value="0" min="0"/></div>
+                  <div></div>
+                </div>
+                <div id="crop-progress" class="progress-container" style="display:none;margin-top:8px">
+                  <div class="progress-bar"><div class="progress-fill" id="crop-progress-fill"></div></div>
+                  <p id="crop-progress-text"></p>
+                </div>
+                <div id="crop-result" style="display:none;margin-top:8px"></div>
+              </div>
+            </div>
+
+            <!-- RESIZE Panel -->
+            <div class="op-panel" id="op-panel-resize">
+              <div class="op-card">
+                <div class="op-card-header">
+                  <span class="op-title">⇲ Resize</span>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <button class="btn btn-primary btn-sm" id="resize-apply-btn">Apply</button>
+                    <button class="btn btn-download btn-sm" id="resize-dl-btn" disabled>⬇ Download</button>
+                  </div>
+                </div>
+                <select id="tf-preset" class="select-input" style="margin-top:8px">
+                  <option value="none">Select a size...</option>
+                  <option value="a4">A4 (595×842 pt)</option>
+                  <option value="letter">Letter (612×792 pt)</option>
+                  <option value="a3">A3 (842×1190 pt)</option>
+                  <option value="custom">Custom size</option>
+                </select>
+                <div id="tf-custom-dims" style="display:none;margin-top:10px;gap:8px">
+                  <div style="display:flex;gap:8px">
+                    <div><label>Width (pt)</label><input type="number" id="tf-cw" class="text-input" value="595"/></div>
+                    <div><label>Height (pt)</label><input type="number" id="tf-ch" class="text-input" value="842"/></div>
+                  </div>
+                </div>
+                <div id="resize-progress" class="progress-container" style="display:none;margin-top:8px">
+                  <div class="progress-bar"><div class="progress-fill" id="resize-progress-fill"></div></div>
+                  <p id="resize-progress-text"></p>
+                </div>
+                <div id="resize-result" style="display:none;margin-top:8px"></div>
+              </div>
+            </div>
+
+          </div><!-- tf-right -->
+        </div><!-- tf-main-layout -->
+      </div><!-- tf-workspace -->
+    </section>
+
+    <!-- ======== WORD TO PDF ======== -->
+    <section id="tool-word" class="tool-section">
+      <div class="tool-header">
+        <h1>Word → PDF</h1>
+        <p>.docx dosyasını PDF'e dönüştür. A4 önizleme ile belgeni kontrol et.</p>
+      </div>
+      <div class="drop-zone" id="word-drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">W</div>
+          <p class="drop-title">.docx dosyasını buraya bırak</p>
+          <p class="drop-sub">veya tıkla</p>
+          <input type="file" id="word-file-input" accept=".docx" hidden/>
+        </div>
+      </div>
+      <div id="word-workspace" style="display:none">
+        <div class="toolbar-bar">
+          <span id="word-filename" class="file-name-label"></span>
+          <button class="btn btn-primary" id="word-convert-btn" style="margin-left:auto">⬇ PDF'e Dönüştür</button>
+        </div>
+        <div class="options-card">
+          <h3>Belge Önizleme (A4)</h3>
+          <div id="word-preview"></div>
+        </div>
+      </div>
+      <div id="word-progress" class="progress-container" style="display:none">
+        <div class="progress-bar"><div class="progress-fill" id="word-progress-fill"></div></div>
+        <p id="word-progress-text">Dönüştürülüyor...</p>
+      </div>
+      <div id="word-result" class="result-box" style="display:none"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
+      document.querySelectorAll('.tool-section').forEach(function(s){s.classList.remove('active');});
+      item.classList.add('active');
+      document.getElementById('tool-'+item.dataset.tool).classList.add('active');
+    });
+  });
+  // Op tabs for transform section
+  document.querySelectorAll('.op-tab-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.op-tab-btn').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('.op-panel').forEach(function(p){p.classList.remove('active');});
+      btn.classList.add('active');
+      document.getElementById('op-panel-'+btn.dataset.panel).classList.add('active');
+    });
+  });
+</script>
+<script src="utils.js"></script>
+<script src="merge.js"></script>
+<script src="split.js"></script>
+<script src="compress.js"></script>
+<script src="transform.js"></script>
+<script src="wordtopdf.js"></script>
+</body>
+</html>
