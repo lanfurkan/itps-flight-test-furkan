@@ -2009,14 +2009,13 @@
                 .slice()
                 .filter(p => !p.isManual)
                 .filter(p => p.name.toLowerCase().includes(state.personnelSearch.toLowerCase()) || p.call.toLowerCase().includes(state.personnelSearch.toLowerCase()))
-                .sort((a, b) => a.name.localeCompare(b.name))
+                .sort((a, b) => a.call.localeCompare(b.call))
                 .map(p => `
                         <div class="personnel-list-item">
                             <div class="personnel-info">
-                                <span class="personnel-name">${p.name}</span>
+                                <span class="personnel-name">${p.call}</span>
                                 <span class="personnel-weight">${p.weight !== null ? p.weight + ' lb' : '[N/A]'}</span>
                             </div>
-                            <span class="personnel-call">${p.call}</span>
                         </div>
                     `).join('');
         }
@@ -2032,18 +2031,18 @@
                 if (manualIdx !== -1) {
                     const p = aircraftDatabase.personnel[manualIdx];
                     const isSelected = selectedIdx !== "" && parseInt(selectedIdx) === manualIdx;
-                    options += `<option value="${manualIdx}" ${isSelected ? 'selected' : ''}>✍️ ${p.name}</option>`;
+                    options += `<option value="${manualIdx}" ${isSelected ? 'selected' : ''}>✍️ ${p.call}</option>`;
                 }
 
                 const sortedPersonnel = aircraftDatabase.personnel
                     .map((p, idx) => ({ ...p, originalIdx: idx }))
                     .filter(p => !p.isManual) // Exclude manual from sorted list
-                    .sort((a, b) => a.name.localeCompare(b.name));
+                    .sort((a, b) => a.call.localeCompare(b.call));
 
                 options += sortedPersonnel.map(p => {
                     const isSelected = selectedIdx !== "" && parseInt(selectedIdx) === p.originalIdx;
                     const weightStr = p.weight !== null ? ` (${p.weight} lb)` : ' [N/A]';
-                    return `<option value="${p.originalIdx}" ${isSelected ? 'selected' : ''}>${p.name} (${p.call})${weightStr}</option>`;
+                    return `<option value="${p.originalIdx}" ${isSelected ? 'selected' : ''}>${p.call}${weightStr}</option>`;
                 }).join('');
                 return options;
             };
@@ -2052,7 +2051,7 @@
                 if (id === "" || id === null) return '';
                 const person = aircraftDatabase.personnel[id];
                 if (person && (person.weight === null || person.isManual)) {
-                    const label = person.isManual ? "No name entry. Enter weight (lb):" : `Weight unknown for ${person.name}. Enter weight (lb):`;
+                    const label = person.isManual ? "No name entry. Enter weight (lb):" : `Weight unknown for ${person.call}. Enter weight (lb):`;
                     const uniqueKey = `${field}-${id}`;
                     return `
                         <div class="manual-weight-prompt">
@@ -2158,7 +2157,7 @@
                     } else {
                         frontSeatsWeight += weight;
                         const weightLabel = person.weight !== null ? `${person.weight} lb` : `${weight} lb`;
-                        frontSeatsNames.push(`${person.name} (${weightLabel}) FS-${item.pos}`);
+                        frontSeatsNames.push(`${person.call} (${weightLabel}) FS-${item.pos}`);
                     }
                 }
             });
@@ -2184,7 +2183,7 @@
                     } else {
                         centreSeatsWeight += weight;
                         const weightLabel = person.weight !== null ? `${person.weight} lb` : `${weight} lb`;
-                        centreSeatsNames.push(`${person.name} (${weightLabel}) CS-${item.pos}`);
+                        centreSeatsNames.push(`${person.call} (${weightLabel}) CS-${item.pos}`);
                     }
                 }
             });
@@ -2205,7 +2204,7 @@
                 } else {
                     totalWeight += weight;
                     const weightLabel = person.weight !== null ? `${person.weight} lb` : `${weight} lb`;
-                    breakdown.push(`<span>Rear Seat:</span> <b>${person.name} (${weightLabel})</b>`);
+                    breakdown.push(`<span>Rear Seat:</span> <b>${person.call} (${weightLabel})</b>`);
                 }
             }
 
