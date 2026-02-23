@@ -1202,6 +1202,10 @@
                                     <span class="btn-icon">🌐</span>
                                     <span class="btn-text">Windy</span>
                                 </button>
+                                <button class="btn-premium-dashboard" style="background: linear-gradient(135deg, #4c1d95, #312e81);" onclick="openFocusTimer()">
+                                    <span class="btn-icon">⏱️</span>
+                                    <span class="btn-text">Focus Timer</span>
+                                </button>
                             </div>
 
                             <div style="margin-top: 1rem; text-align: center;">
@@ -3794,6 +3798,11 @@
     </div>
 
     <script>
+        // ── Focus Timer ──────────────────────────────────────────────────────
+        function openFocusTimer() {
+            window.location.href = 'focus.html';
+        }
+
         // ── PDF Design Tool ──────────────────────────────────────────────────
         function openPdfDesignTool() {
             var base = window.location.href.replace(/\/[^\/]*$/, '/');

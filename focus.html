@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOCUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #ffffff0f;
+    --border-hover: #ffffff1a;
+    --accent: #7c6dfa;
+    --accent2: #fa6d6d;
+    --accent3: #6dfabd;
+    --banana: #fbbf24;
+    --banana-glow: rgba(251,191,36,0.25);
+    --text: #e8e8f0;
+    --muted: #5a5a72;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image: linear-gradient(rgba(124,109,250,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(124,109,250,0.03) 1px,transparent 1px);
+    background-size:40px 40px; pointer-events:none; z-index:0;
+  }
+  .app { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:32px 20px 80px; }
+
+  /* HEADER */
+  header { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; flex-wrap:wrap; gap:12px; }
+  .back-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--muted); font-family:var(--sans); font-size:13px; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; gap:6px; }
+  .back-btn:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+  .logo { font-family:var(--mono); font-size:18px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; }
+  .logo span { color:var(--muted); }
+  .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+  .date-display { font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:1px; }
+  .save-indicator { font-family:var(--mono); font-size:10px; color:var(--accent3); opacity:0; transition:opacity 0.4s; }
+  .save-indicator.visible { opacity:1; }
+
+  /* BANANA COUNTER in header */
+  .banana-header {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2);
+    border-radius:20px; padding:6px 14px; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .banana-header:hover { background:rgba(251,191,36,0.14); }
+  .banana-header-count { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--banana); }
+  .banana-header-label { font-size:11px; color:var(--muted); }
+
+  /* TABS */
+  .tabs { display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:32px; }
+  .tab { flex:1; padding:10px; background:transparent; border:none; color:var(--muted); font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; border-radius:9px; transition:all 0.2s; }
+  .tab.active { background:var(--surface2); color:var(--text); border:1px solid var(--border-hover); }
+
+  .panel { display:none; }
+  .panel.active { display:block; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* TIMER CARD */
+  .timer-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:48px 40px; text-align:center; position:relative; overflow:hidden; margin-bottom:20px; }
+  .timer-card::after { content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%); width:300px; height:300px; background:radial-gradient(circle,rgba(124,109,250,0.08) 0%,transparent 70%); pointer-events:none; }
+  .timer-label { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:24px; font-family:var(--mono); }
+  .timer-display { font-family:var(--mono); font-size:clamp(64px,12vw,96px); font-weight:700; color:var(--text); letter-spacing:-2px; line-height:1; margin-bottom:8px; transition:color 0.3s; }
+  .timer-display.running { color:var(--accent); }
+  .timer-display.break-mode { color:var(--accent3); }
+  .timer-ms { font-family:var(--mono); font-size:28px; color:var(--muted); letter-spacing:1px; }
+
+  /* BUTTONS */
+  .controls { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+  .btn { padding:12px 28px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:var(--sans); font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .btn:hover { border-color:var(--border-hover); background:var(--surface2); transform:translateY(-1px); }
+  .btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; min-width:120px; }
+  .btn-primary:hover { background:#8d7ffb; border-color:#8d7ffb; }
+  .btn-danger { border-color:rgba(250,109,109,0.3); color:var(--accent2); }
+  .btn-danger:hover { background:rgba(250,109,109,0.1); border-color:var(--accent2); }
+
+  /* STATS */
+  .stats-bar { display:flex; gap:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:24px; flex-wrap:wrap; }
+  .stat { flex:1; min-width:110px; text-align:center; }
+  .stat-value { font-family:var(--mono); font-size:22px; color:var(--accent); margin-bottom:4px; }
+  .stat-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+
+  /* LAPS */
+  .laps-container { max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-top:16px; }
+  .laps-container::-webkit-scrollbar { width:4px; }
+  .laps-container::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:2px; }
+  .lap-item { display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-family:var(--mono); font-size:13px; animation:slideIn 0.2s ease; }
+  .lap-num { color:var(--muted); }
+  .lap-time { color:var(--text); }
+  .lap-split { color:var(--accent); font-size:12px; }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+
+  /* POMODORO */
+  .progress-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:320px; height:320px; opacity:0.15; pointer-events:none; }
+  .ring-circle { fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:942; stroke-dashoffset:942; stroke-linecap:round; transform:rotate(-90deg); transform-origin:center; transition:stroke-dashoffset 1s linear; }
+  .pomo-mode { display:inline-flex; align-items:center; gap:8px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--muted); margin-bottom:20px; }
+  .pomo-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); }
+  .pomo-sessions { display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+  .session-dot { width:8px; height:8px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); transition:all 0.3s; }
+  .session-dot.done { background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px rgba(124,109,250,0.5); }
+
+  /* WORKING ON INPUT */
+  .working-on-wrap { margin-bottom:20px; }
+  .working-on-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-family:var(--mono); margin-bottom:8px; display:block; }
+  .working-on-input {
+    width:100%; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:12px 16px; color:var(--text); font-family:var(--sans); font-size:14px; outline:none;
+    transition:border-color 0.2s; text-align:center;
+  }
+  .working-on-input:focus { border-color:var(--accent); }
+  .working-on-input::placeholder { color:var(--muted); }
+  /* Display current task inside timer card */
+  .current-focus-tag {
+    display:inline-block; background:rgba(124,109,250,0.1); border:1px solid rgba(124,109,250,0.25);
+    border-radius:20px; padding:4px 14px; font-size:12px; color:var(--accent);
+    margin-bottom:20px; max-width:90%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .current-focus-tag.hidden { display:none; }
+
+  .pomo-settings { display:flex; gap:12px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
+  .setting-chip { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:12px; color:var(--muted); }
+  .setting-chip input { width:40px; background:transparent; border:none; color:var(--text); font-family:var(--mono); font-size:13px; text-align:center; outline:none; }
+  .top-controls { display:flex; justify-content:flex-end; margin-bottom:16px; gap:16px; align-items:center; }
+  .sound-toggle { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); cursor:pointer; user-select:none; }
+  .toggle-switch { width:32px; height:18px; background:var(--surface2); border:1px solid var(--border-hover); border-radius:9px; position:relative; transition:all 0.2s; }
+  .toggle-switch::after { content:''; position:absolute; width:12px; height:12px; border-radius:50%; background:var(--muted); top:2px; left:2px; transition:all 0.2s; }
+  .toggle-switch.on { background:var(--accent); border-color:var(--accent); }
+  .toggle-switch.on::after { left:16px; background:#fff; }
+
+  /* BANANA PANEL */
+  .banana-panel {
+    background:var(--surface); border:1px solid rgba(251,191,36,0.15);
+    border-radius:20px; padding:32px; text-align:center; margin-bottom:24px;
+  }
+  .banana-big { font-size:64px; line-height:1; margin-bottom:12px; }
+  .banana-count-big { font-family:var(--mono); font-size:48px; font-weight:700; color:var(--banana); margin-bottom:6px; }
+  .banana-count-label { font-size:13px; color:var(--muted); margin-bottom:24px; }
+  .banana-grid { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-height:160px; overflow-y:auto; padding:4px; }
+  .banana-grid::-webkit-scrollbar { width:4px; }
+  .banana-grid::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:2px; }
+  .banana-single { font-size:24px; animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes popIn { from{opacity:0;transform:scale(0)} to{opacity:1;transform:scale(1)} }
+
+  .banana-log { margin-top:20px; }
+  .banana-log-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); font-family:var(--mono); margin-bottom:12px; }
+  .banana-log-list { display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; }
+  .banana-log-list::-webkit-scrollbar { width:4px; }
+  .banana-log-list::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:2px; }
+  .banana-log-item { display:flex; align-items:center; gap:10px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; animation:slideIn 0.3s ease; }
+  .banana-log-emoji { font-size:16px; }
+  .banana-log-text { flex:1; font-size:13px; color:var(--text); }
+  .banana-log-time { font-family:var(--mono); font-size:11px; color:var(--muted); }
+
+  /* BANANA TOAST */
+  .banana-toast {
+    position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.4);
+    border-radius:16px; padding:16px 28px; text-align:center;
+    backdrop-filter:blur(12px); z-index:1000;
+    transition:transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s;
+    opacity:0; pointer-events:none;
+  }
+  .banana-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+  .banana-toast-emoji { font-size:36px; display:block; margin-bottom:6px; }
+  .banana-toast-msg { font-family:var(--mono); font-size:14px; color:var(--banana); }
+  .banana-toast-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+
+  /* TASKS */
+  .section-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; font-family:var(--mono); }
+  .task-input-row { display:flex; gap:10px; margin-bottom:24px; }
+  .task-input { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; color:var(--text); font-family:var(--sans); font-size:14px; outline:none; transition:border-color 0.2s; }
+  .task-input:focus { border-color:var(--accent); }
+  .task-input::placeholder { color:var(--muted); }
+  .task-list { display:flex; flex-direction:column; gap:8px; }
+  .task-item { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; align-items:center; gap:12px; transition:all 0.2s; animation:slideIn 0.3s ease; }
+  .task-item:hover { border-color:var(--border-hover); }
+  .task-item.active { border-color:rgba(124,109,250,0.4); background:rgba(124,109,250,0.05); }
+  .task-check { width:18px; height:18px; border-radius:50%; border:2px solid var(--border-hover); cursor:pointer; flex-shrink:0; transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
+  .task-check:hover { border-color:var(--accent); }
+  .task-check.done { background:var(--accent); border-color:var(--accent); }
+  .task-check.done::after { content:'✓'; font-size:10px; color:#fff; }
+  .task-name { flex:1; font-size:14px; }
+  .task-name.done { color:var(--muted); text-decoration:line-through; }
+  .task-time-display { font-family:var(--mono); font-size:13px; color:var(--accent); min-width:70px; text-align:right; }
+  .task-timer-btn { width:28px; height:28px; border-radius:7px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .task-timer-btn:hover, .task-timer-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .task-del { width:28px; height:28px; border-radius:7px; border:1px solid transparent; background:transparent; color:var(--muted); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .task-del:hover { color:var(--accent2); border-color:rgba(250,109,109,0.3); }
+  .empty-state { text-align:center; color:var(--muted); font-size:13px; padding:32px; border:1px dashed var(--border); border-radius:12px; }
+  .danger-zone { margin-top:32px; padding-top:24px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .danger-zone p { font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- BANANA TOAST -->
+<div class="banana-toast" id="bananaToast">
+  <span class="banana-toast-emoji">🍌</span>
+  <div class="banana-toast-msg">You earned a banana!</div>
+  <div class="banana-toast-sub" id="bananaToastSub"></div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="logo">FOCUS</div>
+      <a class="back-btn" href="index.html">← Back</a>
+    <div class="header-right">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
+        <div class="banana-header" onclick="switchTab('bananas')">
+          <span>🍌</span>
+          <span class="banana-header-count" id="bananaHeaderCount">0</span>
+          <span class="banana-header-label">bananas</span>
+        </div>
+        <div>
+          <div class="date-display" id="dateDisplay"></div>
+          <div class="save-indicator" id="saveIndicator">💾 Saved</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('stopwatch')">⏱ Stopwatch</button>
+    <button class="tab" onclick="switchTab('pomodoro')">🍅 Pomodoro</button>
+    <button class="tab" onclick="switchTab('tasks')">📋 Tasks</button>
+    <button class="tab" onclick="switchTab('bananas')">🍌 Bananas</button>
+  </div>
+
+  <!-- STOPWATCH -->
+  <div class="panel active" id="panel-stopwatch">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-value" id="sw-laps-count">0</div><div class="stat-label">Laps</div></div>
+      <div class="stat"><div class="stat-value" id="sw-best-lap">--:--</div><div class="stat-label">Best Lap</div></div>
+      <div class="stat"><div class="stat-value" id="sw-avg-lap">--:--</div><div class="stat-label">Avg Lap</div></div>
+    </div>
+    <div class="timer-card">
+      <div class="timer-label">STOPWATCH</div>
+      <div class="timer-display" id="sw-display">00:00</div>
+      <div class="timer-ms" id="sw-ms">.000</div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-danger" onclick="swReset()">Reset</button>
+      <button class="btn btn-primary" id="sw-start-btn" onclick="swToggle()">Start</button>
+      <button class="btn" id="sw-lap-btn" onclick="swLap()" disabled>Lap</button>
+    </div>
+    <div id="sw-laps-container" class="laps-container"></div>
+  </div>
+
+  <!-- POMODORO -->
+  <div class="panel" id="panel-pomodoro">
+    <div class="top-controls">
+      <label class="sound-toggle" onclick="toggleSound()">
+        <div class="toggle-switch on" id="soundToggle"></div>
+        Sound alerts
+      </label>
+    </div>
+
+    <!-- Working on input -->
+    <div class="working-on-wrap">
+      <span class="working-on-label">Working on</span>
+      <input class="working-on-input" id="workingOnInput" placeholder="What are you focusing on? (optional)" oninput="onWorkingOnChange()">
+    </div>
+
+    <div class="pomo-sessions" id="pomo-sessions">
+      <div class="session-dot"></div><div class="session-dot"></div>
+      <div class="session-dot"></div><div class="session-dot"></div>
+    </div>
+
+    <div class="timer-card" style="position:relative;">
+      <svg class="progress-ring" viewBox="0 0 320 320">
+        <circle class="ring-circle" id="pomoRing" cx="160" cy="160" r="150"/>
+      </svg>
+      <div class="pomo-mode" id="pomoMode">
+        <div class="pomo-dot" id="pomoDot"></div>
+        <span id="pomoModeText">Focus Time</span>
+      </div>
+      <div class="current-focus-tag hidden" id="currentFocusTag"></div>
+      <div class="timer-display" id="pomo-display">25:00</div>
+    </div>
+
+    <div class="pomo-settings">
+      <div class="setting-chip">⚡ Work <input type="number" id="workMin" value="25" min="1" max="60" onchange="pomoReset()"> min</div>
+      <div class="setting-chip">☕ Short break <input type="number" id="shortMin" value="5" min="1" max="30" onchange="pomoReset()"> min</div>
+      <div class="setting-chip">🌙 Long break <input type="number" id="longMin" value="15" min="1" max="60" onchange="pomoReset()"> min</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-danger" onclick="pomoReset()">Reset</button>
+      <button class="btn btn-primary" id="pomo-btn" onclick="pomoToggle()">Start</button>
+      <button class="btn" onclick="pomoSkip()">Skip →</button>
+    </div>
+
+    <div class="stats-bar" style="margin-top:20px;">
+      <div class="stat"><div class="stat-value" id="pomo-sessions-done">0</div><div class="stat-label">Sessions Done</div></div>
+      <div class="stat"><div class="stat-value" id="pomo-total-focus">0:00</div><div class="stat-label">Total Focus</div></div>
+      <div class="stat"><div class="stat-value" id="pomo-banana-count">0 🍌</div><div class="stat-label">Bananas Earned</div></div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="panel" id="panel-tasks">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-value" id="tasks-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-value" id="tasks-done-count">0</div><div class="stat-label">Done</div></div>
+      <div class="stat"><div class="stat-value" id="tasks-total-time">0:00:00</div><div class="stat-label">Time Logged</div></div>
+    </div>
+    <div class="task-input-row">
+      <input class="task-input" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key==='Enter'){addTask()}">
+      <button class="btn btn-primary" onclick="addTask()">+ Add</button>
+    </div>
+    <div class="section-title">Tasks</div>
+    <div class="task-list" id="taskList">
+      <div class="empty-state" id="emptyState">No tasks yet.<br>Add one to start tracking your time.</div>
+    </div>
+    <div class="danger-zone">
+      <p>⚠️ Permanently deletes all your local data.</p>
+      <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+    </div>
+  </div>
+
+  <!-- BANANAS -->
+  <div class="panel" id="panel-bananas">
+    <div class="banana-panel">
+      <div class="banana-big">🍌</div>
+      <div class="banana-count-big" id="bananaBigCount">0</div>
+      <div class="banana-count-label">bananas earned from completed pomodoros</div>
+      <div class="banana-grid" id="bananaGrid"></div>
+    </div>
+    <div class="banana-log">
+      <div class="banana-log-title">Banana Log</div>
+      <div class="banana-log-list" id="bananaLogList">
+        <div class="empty-state">Complete a 🍅 pomodoro to earn your first banana!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================
+// STORAGE
+// ========================
+const STORAGE_KEY = 'focusflow_v2';
+
+function saveAll() {
+  const data = {
+    tasks, pomoSession, pomoTotalFocus, laps, soundEnabled, bananas, bananaLog,
+    workMin: parseInt(document.getElementById('workMin').value),
+    shortMin: parseInt(document.getElementById('shortMin').value),
+    longMin: parseInt(document.getElementById('longMin').value),
+    savedAt: Date.now()
+  };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); showSaveIndicator(); } catch(e) {}
+}
+
+function loadAll() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+}
+
+function clearAllData() {
+  if (!confirm('This will delete all your tasks, pomodoro stats, and bananas. Are you sure?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function showSaveIndicator() {
+  const el = document.getElementById('saveIndicator');
+  el.classList.add('visible');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ========================
+// UTILS
+// ========================
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const map = {stopwatch:0, pomodoro:1, tasks:2, bananas:3};
+  document.querySelectorAll('.tab')[map[name]].classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+(function() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateDisplay').textContent =
+    `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
+})();
+
+// ========================
+// STOPWATCH
+// ========================
+let swInterval = null, swRunning = false, swMs = 0, laps = [];
+
+function swFormat(ms) {
+  return `${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
+}
+
+function swTick() {
+  swMs += 10;
+  document.getElementById('sw-display').textContent = swFormat(swMs);
+  document.getElementById('sw-ms').textContent = '.' + String(swMs%1000).padStart(3,'0');
+}
+
+function swToggle() {
+  if (swRunning) {
+    clearInterval(swInterval); swRunning = false;
+    document.getElementById('sw-start-btn').textContent = 'Resume';
+    document.getElementById('sw-display').classList.remove('running');
+    saveAll();
+  } else {
+    swInterval = setInterval(swTick, 10); swRunning = true;
+    document.getElementById('sw-start-btn').textContent = 'Pause';
+    document.getElementById('sw-display').classList.add('running');
+    document.getElementById('sw-lap-btn').disabled = false;
+  }
+}
+
+function swReset() {
+  clearInterval(swInterval); swRunning = false; swMs = 0; laps = [];
+  document.getElementById('sw-display').textContent = '00:00';
+  document.getElementById('sw-ms').textContent = '.000';
+  document.getElementById('sw-display').classList.remove('running');
+  document.getElementById('sw-start-btn').textContent = 'Start';
+  document.getElementById('sw-lap-btn').disabled = true;
+  document.getElementById('sw-laps-container').innerHTML = '';
+  updateSwStats(); saveAll();
+}
+
+function swLap() {
+  const split = swMs - (laps.length ? laps[laps.length-1].total : 0);
+  laps.push({total: swMs, split});
+  renderLaps(); updateSwStats(); saveAll();
+}
+
+function renderLaps() {
+  document.getElementById('sw-laps-container').innerHTML = [...laps].reverse().map((l,i) => {
+    const n = laps.length - i;
+    return `<div class="lap-item">
+      <span class="lap-num">Lap ${n}</span>
+      <span class="lap-split">+${swFormat(l.split)}.${String(l.split%1000).padStart(3,'0')}</span>
+      <span class="lap-time">${swFormat(l.total)}.${String(l.total%1000).padStart(3,'0')}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateSwStats() {
+  document.getElementById('sw-laps-count').textContent = laps.length;
+  if (!laps.length) {
+    document.getElementById('sw-best-lap').textContent = '--:--';
+    document.getElementById('sw-avg-lap').textContent = '--:--';
+    return;
+  }
+  const splits = laps.map(l=>l.split);
+  document.getElementById('sw-best-lap').textContent = swFormat(Math.min(...splits));
+  document.getElementById('sw-avg-lap').textContent = swFormat(splits.reduce((a,b)=>a+b,0)/splits.length);
+}
+
+// ========================
+// BANANAS 🍌
+// ========================
+let bananas = 0;
+let bananaLog = []; // [{task, time, ts}]
+
+function awardBanana(focusLabel) {
+  bananas++;
+  const now = new Date();
+  bananaLog.unshift({
+    task: focusLabel || 'Focus session',
+    time: now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+    date: now.toLocaleDateString([], {month:'short', day:'numeric'}),
+    ts: Date.now()
+  });
+  updateBananaUI();
+  showBananaToast(focusLabel);
+  saveAll();
+}
+
+function updateBananaUI() {
+  // Header
+  document.getElementById('bananaHeaderCount').textContent = bananas;
+  // Pomodoro panel
+  document.getElementById('pomo-banana-count').textContent = bananas + ' 🍌';
+  // Big count
+  document.getElementById('bananaBigCount').textContent = bananas;
+  // Grid
+  document.getElementById('bananaGrid').innerHTML = Array.from({length: Math.min(bananas, 100)}, () =>
+    `<span class="banana-single">🍌</span>`
+  ).join('');
+  // Log
+  const logList = document.getElementById('bananaLogList');
+  if (!bananaLog.length) {
+    logList.innerHTML = '<div class="empty-state">Complete a 🍅 pomodoro to earn your first banana!</div>';
+    return;
+  }
+  logList.innerHTML = bananaLog.map(b => `
+    <div class="banana-log-item">
+      <span class="banana-log-emoji">🍌</span>
+      <span class="banana-log-text">${escHtml(b.task)}</span>
+      <span class="banana-log-time">${b.date} · ${b.time}</span>
+    </div>
+  `).join('');
+}
+
+function showBananaToast(label) {
+  const toast = document.getElementById('bananaToast');
+  document.getElementById('bananaToastSub').textContent = label ? `for: "${label}"` : `Total: ${bananas} 🍌`;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ========================
+// POMODORO
+// ========================
+let pomoInterval = null, pomoRunning = false, pomoMs = 0;
+let pomoIsWork = true, pomoSession = 0, pomoTotalFocus = 0;
+let soundEnabled = true;
+
+function getWorkMs()  { return parseInt(document.getElementById('workMin').value)*60000; }
+function getShortMs() { return parseInt(document.getElementById('shortMin').value)*60000; }
+function getLongMs()  { return parseInt(document.getElementById('longMin').value)*60000; }
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundToggle').classList.toggle('on', soundEnabled);
+  saveAll();
+}
+
+function onWorkingOnChange() {
+  const val = document.getElementById('workingOnInput').value.trim();
+  const tag = document.getElementById('currentFocusTag');
+  if (val) { tag.textContent = '🎯 ' + val; tag.classList.remove('hidden'); }
+  else { tag.classList.add('hidden'); }
+}
+
+function pomoReset() {
+  clearInterval(pomoInterval); pomoRunning = false; pomoIsWork = true;
+  pomoMs = getWorkMs();
+  document.getElementById('pomo-btn').textContent = 'Start';
+  document.getElementById('pomo-display').classList.remove('running','break-mode');
+  updatePomoDisplay(); updatePomoMode(); resetRing();
+}
+
+function pomoToggle() {
+  if (pomoRunning) {
+    clearInterval(pomoInterval); pomoRunning = false;
+    document.getElementById('pomo-btn').textContent = 'Resume';
+    document.getElementById('pomo-display').classList.remove('running');
+    saveAll();
+  } else {
+    if (pomoMs <= 0) pomoMs = getWorkMs();
+    pomoInterval = setInterval(pomoTick, 100); pomoRunning = true;
+    document.getElementById('pomo-btn').textContent = 'Pause';
+    document.getElementById('pomo-display').classList.add('running');
+  }
+}
+
+function pomoTick() {
+  pomoMs -= 100;
+  if (pomoMs <= 0) { pomoMs = 0; pomoComplete(); return; }
+  updatePomoDisplay(); updateRing();
+}
+
+function pomoComplete() {
+  clearInterval(pomoInterval); pomoRunning = false;
+  if (soundEnabled) playBeep();
+
+  if (pomoIsWork) {
+    // 🍌 Award banana for completed work session!
+    const focusLabel = document.getElementById('workingOnInput').value.trim();
+    awardBanana(focusLabel);
+
+    pomoSession++;
+    pomoTotalFocus += getWorkMs();
+    markSession(); updatePomoFocusTotal();
+    pomoIsWork = false;
+    pomoMs = (pomoSession % 4 === 0) ? getLongMs() : getShortMs();
+  } else {
+    pomoIsWork = true;
+    pomoMs = getWorkMs();
+  }
+
+  updatePomoMode(); updatePomoDisplay(); resetRing();
+  document.getElementById('pomo-btn').textContent = 'Start';
+  document.getElementById('pomo-display').classList.remove('running','break-mode');
+  saveAll();
+}
+
+function pomoSkip() {
+  if (pomoRunning) { clearInterval(pomoInterval); pomoRunning = false; }
+  // Skipping a work session does NOT award a banana
+  if (pomoIsWork) {
+    pomoIsWork = false;
+    pomoMs = (pomoSession % 4 === 0) ? getLongMs() : getShortMs();
+  } else {
+    pomoIsWork = true;
+    pomoMs = getWorkMs();
+  }
+  updatePomoMode(); updatePomoDisplay(); resetRing();
+  document.getElementById('pomo-btn').textContent = 'Start';
+  document.getElementById('pomo-display').classList.remove('running','break-mode');
+}
+
+function updatePomoDisplay() {
+  const m = Math.floor(pomoMs/60000), s = Math.floor((pomoMs%60000)/1000);
+  document.getElementById('pomo-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function updatePomoMode() {
+  document.getElementById('pomoDot').style.background = pomoIsWork ? 'var(--accent)' : 'var(--accent3)';
+  document.getElementById('pomoModeText').textContent = pomoIsWork ? 'Focus Time' : (pomoSession%4===0 ? 'Long Break 🌙' : 'Short Break ☕');
+  document.getElementById('pomo-display').classList.toggle('break-mode', !pomoIsWork);
+}
+
+function updateRing() {
+  const total = pomoIsWork ? getWorkMs() : (pomoSession%4===0 ? getLongMs() : getShortMs());
+  document.getElementById('pomoRing').style.strokeDashoffset = 942 * (1 - (pomoMs/total));
+}
+function resetRing() { document.getElementById('pomoRing').style.strokeDashoffset = 942; }
+
+function markSession() {
+  const dots = document.querySelectorAll('.session-dot');
+  const idx = (pomoSession) % 4;
+  if (idx < dots.length) dots[idx].classList.add('done');
+  if ((pomoSession+1) % 4 === 0) setTimeout(()=>dots.forEach(d=>d.classList.remove('done')), 1200);
+  document.getElementById('pomo-sessions-done').textContent = pomoSession + 1;
+}
+
+function updatePomoFocusTotal() {
+  const m = Math.floor(pomoTotalFocus/60000), s = Math.floor((pomoTotalFocus%60000)/1000);
+  document.getElementById('pomo-total-focus').textContent = `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0,300,600].forEach(delay => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0, ctx.currentTime+delay/1000);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime+delay/1000+0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay/1000+0.4);
+      osc.start(ctx.currentTime+delay/1000); osc.stop(ctx.currentTime+delay/1000+0.5);
+    });
+  } catch(e) {}
+}
+
+// ========================
+// TASKS
+// ========================
+let tasks = [], activeTaskId = null, taskInterval = null;
+
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const name = input.value.trim();
+  if (!name) return;
+  tasks.push({ id: Date.now(), name, time: 0, done: false });
+  input.value = '';
+  renderTasks(); updateTaskStats(); saveAll();
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('emptyState');
+  if (!tasks.length) { list.innerHTML = ''; list.appendChild(empty); empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = tasks.map(t => `
+    <div class="task-item ${t.id===activeTaskId?'active':''}" id="task-${t.id}">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleDone(${t.id})"></div>
+      <div class="task-name ${t.done?'done':''}">${escHtml(t.name)}</div>
+      <div class="task-time-display" id="task-time-${t.id}">${formatTaskTime(t.time)}</div>
+      <button class="task-timer-btn ${t.id===activeTaskId?'active':''}" onclick="toggleTaskTimer(${t.id})">${t.id===activeTaskId?'⏸':'▶'}</button>
+      <button class="task-del" onclick="deleteTask(${t.id})">×</button>
+    </div>
+  `).join('');
+  list.appendChild(empty);
+}
+
+function formatTaskTime(ms) {
+  const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function toggleTaskTimer(id) {
+  if (activeTaskId === id) { clearInterval(taskInterval); activeTaskId = null; saveAll(); }
+  else {
+    clearInterval(taskInterval); activeTaskId = id;
+    taskInterval = setInterval(() => {
+      const task = tasks.find(t => t.id === activeTaskId);
+      if (task) {
+        task.time += 1000;
+        const el = document.getElementById('task-time-'+activeTaskId);
+        if (el) el.textContent = formatTaskTime(task.time);
+        updateTaskStats();
+      }
+    }, 1000);
+  }
+  renderTasks();
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  if (t.done && activeTaskId === id) { clearInterval(taskInterval); activeTaskId = null; }
+  renderTasks(); updateTaskStats(); saveAll();
+}
+
+function deleteTask(id) {
+  if (activeTaskId === id) { clearInterval(taskInterval); activeTaskId = null; }
+  tasks = tasks.filter(t => t.id !== id);
+  renderTasks(); updateTaskStats(); saveAll();
+}
+
+function updateTaskStats() {
+  document.getElementById('tasks-total').textContent = tasks.length;
+  document.getElementById('tasks-done-count').textContent = tasks.filter(t=>t.done).length;
+  const total = tasks.reduce((a,t)=>a+t.time,0);
+  document.getElementById('tasks-total-time').textContent = total ? formatTaskTime(total) : '0:00:00';
+}
+
+// ========================
+// INIT
+// ========================
+(function init() {
+  const saved = loadAll();
+  if (saved) {
+    if (Array.isArray(saved.tasks)) tasks = saved.tasks;
+    if (typeof saved.pomoSession === 'number') {
+      pomoSession = saved.pomoSession;
+      document.getElementById('pomo-sessions-done').textContent = pomoSession;
+      const dots = document.querySelectorAll('.session-dot');
+      const filled = pomoSession % 4;
+      dots.forEach((d,i) => { if (i < filled) d.classList.add('done'); });
+    }
+    if (typeof saved.pomoTotalFocus === 'number') {
+      pomoTotalFocus = saved.pomoTotalFocus;
+      updatePomoFocusTotal();
+    }
+    if (saved.workMin)  document.getElementById('workMin').value  = saved.workMin;
+    if (saved.shortMin) document.getElementById('shortMin').value = saved.shortMin;
+    if (saved.longMin)  document.getElementById('longMin').value  = saved.longMin;
+    if (typeof saved.soundEnabled === 'boolean') {
+      soundEnabled = saved.soundEnabled;
+      document.getElementById('soundToggle').classList.toggle('on', soundEnabled);
+    }
+    if (Array.isArray(saved.laps) && saved.laps.length) {
+      laps = saved.laps;
+      swMs = laps[laps.length-1].total;
+      document.getElementById('sw-display').textContent = swFormat(swMs);
+      document.getElementById('sw-ms').textContent = '.' + String(swMs%1000).padStart(3,'0');
+      document.getElementById('sw-lap-btn').disabled = false;
+      renderLaps(); updateSwStats();
+    }
+    if (typeof saved.bananas === 'number') bananas = saved.bananas;
+    if (Array.isArray(saved.bananaLog)) bananaLog = saved.bananaLog;
+  }
+
+  pomoReset();
+  renderTasks();
+  updateTaskStats();
+  updateBananaUI();
+
+  setInterval(saveAll, 60000);
+  window.addEventListener('beforeunload', saveAll);
+})();
+</script>
+</body>
+</html>
